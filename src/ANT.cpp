@@ -896,6 +896,18 @@ ANT::processMessage(void) {
 
     switch (rxMessage[ANT_OFFSET_ID]) {
         case ANT_NOTIF_STARTUP:
+        qDebug() << qPrintable("Reset ack received: 0x"
+                              +QString("%1").arg(rxMessage[0],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[1],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[2],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[3],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[4],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[5],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[6],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[7],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[8],2,16,QChar('0'))
+                              +QString("%1").arg(rxMessage[9],2,16,QChar('0'))
+                              );
             ANT_Reset_Acknowledge = true;
             break;
         case ANT_ACK_DATA:
