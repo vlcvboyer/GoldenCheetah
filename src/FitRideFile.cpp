@@ -34,11 +34,15 @@
 
 #define RECORD_TYPE 20
 
+#define pi 3.14159265358979323846
+
 static int fitFileReaderRegistered =
     RideFileFactory::instance().registerReader(
         "fit", "Garmin FIT", new FitFileReader());
 
 static const QDateTime qbase_time(QDate(1989, 12, 31), QTime(0, 0, 0), Qt::UTC);
+
+static double bearing = 0;
 
 struct FitField {
     int num;
@@ -694,7 +698,22 @@ struct FitFileReaderState
         //    resistance, time_from_course, temperature );
         double secs = time - start_time;
         double nm = 0;
-        double headwind = 0.0;
+
+        // compute bearing in order to calculate headwind
+        if ((!rideFile->dataPoints().empty()) && (last_time != 0))
+        {
+            RideFilePoint *prevPoint = rideFile->dataPoints().back();
+            // ensure a movement occurred and valid lat/lon in order to compute cyclist direction
+            if (  (prevPoint->lat != lat || prevPoint->lon != lng )
+               && (prevPoint->lat != 0 || prevPoint->lon != 0 )
+               && (lat != 0 || lng != 0 ) )
+                        bearing = atan2(cos(lat)*sin(lng - prevPoint->lon),
+                                        cos(prevPoint->lat)*sin(lat)-sin(prevPoint->lat)*cos(lat)*cos(lng - prevPoint->lon));
+        }
+        // else keep previous bearing or 0 at beginning
+
+        double headwind = cos(bearing - rideFile->windHeading()) * rideFile->windSpeed();
+
         int interval = 0;
         // if there are data points && a time difference > 1sec && smartRecording processing is requested at all
         if ((!rideFile->dataPoints().empty()) && (last_time != 0) &&
@@ -953,6 +972,47 @@ struct FitFileReaderState
         }
     }
 
+    void decodeWeather(const FitDefinition &def, int time_offset, const std::vector<FitValue> values) {
+        int i = 0;
+        foreach(const FitField &field, def.fields) {
+            fit_value_t value = values[i++].v;
+
+            if( value == NA_VALUE )
+                continue;
+
+            switch (field.num) {
+                case 253: // Timestamp
+                          // ignored
+                          break;
+                case 8:   // Weather station name
+                          // ignored
+                        break;
+                case 9:   // Weather observation timestamp
+                          // ignored
+                        break;
+                case 10: // Weather station latitude
+                         // ignored
+                        break;
+                case 11: // Weather station longitude
+                         // ignored
+                        break;
+                case 3:  // Wind heading (0°=North)
+                        rideFile->setWindHeading(value / 180.0 * pi);
+                        break;
+                case 4:  // Wind speed (mm/s)
+                        rideFile->setWindSpeed(value * 0.0036);
+                        break;
+                case 1:  // Temperature
+                         // ignored
+                        break;
+                case 7:  // Humidity
+                         // ignored at present
+                        break;
+                default: ; // ignore it
+            }
+        }
+    }
+
     int read_record(bool &stop, QStringList &errors) {
         stop = false;
         int count = 0;
@@ -1098,6 +1158,10 @@ struct FitFileReaderState
 
                 case 101: decodeLength(def, time_offset, values); break; /* lap swimming */
 
+                case 128: /* weather observed at weather station */
+                    decodeWeather(def, time_offset, values);
+                    break;
+
                 case 2: /* DEVICE_SETTINGS */
                 case 3: /* USER_PROFILE */
                 case 7: /* ZONES_TARGET12 */
@@ -1105,18 +1169,17 @@ struct FitFileReaderState
                 case 9: /* POWER_ZONE */
                 case 12: /* SPORT */
                 case 13: /* unknown */
-                case 22: /* undocumented */
-                case 72: /* undocumented  - new for garmin 800*/
+                case 22: /* source (undocumented) */
+                case 72: /* training file (undocumented  - new for garmin 800) */
                 case 34: /* activity */
                 case 49: /* file creator */
-                case 79: /* unknown */
+                case 79: /* hr zone? (undocumented) */
                 case 104: /* battery */
                 case 113: /* unknown */
                 case 125: /* unknown */
-                case 128: /* unknown */
                 case 140: /* unknown */
                 case 141: /* unknown */
-                case 147: /* unknown */
+                case 147: /* equipment? (undocumented) */
 
                     break;
 
@@ -1138,6 +1201,8 @@ struct FitFileReaderState
         // start
         rideFile = new RideFile;
         rideFile->setDeviceType("Garmin FIT");
+        rideFile->setWindHeading(0.0);
+        rideFile->setWindSpeed(0.0);
         rideFile->setRecIntSecs(1.0); // this is a terrible assumption!
         if (!file.open(QIODevice::ReadOnly)) {
             delete rideFile;

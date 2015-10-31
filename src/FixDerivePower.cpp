@@ -148,7 +148,7 @@ FixDerivePower::postProcess(RideFile *ride, DataProcessorConfig *config=0)
     double hRider = ride->getHeight(); //Height in m
     double M = ride->getWeight(); //Weight kg
     double T = 15; //Temp degC in not in ride data
-    double W = 0; //Assume no wind
+    double W = 0;
     double cCad=.002;
     double afCd = 0.62;
     double afSin = 0.89;
@@ -172,6 +172,7 @@ FixDerivePower::postProcess(RideFile *ride, DataProcessorConfig *config=0)
             RideFilePoint *p = ride->dataPoints()[i];
             // Estimate Power if not in data
             double cad = ride->areDataPresent()->cad ? p->cad : 85.00;
+            W = p->headwind * 0.27777777777778; //Speed m/s
             if (cad > 0) {
                 if (ride->areDataPresent()->temp) T = p->temp;
                 double Slope = atan(p->slope * .01);
@@ -188,7 +189,12 @@ FixDerivePower::postProcess(RideFile *ride, DataProcessorConfig *config=0)
                 //qDebug()<<"acc="<<p->kphd<<" , V="<<V<<" , m="<<M<<" , Pa="<<(p->kphd > 1 ? 1 : p->kphd*V*M);
                 double watts = (afCm * V * (Ka * (vw * vw) + Frg + V * CrDyn))+(p->kphd > 1 ? 1 : p->kphd*V*M);
                 ride->command->setPointValue(i, RideFile::watts, watts > 0 ? (watts > 1000 ? 1000 : watts) : 0);
-                //qDebug()<<"w="<<p->watts<<", Ka="<<Ka<<", CwaRi="<<CwaRider<<", slope="<<p->slope<<", v="<<p->kph<<" Cwa="<<(CwaRider + CwaBike);
+                // qDebug() << "watts = "<<p->watts;
+                // qDebug() << "  " << afCm * V * Ka * (vw * vw) << " = afCm(=" << afCm << ") * V(=" << V << ") * Ka(="<<Ka<<") * (vw^2(=" << V+W << "^2))";
+                // qDebug() << "  " << afCm * V * Frg << " = afCm * V * Frg(=" << Frg << ")";
+                // qDebug() << "  " << afCm * V * V * CrDyn << " = afCm * V^2 * CrDyn(=" << CrDyn << ")";
+                // qDebug() << "  " << p->kphd*V*M << " = kphd(=" << p->kphd << ") * V * M(=" << M << ")";
+                // qDebug() << "    Ka="<<Ka<<", CwaRi="<<CwaRider<<", slope="<<p->slope<<", v="<<p->kph<<" Cwa="<<(CwaRider + CwaBike);
             } else {
                 ride->command->setPointValue(i, RideFile::watts, 0);
             }
