@@ -973,6 +973,7 @@ struct FitFileReaderState
     }
 
     void decodeWeather(const FitDefinition &def, int time_offset, const std::vector<FitValue> values) {
+        Q_UNUSED(time_offset);
         int i = 0;
         foreach(const FitField &field, def.fields) {
             fit_value_t value = values[i++].v;
