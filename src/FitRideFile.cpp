@@ -712,7 +712,7 @@ struct FitFileReaderState
         }
         // else keep previous bearing or 0 at beginning
 
-        double headwind = cos(bearing - rideFile->windHeading()) * rideFile->windSpeed();
+        double headwind = cos(bearing - rideFile->windHeading()) * rideFile->windSpeed() + kph;
 
         int interval = 0;
         // if there are data points && a time difference > 1sec && smartRecording processing is requested at all

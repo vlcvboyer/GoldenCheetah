@@ -120,7 +120,9 @@ class FixDerivePowerConfig : public DataProcessorConfig
                               "resistance, it depends on tires and surface\n"
                               "wind speed shall be indicated in kph\n"
                               "wind heading unit is degrees "
-                              "from -179 to +180 (-90=W, 0=N, 90=E, 180=S)")));
+                              "from -179 to +180 (-90=W, 0=N, 90=E, 180=S)\n"
+                              "Note: if the ride file already contain wind data\n"
+                              "      it will be overridden if wind is entered manually")));
         }
 
         void readConfig() {
@@ -234,23 +236,25 @@ FixDerivePower::postProcess(RideFile *ride, DataProcessorConfig *config=0)
             // else keep previous bearing (or 0 at the beginning)
 
             // wind parameters to be considered
-            if (windSpeed || windHeading) // if wind parameters were entered manually then use it
-                W = cos(bearing - windHeading) * windSpeed * 0.27777777777778;
-            else //  otherwise use wind from records (typ. weather forecast included in FIT files)
-                W = p->headwind * 0.27777777777778; //Speed m/s
+            if (windSpeed || windHeading) // if wind parameters were entered manually then use it and override rideFile headwind
+                W = cos(bearing - windHeading) * windSpeed * 0.27777777777778; // Absolute wind speed relative to cyclist orientation (m/s)
+            else if (ride->areDataPresent()->headwind) //  otherwise use headwind from rideFile records (typ. weather forecast included in FIT files)
+                W = (p->headwind - p->kph) * 0.27777777777778; // Compute absolute wind speed relative to cyclist orientation (m/s)
+            else  
+                W = 0.0; //otherwise assume no wind
 
             // Estimate Power if not in data
             double cad = ride->areDataPresent()->cad ? p->cad : 85.00;
             if (cad > 0) {
                 if (ride->areDataPresent()->temp) T = p->temp;
                 double Slope = atan(p->slope * .01);
-                double V = p->kph * 0.27777777777778; //Speed m/s
+                double V = p->kph * 0.27777777777778; // Cyclist speed m/s
                 double CrDyn = 0.1 * cos(Slope);
 
                 double CwaRider, Ka;
                 double Frg = 9.81 * (MBik + M) * (CrEff * cos(Slope) + sin(Slope));
 
-                double vw=V+W;
+                double vw=V+W; // Wind speed against cyclist = cyclist speed + wind speed
 
                 CwaRider = (1 + cad * cCad) * afCd * adipos * (((hRider - adipos) * afSin) + adipos);
                 Ka = 176.5 * exp(-p->alt * .0001253) * (CwaRider + CwaBike) / (273 + T);
