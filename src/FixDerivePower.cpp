@@ -63,8 +63,8 @@ class FixDerivePowerConfig : public DataProcessorConfig
 
             bikeWeightLabel = new QLabel(tr("Bike Weight (kg)"));
             crrLabel = new QLabel(tr("Crr"));
-            windSpeedLabel = new QLabel(tr("Wind speed (kph)"));
-            windHeadingLabel = new QLabel(tr(", heading (0=N; 90=E...)"));
+            windSpeedLabel = new QLabel(tr("Wind (kph)"));
+            windHeadingLabel = new QLabel(tr(", heading"));
 
             bikeWeight = new QDoubleSpinBox();
             bikeWeight->setMaximum(99.9);
@@ -86,7 +86,7 @@ class FixDerivePowerConfig : public DataProcessorConfig
 
             windHeading = new QDoubleSpinBox();
             windHeading->setMaximum(180.0);
-            windHeading->setMinimum(-179.9);
+            windHeading->setMinimum(-179.0);
             windHeading->setSingleStep(1);
             windHeading->setDecimals(0);
 
@@ -117,7 +117,10 @@ class FixDerivePowerConfig : public DataProcessorConfig
                               "weight to compound total mass, it should "
                               "include apparel, shoes, etc\n\n"
                               "CRR parameter is the coefficient of rolling "
-                              "resistance, it depends on tires and surface")));
+                              "resistance, it depends on tires and surface\n"
+                              "wind speed shall be indicated in kph\n"
+                              "wind heading unit is degrees "
+                              "from -179 to +180 (-90=W, 0=N, 90=E, 180=S)")));
         }
 
         void readConfig() {
