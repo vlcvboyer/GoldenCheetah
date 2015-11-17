@@ -325,12 +325,12 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
             else if (rtd.getTrainerCalibStatus()==CALIBR_INPROGRESS_SPEEDUP)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration in progress\nspeedup!");
+                p_meterWidget->Text = tr("Calibration in progress");
             }
             else if (rtd.getTrainerCalibStatus()==CALIBR_INPROGRESS_FREEWHEEL)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration in progress\nfreewheel!");
+                p_meterWidget->Text = tr("Calibration in progress");
             }
             else if (rtd.getTrainerConfigRequired())
             {
@@ -340,12 +340,12 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
             else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_LOWSPEED)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("brake fault\nspeed too low");
+                p_meterWidget->Text = tr("brake fault");
             }
             else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_HIGHSPEED)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("brake fault\nspeed too high");
+                p_meterWidget->Text = tr("brake fault");
             }
             else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK)
             {
@@ -356,6 +356,57 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
             {
                 p_meterWidget->setColor(QColor(0,255,0,180));
                 p_meterWidget->Text = tr("Ready");
+            }
+            else
+            {
+                p_meterWidget->Text = tr("");
+            }
+        }
+        else if (p_meterWidget->Source() == QString("TrainerStatusDetails"))
+        {
+            if (!rtd.getTrainerStatusAvailable())
+            {  // we don't have status from trainer thus we cannot indicate anything on screen
+                p_meterWidget->Text = tr("");
+            }
+            else if (rtd.getTrainerCalibStatus()==CALIBR_REQUIRED)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("");
+            }
+            else if (rtd.getTrainerCalibStatus()==CALIBR_INPROGRESS_SPEEDUP)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Sspeedup!");
+            }
+            else if (rtd.getTrainerCalibStatus()==CALIBR_INPROGRESS_FREEWHEEL)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Freewheel!");
+            }
+            else if (rtd.getTrainerConfigRequired())
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("");
+            }
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_LOWSPEED)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Speed too low");
+            }
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_HIGHSPEED)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Speed too high");
+            }
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("");
+            }
+            else if (rtd.getTrainerReady())
+            {
+                p_meterWidget->setColor(QColor(0,255,0,180));
+                p_meterWidget->Text = tr("");
             }
             else
             {
