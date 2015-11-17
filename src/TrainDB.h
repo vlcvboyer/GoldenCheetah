@@ -67,6 +67,9 @@ class TrainDB : public QObject
     // update default entries in the tables
     bool updateDefaultEntries();
 
+    void setCalibrationRequest(bool calibrationRequest) { this->calibrationRequest = calibrationRequest; }
+    bool getCalibrationRequest() const { return calibrationRequest; }
+
     signals:
         void dataChanged();
 
@@ -87,6 +90,8 @@ class TrainDB : public QObject
 
         bool createDefaultEntriesWorkout();
         bool createDefaultEntriesVideosync();
+
+        bool calibrationRequest;
 };
 
 extern TrainDB *trainDB;

@@ -18,6 +18,7 @@
  */
 
 #include "ANT.h"
+#include "TrainDB.h"
 #include <QDebug>
 #include <QTime>
 
@@ -743,16 +744,30 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                    if (antMessage.fecPowerCalibRequired)
                    {
                         qDebug() << "Trainer calibration required (power)";
-                        // FIXME: if you want automatic calibration remove "&& false" but user will not know how to calibrate as there is no GUI at present
-                        if (!fecPowerCalibInProgress && !fecResisCalibInProgress && false)
-                            parent->requestFecCalib(true /* powercalib */, false /*resisCalib*/ );
+                        if (!fecPowerCalibInProgress && !fecResisCalibInProgress)
+                        {
+                            if (trainDB)
+                                if (trainDB->getCalibrationRequest())
+                                {
+                                    parent->requestFecCalib(true /* powercalib */, false /*resisCalib*/ );
+                                    qDebug() << "Calibration requested";
+                                }
+                            // TODO : add a general setting to allow automatic calibration process startup when training starts
+                        }
                    }
                    if (antMessage.fecResisCalibRequired)
                    {
                         qDebug() << "Trainer calibration required (resistance)";
-                        // FIXME: if you want automatic calibration remove "&& false" but user will not know how to calibrate as there is no GUI at present
-                        if (!fecPowerCalibInProgress && !fecResisCalibInProgress && false)
-                            parent->requestFecCalib(false /* powercalib */, true /*resisCalib*/ );
+                        if (!fecPowerCalibInProgress && !fecResisCalibInProgress)
+                        {
+                            if (trainDB)
+                                if (trainDB->getCalibrationRequest())
+                                {
+                                    parent->requestFecCalib(false /* powercalib */, true /*resisCalib*/ );
+                                    qDebug() << "Calibration requested";
+                                }
+                            // TODO : add a general setting to allow automatic calibration process startup when training starts
+                        }
                    }
                    parent->setTrainerConfigRequired(antMessage.fecUserConfigRequired);
                    if (antMessage.fecUserConfigRequired)
@@ -796,7 +811,11 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     parent->setFecPowerCalibInProgress(antMessage.fecPowerCalibInProgress);
                     parent->setFecResisCalibInProgress(antMessage.fecResisCalibInProgress);
                     if (!antMessage.fecPowerCalibInProgress && !antMessage.fecResisCalibInProgress)
+                    {
                         parent->setTrainerCalibStatus(CALIBRATED);
+                        trainDB->setCalibrationRequest(false);
+                        qDebug() << "Calibration completed";
+                    }
                }
                else if (antMessage.data_page == FITNESS_EQUIPMENT_CALIBRATION_PROGRESS_PAGE)
                {

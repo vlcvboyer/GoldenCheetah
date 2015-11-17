@@ -654,6 +654,9 @@ MainWindow::MainWindow(const QDir &home)
     // TOOLS MENU
     QMenu *optionsMenu = menuBar()->addMenu(tr("&Tools"));
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
+    optionsMenu->addSeparator();
+    optionsMenu->addAction(tr("Calibrate sensors..."), this, SLOT (calibrationRequest()));
+    optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
     optionsMenu->addAction(tr("VDOT and T-Pace Calculator..."), this, SLOT(showVDOTCalculator()));
@@ -2174,6 +2177,23 @@ MainWindow::configChanged(qint32)
     head->updateGeometry();
     repaint();
 
+}
+
+/*----------------------------------------------------------------------
+ * Sensor calibration
+ *--------------------------------------------------------------------*/
+
+void
+MainWindow::calibrationRequest()
+{
+    if (trainDB)
+        trainDB->setCalibrationRequest(true);
+
+    // Note: only FE-C taken into account at present
+    // No dialog / indications are shown at present except when video overlays are present & activated
+    // TODO : add overlay text showing indications for calibration process and also a cancel button
+    // TODO : add global setting to enable automatic calibration sequence startup when training session starts
+    // TODO : take other sensors than ANT+ FE-C into account
 }
 
 /*----------------------------------------------------------------------

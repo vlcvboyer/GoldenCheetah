@@ -31,6 +31,8 @@ TrainDB *trainDB;
 
 TrainDB::TrainDB(QDir home) : home(home)
 {
+    calibrationRequest = false;
+
     // we live above the rider directory
 	initDatabase(home);
 }
