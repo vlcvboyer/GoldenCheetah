@@ -347,7 +347,8 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("brake fault");
             }
-            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK)
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK && false) // FIXME : this message is shown half of the time even when brake is ok... 
+                                                                              // TODO : remove "&& false" when fixed
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("brake fault");
