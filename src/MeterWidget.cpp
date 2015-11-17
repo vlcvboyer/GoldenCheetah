@@ -42,6 +42,7 @@ MeterWidget::MeterWidget(QString Name, QWidget *parent, QString Source) : QWidge
     m_RangeMax = 100;
     m_Angle = 180.0;
     m_SubRange = 10;
+    boundingRectVisibility = false;
 }
 
 void MeterWidget::SetRelativeSize(float RelativeWidth, float RelativeHeight)
@@ -89,12 +90,31 @@ QSize MeterWidget::minimumSize() const
 
 void MeterWidget::paintEvent(QPaintEvent* paintevent)
 {
-    Q_UNUSED(paintevent);
+    Q_UNUSED(paintevent)
+    if (boundingRectVisibility) /* m_PosX, m_PosY, m_Width, m_Height */
+    {
+        m_OutlinePen = QPen(boundingRectColor);
+        m_OutlinePen.setWidth(1);
+        m_OutlinePen.setStyle(Qt::SolidLine);
+
+        //painter
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        painter.setPen(m_OutlinePen);
+        painter.drawRect (m_PosX, m_PosY, m_Width, m_Height);
+    }
 }
 
 void  MeterWidget::setColor(QColor  mainColor)
 {
     m_MainColor = mainColor;
+}
+
+void MeterWidget::setBoundingRectVisibility(bool show, QColor  boundingRectColor)
+{
+    this->boundingRectVisibility=show;
+    this->boundingRectColor = boundingRectColor;
 }
 
 TextMeterWidget::TextMeterWidget(QString Name, QWidget *parent, QString Source) : MeterWidget(Name, parent, Source)
