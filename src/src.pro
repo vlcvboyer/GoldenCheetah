@@ -369,6 +369,7 @@ HEADERS += \
         BingMap.h \
         BlankState.h \
         CalendarDownload.h \
+        CalibrationData.h \
         ChartBar.h \
         ChartSettings.h \
         ChooseCyclistDialog.h \
@@ -602,6 +603,7 @@ SOURCES += \
         BingMap.cpp \
         BlankState.cpp \
         CalendarDownload.cpp \
+        CalibrationData.cpp \
         ChartBar.cpp \
         ChartSettings.cpp \
         ChooseCyclistDialog.cpp \
