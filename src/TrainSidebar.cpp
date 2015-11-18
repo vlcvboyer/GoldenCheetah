@@ -295,6 +295,20 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     toolbuttons->addWidget(lap);
     toolbuttons->addStretch();
 
+    QIcon calIcon(":images/oxygen/cal.png");
+    QPushButton *cal = new QPushButton(calIcon, "", this);
+    cal->setFocusPolicy(Qt::NoFocus);
+    cal->setIconSize(QSize(64,64));
+    cal->setAutoFillBackground(false);
+    cal->setAutoDefault(false);
+    cal->setFlat(true);
+    cal->setStyleSheet("background-color: rgba( 255, 255, 255, 0% ); border: 0px;");
+#if QT_VERSION > 0x050400
+    cal->setShortcut(Qt::Key_C);
+#endif
+    toolbuttons->addWidget(cal);
+    toolbuttons->addStretch();
+
     QHBoxLayout *slideLayout = new QHBoxLayout;
     slideLayout->setSpacing(0);
     slideLayout->setContentsMargins(0,0,0,0);
@@ -358,6 +372,7 @@ intensity->hide(); //XXX!!! temporary
     connect(lap, SIGNAL(clicked()), this, SLOT(newLap()));
     connect(context, SIGNAL(newLap()), this, SLOT(resetLapTimer()));
     connect(intensitySlider, SIGNAL(valueChanged(int)), this, SLOT(adjustIntensity()));
+    connect(cal, SIGNAL(clicked()), this, SLOT(Calibrate()));
 
     // not used but kept in case re-instated in the future
     recordSelector = new QCheckBox(this);
