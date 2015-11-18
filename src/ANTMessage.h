@@ -82,6 +82,10 @@ class ANTMessage {
         static ANTMessage fecSetTrackResistance(const uint8_t channel, const double grade, const double rollingResistance);
         static ANTMessage fecRequestCapabilities(const uint8_t channel);
         static ANTMessage fecRequestCommandStatus(const uint8_t channel, const uint8_t page);
+        static ANTMessage fecRequestCalibration(const uint8_t channel, const uint8_t type);
+
+        // Power meter calibration
+        static ANTMessage requestCalibration(const uint8_t channel, const uint8_t type);
 
         // kickr command channel messages all sent as broadcast data
         // over the command channel as type 0x4E
@@ -169,6 +173,11 @@ class ANTMessage {
         double   fecSetWindResistanceAck;    //    0  /   1.86 kg/m
         int8_t   fecSetWindSpeedAck;         // -127  /   +127 km/h
         uint8_t  fecSetDraftingFactorAck;    //    0  /    100 %
+
+        uint8_t  fecCalibrationReq, fecCalibrationStatus, fecTemperature, fecCalibrationConditions;
+        uint16_t fecZeroOffset, fecSpindownTime, fecTargetSpeed, fecTargetSpindownTime;
+
+        uint16_t calibrationOffset;
 
     private:
         void init();
