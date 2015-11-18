@@ -348,11 +348,26 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
            // Power
            case CHANNEL_TYPE_POWER:
 
+                // Device is a power meter, so assume we support manual zero offset calibration
+                parent->setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
+
+                // calibration has been manually requested
+                if (parent->modeCALIBRATE() && (parent->getCalibrationState() == CALIBRATION_STATE_REQUESTED))
+                {
+                    qDebug() << "Sending new calibration request to ANT+ power meter";
+
+                    // note: no obvious feedback that calibration is underway, therefore go straight to COAST
+                    parent->setCalibrationState(CALIBRATION_STATE_COAST);
+                    parent->requestCalibration(ANT_SPORT_CALIBRATION_REQUEST_MANUALZERO);
+                }
+
                 // what kind of power device is this?
                 switch(antMessage.data_page) {
 
                 case ANT_SPORT_CALIBRATION_MESSAGE:
                 {
+                    qDebug() << "ANT Sport calibration message received";
+
                     // Always ack calibs unless they are acks too!
                     if (antMessage.data[6] != 0xAC) {
                         antMessage.data[6] = 0xAC;
@@ -389,9 +404,33 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                             }
                             break;
 
-                        default:
-                            break;
-                    }
+                    case ANT_SPORT_ZEROOFFSET_SUCCESS: //0xAC
+                        if (parent->modeCALIBRATE()) {
+                            qDebug() << "ANT Sport calibration succeeded";
+                            parent->setCalibrationState(CALIBRATION_STATE_SUCCESS);
+                        }
+
+                        // pass calibrationOffset back up to display
+                        parent->setCalibrationZeroOffset(antMessage.calibrationOffset);
+
+                        break;
+
+                    case ANT_SPORT_ZEROOFFSET_FAIL: //0xAF
+                        if (parent->modeCALIBRATE()) {
+                            qDebug() << "ANT Sport calibration failed";
+                            parent->setCalibrationState(CALIBRATION_STATE_FAILURE);
+                        }
+
+                        // pass calibrationOffset back up to display
+                        // parent->setCalibrationZeroOffset(antMessage.calibrationOffset);
+
+                        break;
+
+                    default:
+                        qDebug() << "Unexpected ANT Sport calibration message received";
+                        break;
+
+                    } // calibrationID
 
                 } // ANT_SPORT_CALIBRATION
                 savemessage = false; // we don't want to overwrite other messages
@@ -724,9 +763,20 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         parent->refreshFecGradient();
                 }
 
+                // calibration has been manually requested
+                if (parent->modeCALIBRATE() && (parent->getCalibrationState() == CALIBRATION_STATE_REQUESTED)) {
+                    qDebug() << "Sending new calibration request to ANT FEC Device";
+                    parent->setCalibrationState(CALIBRATION_STATE_STARTING);
+                    parent->requestFecCalibration(FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
+                }
+
                 switch (antMessage.data_page) {
 
                 case FITNESS_EQUIPMENT_TRAINER_SPECIFIC_PAGE:
+
+                    // Device is a FE-C trainer, so assume we support spindown calibration
+                    parent->setCalibrationType(CALIBRATION_TYPE_SPINDOWN);
+
                     if (antMessage.fecInstantPower != 0xFFF)
                         is_alt ? parent->setAltWatts(antMessage.fecInstantPower) : parent->setWatts(antMessage.fecInstantPower);
                     // TODO : as per ANT specification instantaneous power is to be used for display purpose only
@@ -788,6 +838,47 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     // Note : fecMaxResistance information available but not used
                     fecCapabilities = antMessage.fecCapabilities;
                     qDebug() << "Capabilities received from ANT FEC Device:" << fecCapabilities;
+                    break;
+
+                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                    qDebug() << "Calibration response received from ANT FEC Device";
+                    qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
+
+                    // if error here, roller tension could be too tight or too loose
+                    if ((antMessage.fecCalibrationReq & FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN) ||
+                        (antMessage.fecCalibrationReq & FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET)) {
+                        parent->setCalibrationState(CALIBRATION_STATE_SUCCESS);
+                    } else {
+                        parent->setCalibrationState(CALIBRATION_STATE_FAILURE);
+                    }
+
+                    // pass zero offset & spindown time back up for display
+                    parent->setCalibrationZeroOffset(antMessage.fecZeroOffset);
+                    parent->setCalibrationSpindownTime(antMessage.fecSpindownTime);
+
+                    break;
+
+                case FITNESS_EQUIPMENT_CALIBRATION_PROGRESS_PAGE:
+
+                    if (parent->getCalibrationState() == CALIBRATION_STATE_STARTING)
+                        parent->setCalibrationState(CALIBRATION_STATE_STARTED);
+
+                    if (parent->getCalibrationState() == CALIBRATION_STATE_STARTED) {
+                        if (((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_LO) ||
+                            ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)) {
+                            parent->setCalibrationState(CALIBRATION_STATE_POWER);
+                        }
+                    }
+
+                    if (parent->getCalibrationState() == CALIBRATION_STATE_POWER) {
+                        if ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)
+                            parent->setCalibrationState(CALIBRATION_STATE_COAST);
+                    }
+
+                    if (antMessage.fecTargetSpeed != 0xFFFF){
+                        parent->setCalibrationTargetSpeed((uint32_t)antMessage.fecTargetSpeed * 0.0036);
+                    }
+
                     break;
                 }
 
