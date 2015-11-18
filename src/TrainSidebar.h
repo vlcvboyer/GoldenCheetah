@@ -167,6 +167,9 @@ class TrainSidebar : public GcWindow
         void newLap();      // start new Lap!
         void resetLapTimer(); //reset the lap timer
 
+        void toggleCalibration();
+        void updateCalibration();
+
         // Timed actions
         void guiUpdate();           // refreshes the telemetry
         void diskUpdate();          // writes to CSV file
@@ -237,6 +240,13 @@ class TrainSidebar : public GcWindow
         QFile *recordFile;      // where we record!
         ErgFile *ergFile;       // workout file
         VideoSyncFile *videosyncFile;       // videosync file
+
+        bool     restartCalibration;
+        int      calibrationDeviceIndex;
+        uint8_t  calibrationType;
+        uint8_t  calibrationState;
+        uint16_t calibrationSpindownTime, calibrationZeroOffset;
+        double   calibrationTargetSpeed, calibrationCurrentSpeed;
 
         long total_msecs,
              lap_msecs,
