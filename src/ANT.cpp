@@ -318,16 +318,25 @@ void ANT::refreshFecGradient()
 
 void ANT::requestFecCapabilities()
 {
+    if (fecChannel == -1)
+        return;
+
     sendMessage(ANTMessage::fecRequestCapabilities(fecChannel));
 }
 
 void ANT::requestFecCalibration(uint8_t type)
 {
+    if (fecChannel == -1)
+        return;
+
     sendMessage(ANTMessage::fecRequestCalibration(fecChannel, type));
 }
 
 void ANT::requestCalibration(uint8_t type)
 {
+    if (fecChannel == -1)
+        return;
+
     sendMessage(ANTMessage::requestCalibration(fecChannel, type));
 }
 
