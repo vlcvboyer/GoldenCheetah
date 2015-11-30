@@ -1471,7 +1471,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     rtData.setTrainerRunning(local.getTrainerRunning());
                     rtData.setTrainerCalibRequired(local.getTrainerCalibRequired());
                     rtData.setTrainerConfigRequired(local.getTrainerConfigRequired());
-                    rtData.setTrainerBrakeFault(local.getTrainerBrakeFault());
+                    rtData.setTrainerBrakeStatus(local.getTrainerBrakeStatus());
                 }
             }
 

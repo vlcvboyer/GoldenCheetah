@@ -795,9 +795,21 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     parent->setTrainerConfigRequired(antMessage.fecUserConfigRequired && false);
                     if (antMessage.fecUserConfigRequired)
                         qDebug() << "Trainer configuration required";
-                    parent->setTrainerBrakeFault(antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK_LOWSPEED
-                                             ||  antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK_HIGHSPEED
-                                             ||  antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK);
+                    switch (antMessage.fecPowerOverLimits)
+                    {
+                        case FITNESS_EQUIPMENT_POWER_NOK_LOWSPEED:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK_LOWSPEED);
+                             break;
+                        case FITNESS_EQUIPMENT_POWER_NOK_HIGHSPEED:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK_HIGHSPEED);
+                             break;
+                        case FITNESS_EQUIPMENT_POWER_NOK:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK);
+                             break;
+                        default:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_OK);
+                             break;
+                    }
                     parent->setTrainerReady(antMessage.fecState==FITNESS_EQUIPMENT_READY);
                     parent->setTrainerRunning(antMessage.fecState==FITNESS_EQUIPMENT_IN_USE);
                     break;
