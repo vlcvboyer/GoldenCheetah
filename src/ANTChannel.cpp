@@ -794,7 +794,15 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     // temporarily disabled until calibration included in the code / TODO : remove && false
                     parent->setTrainerConfigRequired(antMessage.fecUserConfigRequired && false);
                     if (antMessage.fecUserConfigRequired)
-                        qDebug() << "Trainer configuration required";
+                    {
+                        qDebug() << "Trainer configuration required. Applying current GC settings...";
+                        float wheelSize = appsettings->cvalue(parent->getTrainAthlete(), GC_WHEELSIZE, 2100).toFloat() / MATHCONST_PI;
+                        float kgCyclistWeight = appsettings->cvalue(parent->getTrainAthlete(), GC_WEIGHT, 75).toFloat();
+                        float gearRatio = 0.5; // TODO : add a parameter? Not really needed if we have external cadence meter.
+                        float kgCycleWeight = appsettings->value(NULL, GC_DPDP_BIKEWEIGHT, "9.5").toFloat();
+                        qDebug() << "wheel diameter: " << QString::number(wheelSize) << "mm, cyclist: " << QString::number(kgCyclistWeight) << "kg, cycle: " << QString::number(kgCycleWeight) << "kg, gear ratio: " << QString::number(gearRatio);
+                        parent->fecUserConfig(kgCyclistWeight, kgCycleWeight, wheelSize, gearRatio);
+                    }
                     switch (antMessage.fecPowerOverLimits)
                     {
                         case FITNESS_EQUIPMENT_POWER_NOK_LOWSPEED:

@@ -340,6 +340,14 @@ void ANT::requestCalibration(uint8_t type)
     sendMessage(ANTMessage::requestCalibration(fecChannel, type));
 }
 
+void ANT::fecUserConfig(const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio)
+{
+    if (fecChannel == -1)
+        return;
+
+    sendMessage(ANTMessage::fecUserConfig(fecChannel, kgCyclistWeight, kgCycleWeight, mmDiameter, gearRatio));
+}
+
 void ANT::refreshVortexLoad()
 {
     if (vortexChannel == -1)

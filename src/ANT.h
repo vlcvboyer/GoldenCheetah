@@ -559,6 +559,7 @@ public:
 
     void requestCalibration(uint8_t type);
 
+    void fecUserConfig(const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio);
     void setVortexData(int channel, int id);
     void refreshVortexLoad();
 
