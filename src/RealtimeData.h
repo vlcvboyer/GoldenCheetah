@@ -29,6 +29,7 @@
 #define TRAINER_BRAKE_NOK_LOWSPEED  0x01
 #define TRAINER_BRAKE_NOK_HIGHSPEED 0x02
 #define TRAINER_BRAKE_NOK           0x03
+
 class RealtimeData
 {
     Q_DECLARE_TR_FUNCTIONS(RealtimeData)
