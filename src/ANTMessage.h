@@ -86,7 +86,8 @@ class ANTMessage {
 
         // Power meter calibration
         static ANTMessage requestCalibration(const uint8_t channel, const uint8_t type);
-
+        static ANTMessage fecUserConfig(const uint8_t channel, const float kgCyclistWeight, const float kgCycleWeight,
+                                        const float mmDiameter, const float gearRatio);
         // kickr command channel messages all sent as broadcast data
         // over the command channel as type 0x4E
         static ANTMessage kickrErgMode(const unsigned char channel, ushort usDeviceId, ushort usWatts, bool bSimSpeed);
