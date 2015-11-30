@@ -401,8 +401,8 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                             default:
                                 break;
 
-                            }
-                            break;
+                        }
+                        break;
 
                     case ANT_SPORT_ZEROOFFSET_SUCCESS: //0xAC
                         if (parent->modeCALIBRATE()) {
