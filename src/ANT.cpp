@@ -90,7 +90,7 @@ ANT::ANT(QObject *parent, DeviceConfiguration *devConf, QString cyclist) : QThre
     qRegisterMetaType<struct timeval>("struct timeval");
 
     //remember the cylist for wheelsize Settings
-    trainCyclist = cyclist;
+    trainAthlete = cyclist;
 
     // device status and settings
     Status=0;
@@ -204,7 +204,7 @@ void ANT::setWheelRpm(float x) {
     // devConf will be NULL if we are are running the add device wizard
     // we can default to the global setting
     if (devConf) telemetry.setSpeed(x * devConf->wheelSize / 1000 * 60 / 1000);
-    else telemetry.setSpeed(x * appsettings->cvalue(trainCyclist, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
+    else telemetry.setSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
 }
 
 void ANT::setHb(double smo2, double thb)

@@ -550,6 +550,7 @@ public:
         telemetry.setRPS(rps);
     }
 
+    QString getTrainAthlete() const { return trainAthlete; }
     void setFecChannel(int channel);
     void refreshFecLoad();
     void refreshFecGradient();
@@ -635,8 +636,8 @@ private:
     int vortexID;
     int vortexChannel;
 
-    // cylist for wheelsize settings
-    QString trainCyclist;
+    // athlete for wheelsize settings, etc.
+    QString trainAthlete;
 };
 
 #include "ANTMessage.h"
