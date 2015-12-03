@@ -58,6 +58,10 @@ ANTChannel::init()
     status = Closed;
     fecPrevRawDistance=0;
     fecCapabilities=0;
+    fecCalibFeatures=CALIBRATION_TYPE_UNKNOWN;
+    fecCalibInProgress=CALIBRATION_TYPE_NONE;
+    fecCalibCompleted=CALIBRATION_TYPE_NONE;
+
     lastMessageTimestamp = lastMessageTimestamp2 = QTime::currentTime();
 }
 

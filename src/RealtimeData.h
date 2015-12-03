@@ -20,6 +20,7 @@
 #ifndef _GC_RealtimeData_h
 #define _GC_RealtimeData_h 1
 #include "GoldenCheetah.h"
+#include "CalibrationData.h"
 
 #include <stdint.h> // uint8_t
 #include <QString>
@@ -122,12 +123,12 @@ public:
     bool getTrainerStatusAvailable() const;
     void setTrainerReady(bool status);
     void setTrainerRunning(bool status);
-    void setTrainerCalibRequired(bool status);
+    void setTrainerCalibStatus(uint8_t status);
     void setTrainerConfigRequired(bool status);
     void setTrainerBrakeStatus(uint8_t status);
     bool getTrainerReady() const;
     bool getTrainerRunning() const;
-    bool getTrainerCalibRequired() const;
+    uint8_t getTrainerCalibStatus() const;
     bool getTrainerConfigRequired() const;
     uint8_t getTrainerBrakeStatus() const;
 
@@ -155,9 +156,9 @@ private:
     bool trainerStatusAvailable;
     bool trainerReady;
     bool trainerRunning;
-    bool trainerCalibRequired;
     bool trainerConfigRequired;
     uint8_t trainerBrakeStatus;
+    uint8_t trainerCalibStatus;
 };
 
 #endif
