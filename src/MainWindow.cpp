@@ -654,6 +654,9 @@ MainWindow::MainWindow(const QDir &home)
     // TOOLS MENU
     QMenu *optionsMenu = menuBar()->addMenu(tr("&Tools"));
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
+    optionsMenu->addSeparator();
+    optionsMenu->addAction(tr("Calibrate sensors..."), this, SLOT (calibrationRequest()));
+    optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
     optionsMenu->addAction(tr("VDOT and T-Pace Calculator..."), this, SLOT(showVDOTCalculator()));
@@ -2174,6 +2177,23 @@ MainWindow::configChanged(qint32)
     head->updateGeometry();
     repaint();
 
+}
+
+/*----------------------------------------------------------------------
+ * Sensor calibration
+ *--------------------------------------------------------------------*/
+
+void
+MainWindow::calibrationRequest()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest();
+    // TODO: add a submenu including:
+    // "All uncalibrated"
+    // "Powermeter"
+    // "ANT FE-C Trainer"
+    // ...
+    // send send it as a parameter to "context->notifyCalibrationRequest();"
 }
 
 /*----------------------------------------------------------------------

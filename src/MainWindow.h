@@ -166,6 +166,9 @@ class MainWindow : public QMainWindow
         void uploadCalendar(); // upload ride to calendar
 #endif
 
+        // Sensors calibration
+        void calibrationRequest();
+
         // Measures View
         void downloadMeasures();
 

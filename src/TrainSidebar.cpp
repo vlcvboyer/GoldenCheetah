@@ -372,7 +372,7 @@ intensity->hide(); //XXX!!! temporary
     connect(lap, SIGNAL(clicked()), this, SLOT(newLap()));
     connect(context, SIGNAL(newLap()), this, SLOT(resetLapTimer()));
     connect(intensitySlider, SIGNAL(valueChanged(int)), this, SLOT(adjustIntensity()));
-    connect(cal, SIGNAL(clicked()), this, SLOT(Calibrate()));
+    connect(cal, SIGNAL(clicked()), context, SLOT(notifyCalibrationRequest()));
 
     // not used but kept in case re-instated in the future
     recordSelector = new QCheckBox(this);
@@ -443,6 +443,7 @@ intensity->hide(); //XXX!!! temporary
     connect(context, SIGNAL(configChanged(qint32)), this, SLOT(configChanged(qint32)));
     connect(context, SIGNAL(selectWorkout(QString)), this, SLOT(selectWorkout(QString)));
     connect(trainDB, SIGNAL(dataChanged()), this, SLOT(refresh()));
+    connect(context, SIGNAL(calibrationRequest(uint8_t)), this, SLOT(Calibrate()));
 
     connect(workoutTree->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(workoutTreeWidgetSelectionChanged()));
 
