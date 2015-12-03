@@ -464,6 +464,7 @@ public:
     void setCalibrationState(uint8_t state)
     {
         calibration.setState(state);
+        telemetry.setTrainerCalibStatus(state);
     }
 
     void setCalibrationType(uint8_t type)
@@ -556,15 +557,14 @@ public:
     void refreshFecGradient();
     void requestFecCapabilities();
     void requestFecCalibration(uint8_t type);
-
     void requestCalibration(uint8_t type);
-
     void fecUserConfig(const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio);
+
     void setVortexData(int channel, int id);
     void refreshVortexLoad();
 
     void setTrainerStatusAvailable(bool status) { telemetry.setTrainerStatusAvailable(status); }
-    void setTrainerCalibRequired(bool status) { telemetry.setTrainerCalibRequired(status); }
+    void setTrainerCalibStatus(uint8_t status) { telemetry.setTrainerCalibStatus(status); }
     void setTrainerConfigRequired(bool status) { telemetry.setTrainerConfigRequired(status); }
     void setTrainerBrakeStatus(uint8_t status) { telemetry.setTrainerBrakeStatus(status); }
     void setTrainerReady(bool status) { telemetry.setTrainerReady(status); }

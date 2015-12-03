@@ -24,6 +24,7 @@
 #include "RideFile.h"
 #include "MeterWidget.h"
 #include "VideoLayoutParser.h"
+#include "CalibrationData.h"
 
 
 VideoWindow::VideoWindow(Context *context)  :
@@ -317,10 +318,20 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
             {  // we don't have status from trainer thus we cannot indicate anything on screen
                 p_meterWidget->Text = tr("");
             }
-            else if (rtd.getTrainerCalibRequired())
+            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_REQUIRED)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("Calibration required");
+            }
+            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_SPEEDUP)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Calibration in progress\nspeedup!");
+            }
+            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_COAST)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("Calibration in progress\nfreewheel!");
             }
             else if (rtd.getTrainerConfigRequired())
             {
