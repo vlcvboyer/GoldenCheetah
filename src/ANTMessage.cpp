@@ -531,6 +531,9 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
                     fecZeroOffset    |= (message[9]) << 8;
                     fecSpindownTime   = message[10];
                     fecSpindownTime  |= (message[11]) << 8;
+                    fecPowerCalibSuccess = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
+                    fecResisCalibSuccess = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
+
                     break;
 
                 case FITNESS_EQUIPMENT_CALIBRATION_PROGRESS_PAGE:
@@ -542,6 +545,8 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
                     fecTargetSpeed          |= (message[9]) << 8;
                     fecTargetSpindownTime    = message[10];
                     fecTargetSpindownTime   |= (message[11]) << 8;
+                    fecPowerCalibInProgress = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
+                    fecResisCalibInProgress = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
                     break;
 
                 case FITNESS_EQUIPMENT_GENERAL_PAGE:
