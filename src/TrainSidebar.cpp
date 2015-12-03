@@ -451,6 +451,7 @@ intensity->hide(); //XXX!!! temporary
     ergFile = NULL;
     videosyncFile = NULL;
     calibrating = false;
+    calibrationDeviceIndex = -1;
 
     // now the GUI is setup lets sort our control variables
     gui_timer = new QTimer(this);
@@ -1851,7 +1852,7 @@ void TrainSidebar::updateCalibration()
                 status = QString("Calibrating...");
                 break;
 
-            case CALIBRATION_STATE_POWER:
+            case CALIBRATION_STATE_SPEEDUP:
                 status = QString("Calibrating...\nCurrent speed %1 kph\nIncrease speed to %2 kph").arg(QString::number(calibrationCurrentSpeed, 'f', 1), QString::number(calibrationTargetSpeed, 'f', 1));
                 break;
 
@@ -1888,7 +1889,7 @@ void TrainSidebar::updateCalibration()
             case CALIBRATION_STATE_STARTED:
                 break;
 
-            case CALIBRATION_STATE_POWER:
+            case CALIBRATION_STATE_SPEEDUP:
                 break;
 
             case CALIBRATION_STATE_COAST:
