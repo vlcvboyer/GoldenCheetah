@@ -351,6 +351,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
            // Power
            case CHANNEL_TYPE_POWER:
+                qDebug() << "ANT power meter on channel " << number;
 
                 // Device is a power meter, so assume we support manual zero offset calibration
                 parent->setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
