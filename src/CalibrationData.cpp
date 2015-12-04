@@ -40,31 +40,31 @@ void CalibrationData::setType(uint8_t type)
         QString StrCalib = "Calibration type changing from ";
         switch(this->type) {
             case CALIBRATION_TYPE_UNKNOWN:
-                StrCalib += "CALIBRATION_TYPE_UNKNOWN";
+                StrCalib += "UNKNOWN";
                 break;
             case CALIBRATION_TYPE_COMPUTRAINER:
-                StrCalib += "CALIBRATION_TYPE_COMPUTRAINER";
+                StrCalib += "COMPUTRAINER";
                 break;
             case CALIBRATION_TYPE_ZERO_OFFSET:
-                StrCalib += "CALIBRATION_TYPE_ZERO_OFFSET";
+                StrCalib += "ZERO_OFFSET";
                 break;
             case CALIBRATION_TYPE_SPINDOWN:
-                StrCalib += "CALIBRATION_TYPE_SPINDOWN";
+                StrCalib += "SPINDOWN";
                 break;
         }
         StrCalib += " to ";
         switch(type) {
             case CALIBRATION_TYPE_UNKNOWN:
-                StrCalib += "CALIBRATION_TYPE_UNKNOWN";
+                StrCalib += "UNKNOWN";
                 break;
             case CALIBRATION_TYPE_COMPUTRAINER:
-                StrCalib += "CALIBRATION_TYPE_COMPUTRAINER";
+                StrCalib += "COMPUTRAINER";
                 break;
             case CALIBRATION_TYPE_ZERO_OFFSET:
-                StrCalib += "CALIBRATION_TYPE_ZERO_OFFSET";
+                StrCalib += "ZERO_OFFSET";
                 break;
             case CALIBRATION_TYPE_SPINDOWN:
-                StrCalib += "CALIBRATION_TYPE_SPINDOWN";
+                StrCalib += "SPINDOWN";
                 break;
         }
         qDebug() << qPrintable(StrCalib);
@@ -87,62 +87,62 @@ void CalibrationData::setState(uint8_t state)
         QString StrCalib = "Calibration state changing from ";
         switch(this->state) {
             case CALIBRATION_STATE_IDLE:
-                StrCalib += "CALIBRATION_STATE_IDLE";
+                StrCalib += "IDLE";
                 break;
             case CALIBRATION_STATE_REQUIRED:
-                StrCalib += "CALIBRATION_STATE_REQUIRED";
+                StrCalib += "REQUIRED";
                 break;
             case CALIBRATION_STATE_REQUESTED:
-                StrCalib += "CALIBRATION_STATE_REQUESTED";
+                StrCalib += "REQUESTED";
                 break;
             case CALIBRATION_STATE_STARTING:
-                StrCalib += "CALIBRATION_STATE_STARTING";
+                StrCalib += "STARTING";
                 break;
             case CALIBRATION_STATE_STARTED:
-                StrCalib += "CALIBRATION_STATE_STARTED";
+                StrCalib += "STARTED";
                 break;
             case CALIBRATION_STATE_SPEEDUP:
-                StrCalib += "CALIBRATION_STATE_SPEEDUP";
+                StrCalib += "SPEEDUP";
                 break;
             case CALIBRATION_STATE_COAST:
-                StrCalib += "CALIBRATION_STATE_COAST";
+                StrCalib += "COAST";
                 break;
             case CALIBRATION_STATE_SUCCESS:
-                StrCalib += "CALIBRATION_STATE_SUCCESS";
+                StrCalib += "SUCCESS";
                 break;
             case CALIBRATION_STATE_FAILURE:
-                StrCalib += "CALIBRATION_STATE_FAILURE";
+                StrCalib += "FAILURE";
                 break;
         }
 
         StrCalib += " to ";
         switch(this->state) {
             case CALIBRATION_STATE_IDLE:
-                StrCalib += "CALIBRATION_STATE_IDLE";
+                StrCalib += "IDLE";
                 break;
             case CALIBRATION_STATE_REQUIRED:
-                StrCalib += "CALIBRATION_STATE_REQUIRED";
+                StrCalib += "REQUIRED";
                 break;
             case CALIBRATION_STATE_REQUESTED:
-                StrCalib += "CALIBRATION_STATE_REQUESTED";
+                StrCalib += "REQUESTED";
                 break;
             case CALIBRATION_STATE_STARTING:
-                StrCalib += "CALIBRATION_STATE_STARTING";
+                StrCalib += "STARTING";
                 break;
             case CALIBRATION_STATE_STARTED:
-                StrCalib += "CALIBRATION_STATE_STARTED";
+                StrCalib += "STARTED";
                 break;
             case CALIBRATION_STATE_SPEEDUP:
-                StrCalib += "CALIBRATION_STATE_SPEEDUP";
+                StrCalib += "SPEEDUP";
                 break;
             case CALIBRATION_STATE_COAST:
-                StrCalib += "CALIBRATION_STATE_COAST";
+                StrCalib += "COAST";
                 break;
             case CALIBRATION_STATE_SUCCESS:
-                StrCalib += "CALIBRATION_STATE_SUCCESS";
+                StrCalib += "SUCCESS";
                 break;
             case CALIBRATION_STATE_FAILURE:
-                StrCalib += "CALIBRATION_STATE_FAILURE";
+                StrCalib += "FAILURE";
                 break;
         }
         qDebug() << qPrintable(StrCalib);
