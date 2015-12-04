@@ -1121,7 +1121,7 @@ void ANTChannel::attemptTransition(int message_id)
     device_id=st->device_id;
     setId();
 
-    qDebug()<<number<<"type="<<channel_type<<"device type="<<device_id<<"freq="<<st->frequency;
+    // qDebug()<<number<<"type="<<channel_type<<"device type="<<device_id<<"freq="<<st->frequency;
 
     // update state
     state=message_id;
@@ -1143,7 +1143,7 @@ void ANTChannel::attemptTransition(int message_id)
     case ANT_UNASSIGN_CHANNEL:
         //qDebug()<<number<<"TRANSITION from unassigned";
 
-        qDebug()<<number<<"assign channel type RX";
+        //qDebug()<<number<<"assign channel type RX";
 
         // assign and set channel id all in one
         parent->sendMessage(ANTMessage::assignChannel(number, CHANNEL_TYPE_RX, st->network)); // receive channel on network 1

@@ -796,7 +796,7 @@ void
 ANT::dropInfo(int channel, int drops, int received)    // we dropped a message
 {
     double reliability = 100.00f - (100.00f * double(drops) / double(received));
-    qDebug()<<"Channel"<<channel<<"reliability is"<< (int)(reliability)<<"%";
+    // qDebug()<<"Channel"<<channel<<"reliability is"<< (int)(reliability)<<"%";
     emit signalStrength(channel, reliability);
     return;
 }
@@ -815,7 +815,7 @@ ANT::staleInfo(int number)   // info is now stale - set to zero
 {
     if (number < 0 || number >= channels) return; // ignore out of bound
 
-    qDebug()<<"stale info for channel"<<number;
+    // qDebug()<<"stale info for channel"<<number;
 }
 
 void
@@ -833,7 +833,7 @@ ANT::slotSearchComplete(int number) // search completed successfully
     if (number < 0 || number >= channels) return; // ignore out of bound
 
     emit searchComplete(number);
-    qDebug()<<"search completed on channel"<<number;
+    // qDebug()<<"search completed on channel"<<number;
 }
 
 /*----------------------------------------------------------------------
