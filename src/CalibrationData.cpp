@@ -35,8 +35,43 @@ uint8_t CalibrationData::getType()
 void CalibrationData::setType(uint8_t type)
 {
     if (this->type != type) {
-        qDebug() << "calibration type changing to " << type;
+
+        // debug message:
+        QString StrCalib = "calibration type changing from ";
+        switch(this->type) {
+            case CALIBRATION_TYPE_UNKNOWN:
+                StrCalib += "CALIBRATION_TYPE_UNKNOWN";
+                break
+            case CALIBRATION_TYPE_COMPUTRAINER:
+                StrCalib += "CALIBRATION_TYPE_COMPUTRAINER";
+                break
+            case CALIBRATION_TYPE_ZERO_OFFSET:
+                StrCalib += "CALIBRATION_TYPE_ZERO_OFFSET";
+                break
+            case CALIBRATION_TYPE_SPINDOWN:
+                StrCalib += "CALIBRATION_TYPE_SPINDOWN";
+                break
+        }
+        StrCalib += " to ";
+        switch(type) {
+            case CALIBRATION_TYPE_UNKNOWN:
+                StrCalib += "CALIBRATION_TYPE_UNKNOWN";
+                break
+            case CALIBRATION_TYPE_COMPUTRAINER:
+                StrCalib += "CALIBRATION_TYPE_COMPUTRAINER";
+                break
+            case CALIBRATION_TYPE_ZERO_OFFSET:
+                StrCalib += "CALIBRATION_TYPE_ZERO_OFFSET";
+                break
+            case CALIBRATION_TYPE_SPINDOWN:
+                StrCalib += "CALIBRATION_TYPE_SPINDOWN";
+                break
+        }
+        qDebug() << StrCalib;
+        
         this->type = type;
+
+        }
     }
 }
 
