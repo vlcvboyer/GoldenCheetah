@@ -1222,7 +1222,7 @@ uint8_t ANTChannel::capabilities()
         return fecCapabilities;
 
     // if we do not know device capabilities, request it
-    qDebug() << qPrintable("Ask for capabilities");
+    qDebug() << qPrintable("ANT FE-C: ask for capabilities");
     parent->requestFecCapabilities();
     return 0;
 }

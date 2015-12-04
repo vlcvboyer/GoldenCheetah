@@ -37,7 +37,7 @@ void CalibrationData::setType(uint8_t type)
     if (this->type != type) {
 
         // debug message:
-        QString StrCalib = "calibration type changing from ";
+        QString StrCalib = "Calibration type changing from ";
         switch(this->type) {
             case CALIBRATION_TYPE_UNKNOWN:
                 StrCalib += "CALIBRATION_TYPE_UNKNOWN";
@@ -67,7 +67,7 @@ void CalibrationData::setType(uint8_t type)
                 StrCalib += "CALIBRATION_TYPE_SPINDOWN";
                 break;
         }
-        qDebug() << StrCalib;
+        qDebug() << qPrintable(StrCalib);
 
         this->type = type;
 
@@ -84,7 +84,7 @@ void CalibrationData::setState(uint8_t state)
     if (this->state != state) {
 
         // debug message:
-        QString StrCalib = "calibration state changing from ";
+        QString StrCalib = "Calibration state changing from ";
         switch(this->state) {
             case CALIBRATION_STATE_IDLE:
                 StrCalib += "CALIBRATION_STATE_IDLE";
@@ -145,7 +145,7 @@ void CalibrationData::setState(uint8_t state)
                 StrCalib += "CALIBRATION_STATE_FAILURE";
                 break;
         }
-        qDebug() << StrCalib;
+        qDebug() << qPrintable(StrCalib);
 
         this->state = state;
     }
