@@ -1036,13 +1036,13 @@ void ANTChannel::channelId(unsigned char *ant_message) {
     is_kickr = (device_id == ANT_SPORT_POWER_TYPE) && ((CHANNEL_ID_TRANSMISSION_TYPE(message)&0xF0) == 0xA0);
 
     if (is_kickr) {
-        qDebug()<<number<<"KICKR DETECTED VIA CHANNEL ID EVENT";
+        qDebug()<<"KICKR DETECTED VIA CHANNEL ID EVENT on channel number " << number;
     }
 
     is_fec = (device_id == ANT_SPORT_FITNESS_EQUIPMENT_TYPE);
 
     if (is_fec) {
-        qDebug()<<number<<"ANT FE-C DETECTED VIA CHANNEL ID EVENT";
+        qDebug()<<"ANT FE-C DETECTED VIA CHANNEL ID EVENT on channel number " << number;
     }
 
     // tell controller we got a new channel id
