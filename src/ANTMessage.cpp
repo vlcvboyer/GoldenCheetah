@@ -1096,12 +1096,12 @@ ANTMessage ANTMessage::fecUserConfig(const uint8_t channel, const float kgCyclis
     uint16_t cyclistWeight = (uint16_t) (kgCyclistWeight / 0.01);             // cyclist weight (unit=0.01kg)
     uint8_t  ratio = (uint8_t) (gearRatio/0.03);
 
-    qDebug() << "UserConfig (ANTMessage::fecUserConfig)";
-    qDebug() << "diameter " << QString::number(diameter);
-    qDebug() << "diameterOffset " << QString::number(diameterOffset);
-    qDebug() << "bicycleWeight " << QString::number(bicycleWeight);
-    qDebug() << "cyclistWeight " << QString::number(cyclistWeight);
-    qDebug() << "ratio " << QString::number(ratio);
+    // qDebug() << "UserConfig (ANTMessage::fecUserConfig)";
+    // qDebug() << "diameter " << QString::number(diameter);
+    // qDebug() << "diameterOffset " << QString::number(diameterOffset);
+    // qDebug() << "bicycleWeight " << QString::number(bicycleWeight);
+    // qDebug() << "cyclistWeight " << QString::number(cyclistWeight);
+    // qDebug() << "ratio " << QString::number(ratio);
 
     return ANTMessage(9, ANT_ACK_DATA, channel,                              // broadcast
                       FITNESS_EQUIPMENT_TRAINER_USER_CONFIG_PAGE,
