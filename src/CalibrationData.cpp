@@ -71,7 +71,6 @@ void CalibrationData::setType(uint8_t type)
 
         this->type = type;
 
-        }
     }
 }
 
