@@ -850,7 +850,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         float kgCyclistWeight = appsettings->cvalue(parent->getTrainAthlete(), GC_WEIGHT, 75).toFloat();
                         float gearRatio = 0.5; // TODO : add a parameter? Not really needed if we have external cadence meter.
                         float kgCycleWeight = appsettings->value(NULL, GC_DPDP_BIKEWEIGHT, "9.5").toFloat();
-                        qDebug() << "wheel diameter: " << QString::number(wheelSize) << "mm, cyclist: " << QString::number(kgCyclistWeight) << "kg, cycle: " << QString::number(kgCycleWeight) << "kg, gear ratio: " << QString::number(gearRatio);
+                        qDebug() << "wheel diam.: " << qPrintable(QString::number(wheelSize)) << "mm, cyclist: " << qPrintable(QString::number(kgCyclistWeight)) << "kg, cycle: " << qPrintable(QString::number(kgCycleWeight)) << "kg, gear ratio: " << qPrintable(QString::number(gearRatio));
                         parent->fecUserConfig(kgCyclistWeight, kgCycleWeight, wheelSize, gearRatio);
                     }
 
