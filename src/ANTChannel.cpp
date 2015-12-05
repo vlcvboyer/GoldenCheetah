@@ -353,16 +353,20 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
            case CHANNEL_TYPE_POWER:
                 qDebug() << "ANT power meter on channel " << number;
 
-                // Device is a power meter, so assume we support manual zero offset calibration
-                parent->setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
+                // TODO : manage calibration support by populating a CalibFeatures & CalibCompleted variables like it is done for ANT FE-C:
+                // => preset to CALIBRATION_TYPE_ZERO_OFFSET as a default value (and reset if we receive a calibration failed ??? does it mean that calibration is not supported?)
 
                 // calibration has been manually requested
-                if (parent->modeCALIBRATE() && (parent->getCalibrationState() == CALIBRATION_STATE_REQUESTED))
+                // Device is a power meter, so assume we support manual zero offset calibration
+                if (parent->modeCALIBRATE() && (Calibration::getCalibrationState() == CALIBRATION_STATE_REQUESTED) && (Calibration::getCurrentDevice()==CALIBRATION_DEVICE_NONE))
                 {
                     qDebug() << "Sending new calibration request to ANT+ power meter";
 
+                    Calibration::setCurrentDevice(CALIBRATION_DEVICE_ANT_SPORT);
+                    Calibration::setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
+
                     // note: no obvious feedback that calibration is underway, therefore go straight to COAST
-                    parent->setCalibrationState(CALIBRATION_STATE_COAST);
+                    Calibration::setCalibrationState(CALIBRATION_STATE_COAST);
                     parent->requestCalibration(ANT_SPORT_CALIBRATION_REQUEST_MANUALZERO);
                 }
 
@@ -412,7 +416,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     case ANT_SPORT_ZEROOFFSET_SUCCESS: //0xAC
                         if (parent->modeCALIBRATE()) {
                             qDebug() << "ANT Sport calibration succeeded";
-                            parent->setCalibrationState(CALIBRATION_STATE_SUCCESS);
+                            Calibration::setCalibrationState(CALIBRATION_STATE_SUCCESS);
                         }
 
                         // pass calibrationOffset back up to display
@@ -423,7 +427,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     case ANT_SPORT_ZEROOFFSET_FAIL: //0xAF
                         if (parent->modeCALIBRATE()) {
                             qDebug() << "ANT Sport calibration failed";
-                            parent->setCalibrationState(CALIBRATION_STATE_FAILURE);
+                            Calibration::etCalibrationState(CALIBRATION_STATE_FAILURE);
                         }
 
                         // pass calibrationOffset back up to display
@@ -771,19 +775,21 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 // calibration is requested manually
                     // or automatically stated at beginning of training session if user preference ask for it:
                     // TODO: add automatic calibration feature (from preference) instead of '&& false' below
-                if ((parent->modeCALIBRATE() && (parent->getCalibrationState() == CALIBRATION_STATE_REQUESTED))
-                    || (((parent->getCalibrationState() == CALIBRATION_STATE_IDLE) && (~fecCalibCompleted & fecCalibFeatures) && false)))
+                if ((Calibration::getCurrentDevice()==CALIBRATION_DEVICE_NONE) &&
+                    (      (parent->modeCALIBRATE() && (Calibration::getCalibrationState() == CALIBRATION_STATE_REQUESTED))
+                       || ((Calibration::getCalibrationState() == CALIBRATION_STATE_IDLE) && (~fecCalibCompleted & fecCalibFeatures) && false)  ))
                 {
                     qDebug() << "Sending new calibration request to ANT FEC Device";
-                    parent->setCalibrationState(CALIBRATION_STATE_STARTING);
+                    Calibration::setCurrentDevice(CALIBRATION_DEVICE_ANT_FEC);
+                    Calibration::setCalibrationState(CALIBRATION_STATE_STARTING);
                     if (fecCalibFeatures & ~fecCalibCompleted & CALIBRATION_TYPE_SPINDOWN)
                     {
-                        parent->setCalibrationType(CALIBRATION_TYPE_SPINDOWN);
+                        Calibration::setCalibrationType(CALIBRATION_TYPE_SPINDOWN);
                         parent->requestFecCalibration(FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
                     }
                     else if (fecCalibFeatures & ~fecCalibCompleted & CALIBRATION_TYPE_ZERO_OFFSET)
                     {
-                        parent->setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
+                        Calibration::setCalibrationType(CALIBRATION_TYPE_ZERO_OFFSET);
                         parent->requestFecCalibration(FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
                     }
                 }
@@ -923,7 +929,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     qDebug() << "Calibration response received from ANT FEC Device";
 
                     if (antMessage.fecPowerCalibSuccess || antMessage.fecResisCalibSuccess)
-                        parent->setCalibrationState(CALIBRATION_STATE_SUCCESS);
+                        Calibration::setCalibrationState(CALIBRATION_STATE_SUCCESS);
 
                     // qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
                     if (antMessage.fecPowerCalibSuccess)
@@ -932,7 +938,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         fecCalibCompleted |= CALIBRATION_TYPE_ZERO_OFFSET;
                     }
                     else if (fecCalibInProgress & CALIBRATION_TYPE_ZERO_OFFSET)
-                        parent->setCalibrationState(CALIBRATION_STATE_FAILURE);
+                        Calibration::setCalibrationState(CALIBRATION_STATE_FAILURE);
 
                     if (antMessage.fecResisCalibSuccess)
                     {
@@ -941,7 +947,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     }
                     // if error here, roller tension could be too tight or too loose
                     else if (fecCalibInProgress & CALIBRATION_TYPE_SPINDOWN)
-                        parent->setCalibrationState(CALIBRATION_STATE_FAILURE);
+                        Calibration::setCalibrationState(CALIBRATION_STATE_FAILURE);
 
                     // pass zero offset & spindown time back up for display
                     parent->setCalibrationZeroOffset(antMessage.fecZeroOffset);
@@ -955,19 +961,19 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     if (antMessage.fecResisCalibInProgress)
                         fecCalibInProgress |= CALIBRATION_TYPE_SPINDOWN;
 
-                    if (parent->getCalibrationState() == CALIBRATION_STATE_STARTING)
-                        parent->setCalibrationState(CALIBRATION_STATE_STARTED);
+                    if (Calibration::etCalibrationState() == CALIBRATION_STATE_STARTING)
+                        Calibration::setCalibrationState(CALIBRATION_STATE_STARTED);
 
-                    if (parent->getCalibrationState() == CALIBRATION_STATE_STARTED) {
+                    if (Calibration::etCalibrationState() == CALIBRATION_STATE_STARTED) {
                         if (((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_LO) ||
                             ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)) {
-                            parent->setCalibrationState(CALIBRATION_STATE_SPEEDUP);
+                            Calibration::setCalibrationState(CALIBRATION_STATE_SPEEDUP);
                         }
                     }
 
-                    if (parent->getCalibrationState() == CALIBRATION_STATE_SPEEDUP) {
+                    if (Calibration::getCalibrationState() == CALIBRATION_STATE_SPEEDUP) {
                         if ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)
-                            parent->setCalibrationState(CALIBRATION_STATE_COAST);
+                            Calibration::setCalibrationState(CALIBRATION_STATE_COAST);
                     }
 
                     if (antMessage.fecTargetSpeed != 0xFFFF){

@@ -1403,16 +1403,14 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
 
                     calibrationTargetSpeed = Devices[dev].controller->getCalibrationTargetSpeed();
 
-                    calibrationState = Devices[dev].controller->getCalibrationState();
-
                     calibrationSpindownTime =  Devices[dev].controller->getCalibrationSpindownTime();
                     calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
 
                     // if calibration was already requested, but not receiving updates, then try again..
-                    if ((calibrationState == CALIBRATION_STATE_STARTING) && restartCalibration) {
+                    if ((Calibration::getCalibrationState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
                         restartCalibration = false;
                         qDebug() << "No response to our calibration request, re-requesting..";
-                        Devices[dev].controller->setCalibrationState(CALIBRATION_STATE_REQUESTED);
+                        Calibration::setCalibrationState(CALIBRATION_STATE_REQUESTED);
                     }
                 }
             }
@@ -1728,12 +1726,13 @@ void TrainSidebar::toggleCalibration()
         if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
         context->notifyUnPause(); // get video started again, amongst other things
 
+        Calibration::setCalibrationState(CALIBRATION_STATE_IDLE);
+        Calibration::setCalibrationCurrentDevice(CALIBRATION_DEVICE_NONE);
         // back to ergo/slope mode and restore load/gradient
         if (status&RT_MODE_ERGO) {
 
             foreach(int dev, devices()) {
                 if (calibrationDeviceIndex == dev) {
-                    Devices[dev].controller->setCalibrationState(CALIBRATION_STATE_IDLE);
                     Devices[dev].controller->setMode(RT_MODE_ERGO);
                     Devices[dev].controller->setLoad(load);
                 }
@@ -1742,7 +1741,6 @@ void TrainSidebar::toggleCalibration()
 
             foreach(int dev, devices()) {
                 if (calibrationDeviceIndex == dev) {
-                    Devices[dev].controller->setCalibrationState(CALIBRATION_STATE_IDLE);
                     Devices[dev].controller->setMode(RT_MODE_SPIN);
                     Devices[dev].controller->setGradient(slope);
                 }
@@ -1782,7 +1780,7 @@ void TrainSidebar::toggleCalibration()
                     Devices[dev].controller->setGradient(0);
 
                 Devices[dev].controller->setMode(RT_MODE_CALIBRATE);
-                Devices[dev].controller->setCalibrationState(CALIBRATION_STATE_REQUESTED);
+                Calibration::setCalibrationState(CALIBRATION_STATE_REQUESTED);
             }
         }
 
@@ -1792,7 +1790,6 @@ void TrainSidebar::toggleCalibration()
             qDebug() << "Device" << calibrationDeviceIndex << "being used for calibration";
 
     }
-
 
     restartCalibration = false;
     calibrating = !calibrating; // toggle calibration

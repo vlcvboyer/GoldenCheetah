@@ -123,13 +123,9 @@ public:
     bool getTrainerStatusAvailable() const;
     void setTrainerReady(bool status);
     void setTrainerRunning(bool status);
-    void setTrainerCalibStatus(uint8_t status);
-    void setTrainerConfigRequired(bool status);
     void setTrainerBrakeStatus(uint8_t status);
     bool getTrainerReady() const;
     bool getTrainerRunning() const;
-    uint8_t getTrainerCalibStatus() const;
-    bool getTrainerConfigRequired() const;
     uint8_t getTrainerBrakeStatus() const;
 
     uint8_t spinScan[24];
@@ -156,9 +152,7 @@ private:
     bool trainerStatusAvailable;
     bool trainerReady;
     bool trainerRunning;
-    bool trainerConfigRequired;
     uint8_t trainerBrakeStatus;
-    uint8_t trainerCalibStatus;
 };
 
 #endif

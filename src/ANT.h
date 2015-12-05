@@ -436,16 +436,6 @@ public:
     void processMessage(void);
 
     // calibration
-    uint8_t getCalibrationType()
-    {
-        return calibration.getType();
-    }
-
-    uint8_t getCalibrationState()
-    {
-        return calibration.getState();
-    }
-
     double getCalibrationTargetSpeed()
     {
         return calibration.getTargetSpeed();
@@ -459,17 +449,6 @@ public:
     uint16_t getCalibrationSpindownTime()
     {
         return calibration.getZeroOffset();
-    }
-
-    void setCalibrationState(uint8_t state)
-    {
-        calibration.setState(state);
-        telemetry.setTrainerCalibStatus(state);
-    }
-
-    void setCalibrationType(uint8_t type)
-    {
-        calibration.setType(type);
     }
 
     void setCalibrationTargetSpeed(double target)
@@ -564,8 +543,6 @@ public:
     void refreshVortexLoad();
 
     void setTrainerStatusAvailable(bool status) { telemetry.setTrainerStatusAvailable(status); }
-    void setTrainerCalibStatus(uint8_t status) { telemetry.setTrainerCalibStatus(status); }
-    void setTrainerConfigRequired(bool status) { telemetry.setTrainerConfigRequired(status); }
     void setTrainerBrakeStatus(uint8_t status) { telemetry.setTrainerBrakeStatus(status); }
     void setTrainerReady(bool status) { telemetry.setTrainerReady(status); }
     void setTrainerRunning(bool status) { telemetry.setTrainerRunning(status); }

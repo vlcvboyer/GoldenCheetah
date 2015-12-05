@@ -27,6 +27,7 @@
 #define CALIBRATION_TYPE_COMPUTRAINER   0x01
 #define CALIBRATION_TYPE_ZERO_OFFSET    0x02
 #define CALIBRATION_TYPE_SPINDOWN       0x04
+#define CALIBRATION_TYPE_CONFIGURATION  0x08 // FIXME: TODO !!! merge with previous method
 
 #define CALIBRATION_STATE_IDLE          0x00
 #define CALIBRATION_STATE_REQUIRED      0x01
@@ -77,6 +78,7 @@ private:
     static uint8_t  state;
     static uint8_t  current_device;
     static uint8_t  target_device;
+    static QString  message;
     uint16_t zerooffset;
     uint16_t spindowntime;
     double   targetspeed;

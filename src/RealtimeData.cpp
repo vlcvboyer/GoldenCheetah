@@ -235,11 +235,6 @@ void RealtimeData::setTrainerRunning(bool status)
     this->trainerRunning = status;
 }
 
-void RealtimeData::setTrainerConfigRequired(bool status)
-{
-    this->trainerConfigRequired = status;
-}
-
 void RealtimeData::setTrainerBrakeStatus(uint8_t status)
 {
     this->trainerBrakeStatus = status;
@@ -253,21 +248,6 @@ bool RealtimeData::getTrainerReady() const
 bool RealtimeData::getTrainerRunning() const
 {
     return trainerRunning;
-}
-
-uint8_t RealtimeData::getTrainerCalibStatus() const
-{
-    return trainerCalibStatus;
-}
-
-void RealtimeData::setTrainerCalibStatus(uint8_t status)
-{
-    trainerCalibStatus = status;
-}
-
-bool RealtimeData::getTrainerConfigRequired() const
-{
-    return trainerConfigRequired;
 }
 
 uint8_t RealtimeData::getTrainerBrakeStatus() const

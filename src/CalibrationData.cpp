@@ -20,9 +20,11 @@
 #include "CalibrationData.h"
 #include <QtDebug>
 
+uint8_t CalibrationData::type = CALIBRATION_TYPE_NONE;
 uint8_t CalibrationData::state = CALIBRATION_STATE_IDLE;
 uint8_t CalibrationData::current_device = CALIBRATION_DEVICE_NONE;
 uint8_t CalibrationData::target_device = CALIBRATION_DEVICE_NONE;
+QString CalibrationData::message = "";
 
 CalibrationData::CalibrationData()
 {
