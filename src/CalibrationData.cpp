@@ -24,7 +24,8 @@ CalibrationData::CalibrationData()
 {
     type = CALIBRATION_TYPE_NOT_SUPPORTED;
     state = CALIBRATION_STATE_IDLE;
-    device = CALIBRATION_DEVICE_NONE;
+    current_device = CALIBRATION_DEVICE_NONE;
+    target_device = CALIBRATION_DEVICE_NONE;
     targetspeed = spindowntime = zerooffset = 0;
 }
 
@@ -224,7 +225,7 @@ void CalibrationData::setCurrentDevice(uint8_t device)
 
         // debug message:
         QString StrCalib = "Calibration device changing from ";
-        switch(this->device) {
+        switch(this->current_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
