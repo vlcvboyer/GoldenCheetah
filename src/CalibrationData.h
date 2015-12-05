@@ -56,6 +56,9 @@ public:
     uint8_t getState();
     void setState(uint8_t state);
 
+    uint8_t getDevice();
+    void setDevice(uint8_t type);
+
     uint16_t getZeroOffset();
     void setZeroOffset(uint16_t offset);
 
@@ -69,6 +72,7 @@ private:
 
     uint8_t  type;
     uint8_t  state;
+    uint8_t  device;
     uint16_t zerooffset;
     uint16_t spindowntime;
     double   targetspeed;
