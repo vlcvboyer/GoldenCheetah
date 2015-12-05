@@ -171,7 +171,7 @@ void CalibrationData::setTargetDevice(uint8_t device)
 
         // debug message:
         QString StrCalib = "Calibration target device changing from ";
-        switch(this->device) {
+        switch(this->target_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
@@ -189,7 +189,7 @@ void CalibrationData::setTargetDevice(uint8_t device)
         }
 
         StrCalib += " to ";
-        switch(this->state) {
+        switch(this->target_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
@@ -242,7 +242,7 @@ void CalibrationData::setCurrentDevice(uint8_t device)
         }
 
         StrCalib += " to ";
-        switch(this->state) {
+        switch(this->current_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
