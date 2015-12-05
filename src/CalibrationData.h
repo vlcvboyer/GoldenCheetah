@@ -21,6 +21,7 @@
 
 #include <stdint.h> // uint8_t etc
 
+#define CALIBRATION_TYPE_NONE           0x00
 #define CALIBRATION_TYPE_UNKNOWN        0x00
 #define CALIBRATION_TYPE_NOT_SUPPORTED  0x00
 #define CALIBRATION_TYPE_COMPUTRAINER   0x01
