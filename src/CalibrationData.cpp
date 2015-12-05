@@ -24,6 +24,7 @@ CalibrationData::CalibrationData()
 {
     type = CALIBRATION_TYPE_NOT_SUPPORTED;
     state = CALIBRATION_STATE_IDLE;
+    device = CALIBRATION_DEVICE_NONE;
     targetspeed = spindowntime = zerooffset = 0;
 }
 
@@ -51,6 +52,8 @@ void CalibrationData::setType(uint8_t type)
             case CALIBRATION_TYPE_SPINDOWN:
                 StrCalib += "SPINDOWN";
                 break;
+            default:
+                StrCalib += "UNKNOWN";
         }
         StrCalib += " to ";
         switch(type) {
@@ -66,6 +69,8 @@ void CalibrationData::setType(uint8_t type)
             case CALIBRATION_TYPE_SPINDOWN:
                 StrCalib += "SPINDOWN";
                 break;
+            default:
+                StrCalib += "UNKNOWN";
         }
         qDebug() << qPrintable(StrCalib);
 
@@ -113,6 +118,8 @@ void CalibrationData::setState(uint8_t state)
             case CALIBRATION_STATE_FAILURE:
                 StrCalib += "FAILURE";
                 break;
+            default:
+                StrCalib += "UNKNOWN";
         }
 
         StrCalib += " to ";
@@ -144,10 +151,63 @@ void CalibrationData::setState(uint8_t state)
             case CALIBRATION_STATE_FAILURE:
                 StrCalib += "FAILURE";
                 break;
+            default:
+                StrCalib += "UNKNOWN";
         }
         qDebug() << qPrintable(StrCalib);
 
         this->state = state;
+    }
+}
+
+uint8_t CalibrationData::getDevice()
+{
+    return this->device;
+}
+
+void CalibrationData::setDevice(uint8_t device)
+{
+    if (this->device != device) {
+
+        // debug message:
+        QString StrCalib = "Calibration device changing from ";
+        switch(this->device) {
+            case CALIBRATION_DEVICE_NONE:
+                StrCalib += "NONE";
+                break;
+            case CALIBRATION_DEVICE_COMPUTRAINER:
+                StrCalib += "COMPUTRAINER";
+                break;
+            case CALIBRATION_DEVICE_ANT_SPORT:
+                StrCalib += "ANT_SPORT";
+                break;
+            case CALIBRATION_DEVICE_ANT_FEC:
+                StrCalib += "ANT FEC";
+                break;
+            default:
+                StrCalib += "UNKNOWN";
+        }
+
+        StrCalib += " to ";
+        switch(this->state) {
+            case CALIBRATION_DEVICE_NONE:
+                StrCalib += "NONE";
+                break;
+            case CALIBRATION_DEVICE_COMPUTRAINER:
+                StrCalib += "COMPUTRAINER";
+                break;
+            case CALIBRATION_DEVICE_ANT_SPORT:
+                StrCalib += "ANT_SPORT";
+                break;
+            case CALIBRATION_DEVICE_ANT_FEC:
+                StrCalib += "ANT FEC";
+                break;
+            default:
+                StrCalib += "UNKNOWN";
+        }
+        qDebug() << qPrintable(StrCalib);
+
+        this->devicee = device;
     }
 }
 
