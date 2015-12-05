@@ -160,14 +160,67 @@ void CalibrationData::setState(uint8_t state)
     }
 }
 
-uint8_t CalibrationData::getDevice()
+uint8_t CalibrationData::getTargetDevice()
 {
-    return this->device;
+    return this->target_device;
 }
 
-void CalibrationData::setDevice(uint8_t device)
+void CalibrationData::setTargetDevice(uint8_t device)
 {
-    if (this->device != device) {
+    if (this->target_device != target_device) {
+
+        // debug message:
+        QString StrCalib = "Calibration target device changing from ";
+        switch(this->device) {
+            case CALIBRATION_DEVICE_NONE:
+                StrCalib += "NONE";
+                break;
+            case CALIBRATION_DEVICE_COMPUTRAINER:
+                StrCalib += "COMPUTRAINER";
+                break;
+            case CALIBRATION_DEVICE_ANT_SPORT:
+                StrCalib += "ANT_SPORT";
+                break;
+            case CALIBRATION_DEVICE_ANT_FEC:
+                StrCalib += "ANT FEC";
+                break;
+            default:
+                StrCalib += "UNKNOWN";
+        }
+
+        StrCalib += " to ";
+        switch(this->state) {
+            case CALIBRATION_DEVICE_NONE:
+                StrCalib += "NONE";
+                break;
+            case CALIBRATION_DEVICE_COMPUTRAINER:
+                StrCalib += "COMPUTRAINER";
+                break;
+            case CALIBRATION_DEVICE_ANT_SPORT:
+                StrCalib += "ANT_SPORT";
+                break;
+            case CALIBRATION_DEVICE_ANT_FEC:
+                StrCalib += "ANT FEC";
+            case CALIBRATION_DEVICE_ALL:
+                StrCalib += "ALL";
+                break;
+            default:
+                StrCalib += "UNKNOWN";
+        }
+        qDebug() << qPrintable(StrCalib);
+
+        this->target_device = target_device;
+    }
+}
+
+uint8_t CalibrationData::getCurrentDevice()
+{
+    return this->current_device;
+}
+
+void CalibrationData::setCurrentDevice(uint8_t device)
+{
+    if (this->current_device != current_device) {
 
         // debug message:
         QString StrCalib = "Calibration device changing from ";
@@ -207,7 +260,7 @@ void CalibrationData::setDevice(uint8_t device)
         }
         qDebug() << qPrintable(StrCalib);
 
-        this->device = device;
+        this->current_device = current_device;
     }
 }
 
