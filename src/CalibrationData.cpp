@@ -20,12 +20,13 @@
 #include "CalibrationData.h"
 #include <QtDebug>
 
+uint8_t CalibrationData::state = CALIBRATION_STATE_IDLE;
+uint8_t CalibrationData::current_device = CALIBRATION_DEVICE_NONE;
+uint8_t CalibrationData::target_device = CALIBRATION_DEVICE_NONE;
+
 CalibrationData::CalibrationData()
 {
     type = CALIBRATION_TYPE_NOT_SUPPORTED;
-    state = CALIBRATION_STATE_IDLE;
-    current_device = CALIBRATION_DEVICE_NONE;
-    target_device = CALIBRATION_DEVICE_NONE;
     targetspeed = spindowntime = zerooffset = 0;
 }
 
@@ -124,7 +125,7 @@ void CalibrationData::setState(uint8_t state)
         }
 
         StrCalib += " to ";
-        switch(this->state) {
+        switch(state) {
             case CALIBRATION_STATE_IDLE:
                 StrCalib += "IDLE";
                 break;
@@ -168,7 +169,7 @@ uint8_t CalibrationData::getTargetDevice()
 
 void CalibrationData::setTargetDevice(uint8_t device)
 {
-    if (this->target_device != target_device) {
+    if (this->target_device != device) {
 
         // debug message:
         QString StrCalib = "Calibration target device changing from ";
@@ -190,7 +191,7 @@ void CalibrationData::setTargetDevice(uint8_t device)
         }
 
         StrCalib += " to ";
-        switch(this->target_device) {
+        switch(device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
@@ -221,7 +222,7 @@ uint8_t CalibrationData::getCurrentDevice()
 
 void CalibrationData::setCurrentDevice(uint8_t device)
 {
-    if (this->current_device != current_device) {
+    if (this->current_device != device) {
 
         // debug message:
         QString StrCalib = "Calibration device changing from ";
@@ -243,7 +244,7 @@ void CalibrationData::setCurrentDevice(uint8_t device)
         }
 
         StrCalib += " to ";
-        switch(this->current_device) {
+        switch(device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;

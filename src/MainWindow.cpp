@@ -655,7 +655,11 @@ MainWindow::MainWindow(const QDir &home)
     QMenu *optionsMenu = menuBar()->addMenu(tr("&Tools"));
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
     optionsMenu->addSeparator();
-    optionsMenu->addAction(tr("Calibrate sensors..."), this, SLOT (calibrationRequest()));
+    // TODO : create submenu?
+    optionsMenu->addAction(tr("Calibrate sensors: Any"), this, SLOT (calibrationRequest()));
+    optionsMenu->addAction(tr("Calibrate sensors: Computrainer"), this, SLOT (calibrationRequest()));
+    optionsMenu->addAction(tr("Calibrate sensors: ANT trainer"), this, SLOT (calibrationRequest()));
+    optionsMenu->addAction(tr("Calibrate sensors: ANT powermeter"), this, SLOT (calibrationRequest()));
     optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
