@@ -207,7 +207,7 @@ void CalibrationData::setDevice(uint8_t device)
         }
         qDebug() << qPrintable(StrCalib);
 
-        this->devicee = device;
+        this->device = device;
     }
 }
 
