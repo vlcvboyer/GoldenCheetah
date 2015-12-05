@@ -167,7 +167,7 @@ class MainWindow : public QMainWindow
 #endif
 
         // Sensors calibration
-        void calibrationRequest();
+        void calibrationRequest(uint8_t target_device=CALIBRATION_DEVICE_ALL);
 
         // Measures View
         void downloadMeasures();

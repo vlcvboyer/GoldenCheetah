@@ -656,10 +656,10 @@ MainWindow::MainWindow(const QDir &home)
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
     optionsMenu->addSeparator();
     // TODO : create submenu?
-    optionsMenu->addAction(tr("Calibrate sensors: Any"), this, SLOT (calibrationRequest()));
-    optionsMenu->addAction(tr("Calibrate sensors: Computrainer"), this, SLOT (calibrationRequest()));
-    optionsMenu->addAction(tr("Calibrate sensors: ANT trainer"), this, SLOT (calibrationRequest()));
-    optionsMenu->addAction(tr("Calibrate sensors: ANT powermeter"), this, SLOT (calibrationRequest()));
+    optionsMenu->addAction(tr("Calibrate sensors: Any"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ALL)));
+    optionsMenu->addAction(tr("Calibrate sensors: Computrainer"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_COMPUTRAINER)));
+    optionsMenu->addAction(tr("Calibrate sensors: ANT trainer"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ANT_FEC)));
+    optionsMenu->addAction(tr("Calibrate sensors: ANT powermeter"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ANT_SPORT)));
     optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
@@ -2188,10 +2188,10 @@ MainWindow::configChanged(qint32)
  *--------------------------------------------------------------------*/
 
 void
-MainWindow::calibrationRequest()
+MainWindow::calibrationRequest(uint8_t target_device)
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest();
+        currentTab->context->notifyCalibrationRequest(target_device);
     // TODO: add a submenu including:
     // "All uncalibrated"
     // "Powermeter"
