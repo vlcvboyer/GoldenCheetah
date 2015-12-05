@@ -29,6 +29,7 @@
 #include "RideItem.h"
 #include "TimeUtils.h"
 #include "DragBar.h"
+#include "CalibrationData.h"
 
 #ifdef Q_OS_MAC
 // What versions are supported by this SDK?
