@@ -32,12 +32,12 @@ CalibrationData::CalibrationData()
     targetspeed = spindowntime = zerooffset = 0;
 }
 
-uint8_t CalibrationData::getType()
+static uint8_t CalibrationData::getType()
 {
     return this->type;
 }
 
-void CalibrationData::setType(uint8_t type)
+static void CalibrationData::setType(uint8_t type)
 {
     if (this->type != type) {
 
@@ -83,12 +83,12 @@ void CalibrationData::setType(uint8_t type)
     }
 }
 
-uint8_t CalibrationData::getState()
+static uint8_t CalibrationData::getState()
 {
     return this->state;
 }
 
-void CalibrationData::setState(uint8_t state)
+static void CalibrationData::setState(uint8_t state)
 {
     if (this->state != state) {
 
@@ -164,12 +164,12 @@ void CalibrationData::setState(uint8_t state)
     }
 }
 
-uint8_t CalibrationData::getTargetDevice()
+static uint8_t CalibrationData::getTargetDevice()
 {
     return this->target_device;
 }
 
-void CalibrationData::setTargetDevice(uint8_t device)
+static void CalibrationData::setTargetDevice(uint8_t device)
 {
     if (this->target_device != device) {
 
@@ -217,12 +217,12 @@ void CalibrationData::setTargetDevice(uint8_t device)
     }
 }
 
-uint8_t CalibrationData::getCurrentDevice()
+static uint8_t CalibrationData::getCurrentDevice()
 {
     return this->current_device;
 }
 
-void CalibrationData::setCurrentDevice(uint8_t device)
+static void CalibrationData::setCurrentDevice(uint8_t device)
 {
     if (this->current_device != device) {
 
@@ -307,4 +307,12 @@ void CalibrationData::setTargetSpeed(double speed)
     }
 }
 
+static QString CalibrationData::getMessage()
+{
+    return this->message;
+}
 
+static void CalibrationData::setMessage(QString message)
+{
+    this->message = message;
+}

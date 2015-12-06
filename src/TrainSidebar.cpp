@@ -1407,10 +1407,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
 
                     // if calibration was already requested, but not receiving updates, then try again..
-                    if ((Calibration::getCalibrationState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
+                    if ((CalibrationData::getState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
                         restartCalibration = false;
                         qDebug() << "No response to our calibration request, re-requesting..";
-                        Calibration::setCalibrationState(CALIBRATION_STATE_REQUESTED);
+                        CalibrationData::setState(CALIBRATION_STATE_REQUESTED);
                     }
                 }
             }
@@ -1469,8 +1469,6 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     rtData.setTrainerStatusAvailable(true);
                     rtData.setTrainerReady(local.getTrainerReady());
                     rtData.setTrainerRunning(local.getTrainerRunning());
-                    rtData.setTrainerCalibStatus(local.getTrainerCalibStatus());
-                    rtData.setTrainerConfigRequired(local.getTrainerConfigRequired());
                     rtData.setTrainerBrakeStatus(local.getTrainerBrakeStatus());
                 }
             }
@@ -1726,13 +1724,13 @@ void TrainSidebar::toggleCalibration()
         if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
         context->notifyUnPause(); // get video started again, amongst other things
 
-        Calibration::setCalibrationState(CALIBRATION_STATE_IDLE);
-        Calibration::setCalibrationCurrentDevice(CALIBRATION_DEVICE_NONE);
+        CalibrationData::setState(CALIBRATION_STATE_IDLE);
+        CalibrationData::setCalibrationCurrentDevice(CALIBRATION_DEVICE_NONE);
         // back to ergo/slope mode and restore load/gradient
         if (status&RT_MODE_ERGO) {
 
             foreach(int dev, devices()) {
-                if (calibrationDeviceIndex == dev) {
+                if (calibrationDeviceIndex == dev) { // FIXME : remove this variable and replace everywhere by Calibration::curentCalibDevice or similar
                     Devices[dev].controller->setMode(RT_MODE_ERGO);
                     Devices[dev].controller->setLoad(load);
                 }
@@ -1760,18 +1758,26 @@ void TrainSidebar::toggleCalibration()
 
         context->notifyPause(); // get video started again, amongst other things
 
-        // select the first device that reports calibration capabilities
-        // todo: add support for calibrating multiple devices, what would user interaction look like?
+        // select the first uncalibrated device that reports requested calibration capabilities
         foreach(int dev, devices()) {
-            if ((Devices[dev].controller->getCalibrationType()) && (calibrationDeviceIndex == -1)) {
+            if (calibrationDeviceIndex != -1)
+                break;
+            if (       (CalibrationData::target_device & Devices[dev].getCalibrationType())
+                    && (Devices[dev].CalibFeatures & ~Devices[dev].CalibCompleted))
                 calibrationDeviceIndex = dev;
-            }
+        }
+
+        // otherwise select the first uncalibrated device that reports requested calibration capabilities
+        foreach(int dev, devices()) {
+            if (calibrationDeviceIndex != -1)
+                break;
+            if (CalibrationData::target_device & Devices[dev].getCalibrationType())
+                calibrationDeviceIndex = dev;
         }
 
         // only do this for the selected device
         foreach(int dev, devices()) {
             if (calibrationDeviceIndex == dev) {
-                calibrationType = Devices[dev].controller->getCalibrationType();
 
                 // trainer (tacx vortex smart) doesn't appear to reduce resistance automatically when entering calibration mode
                 if (status&RT_MODE_ERGO)
@@ -1780,7 +1786,7 @@ void TrainSidebar::toggleCalibration()
                     Devices[dev].controller->setGradient(0);
 
                 Devices[dev].controller->setMode(RT_MODE_CALIBRATE);
-                Calibration::setCalibrationState(CALIBRATION_STATE_REQUESTED);
+                CalibrationData::setState(CALIBRATION_STATE_REQUESTED);
             }
         }
 

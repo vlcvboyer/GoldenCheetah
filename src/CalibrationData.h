@@ -21,13 +21,13 @@
 
 #include <stdint.h> // uint8_t etc
 
-#define CALIBRATION_TYPE_NONE           0x00
-#define CALIBRATION_TYPE_UNKNOWN        0x00
-#define CALIBRATION_TYPE_NOT_SUPPORTED  0x00
-#define CALIBRATION_TYPE_COMPUTRAINER   0x01
-#define CALIBRATION_TYPE_ZERO_OFFSET    0x02
-#define CALIBRATION_TYPE_SPINDOWN       0x04
-#define CALIBRATION_TYPE_CONFIGURATION  0x08 // FIXME: TODO !!! merge with previous method
+#define CALIBRATION_TYPE_NONE           ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_UNKNOWN        ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_NOT_SUPPORTED  ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_COMPUTRAINER   ((uint8_t) 0x01)
+#define CALIBRATION_TYPE_ZERO_OFFSET    ((uint8_t) 0x02)
+#define CALIBRATION_TYPE_SPINDOWN       ((uint8_t) 0x04)
+#define CALIBRATION_TYPE_CONFIGURATION  ((uint8_t) 0x08) // FIXME: TODO !!! merge previous method with  this one
 
 #define CALIBRATION_STATE_IDLE          0x00
 #define CALIBRATION_STATE_REQUIRED      0x01
@@ -39,11 +39,11 @@
 #define CALIBRATION_STATE_SUCCESS       0x07
 #define CALIBRATION_STATE_FAILURE       0x08
 
-#define CALIBRATION_DEVICE_NONE         0x00
-#define CALIBRATION_DEVICE_COMPUTRAINER 0x01
-#define CALIBRATION_DEVICE_ANT_SPORT    0x02
-#define CALIBRATION_DEVICE_ANT_FEC      0x04
-#define CALIBRATION_DEVICE_ALL          0xFF
+#define CALIBRATION_DEVICE_NONE         ((uint8_t) 0x00)
+#define CALIBRATION_DEVICE_COMPUTRAINER ((uint8_t) 0x01)
+#define CALIBRATION_DEVICE_ANT_SPORT    ((uint8_t) 0x02)
+#define CALIBRATION_DEVICE_ANT_FEC      ((uint8_t) 0x04)
+#define CALIBRATION_DEVICE_ALL          ((uint8_t) 0xFF)
 
 class CalibrationData
 {
@@ -51,30 +51,33 @@ public:
 
     CalibrationData();
 
-    uint8_t getType();
-    void setType(uint8_t type);
+    static uint8_t getType();
+    static void setType(uint8_t type);
 
-    uint8_t getState();
-    void setState(uint8_t state);
+    static uint8_t getState();
+    static void setState(uint8_t state);
 
-    uint8_t getCurrentDevice();
-    void setCurrentDevice(uint8_t device);
+    static uint8_t getCurrentDevice();
+    static void setCurrentDevice(uint8_t device);
 
-    uint8_t getTargetDevice();
-    void setTargetDevice(uint8_t device);
+    static uint8_t getTargetDevice();
+    static void setTargetDevice(uint8_t device);
 
-    uint16_t getZeroOffset();
+    uint16_t getZeroOffset() const;
     void setZeroOffset(uint16_t offset);
 
-    uint16_t getSpindownTime();
+    uint16_t getSpindownTime() const;
     void setSpindownTime(uint16_t time);
 
-    double getTargetSpeed();
+    double getTargetSpeed() const;
     void setTargetSpeed(double speed);
+
+    static QString getMessage();
+    static void setMessage(QString message);
 
 private:
 
-    uint8_t  type;
+    static uint8_t  type;
     static uint8_t  state;
     static uint8_t  current_device;
     static uint8_t  target_device;

@@ -26,7 +26,6 @@
 #include "VideoLayoutParser.h"
 #include "CalibrationData.h"
 
-
 VideoWindow::VideoWindow(Context *context)  :
     GcWindow(context), context(context), m_MediaChanged(false)
 {
@@ -314,29 +313,14 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
         }
         else if (p_meterWidget->Source() == QString("TrainerStatus"))
         {
-            if (!rtd.getTrainerStatusAvailable())
+            // First print message related to calibration if available
+            if (CalibrationData::getMessage()!="") {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = CalibrationData::getMessage();
+            }
+            else if (!rtd.getTrainerStatusAvailable())
             {  // we don't have status from trainer thus we cannot indicate anything on screen
                 p_meterWidget->Text = tr("");
-            }
-            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_REQUIRED)
-            {
-                p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration required");
-            }
-            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_SPEEDUP)
-            {
-                p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration in progress\nspeedup!");
-            }
-            else if (rtd.getTrainerCalibStatus()==CALIBRATION_STATE_COAST)
-            {
-                p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration in progress\nfreewheel!");
-            }
-            else if (rtd.getTrainerConfigRequired())
-            {
-                p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Configuration required");
             }
             else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_LOWSPEED)
             {
