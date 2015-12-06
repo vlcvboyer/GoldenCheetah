@@ -32,18 +32,18 @@ CalibrationData::CalibrationData()
     targetspeed = spindowntime = zerooffset = 0;
 }
 
-static uint8_t CalibrationData::getType()
+uint8_t CalibrationData::getType()
 {
-    return this->type;
+    return type;
 }
 
-static void CalibrationData::setType(uint8_t type)
+void CalibrationData::setType(uint8_t param_type)
 {
-    if (this->type != type) {
+    if (type != param_type) {
 
         // debug message:
         QString StrCalib = "Calibration type changing from ";
-        switch(this->type) {
+        switch(type) {
             case CALIBRATION_TYPE_UNKNOWN:
                 StrCalib += "UNKNOWN";
                 break;
@@ -60,7 +60,7 @@ static void CalibrationData::setType(uint8_t type)
                 StrCalib += "UNKNOWN";
         }
         StrCalib += " to ";
-        switch(type) {
+        switch(param_type) {
             case CALIBRATION_TYPE_UNKNOWN:
                 StrCalib += "UNKNOWN";
                 break;
@@ -78,55 +78,21 @@ static void CalibrationData::setType(uint8_t type)
         }
         qDebug() << qPrintable(StrCalib);
 
-        this->type = type;
-
+        type = param_type;
     }
 }
 
-static uint8_t CalibrationData::getState()
+uint8_t CalibrationData::getState()
 {
-    return this->state;
+    return state;
 }
 
-static void CalibrationData::setState(uint8_t state)
+void CalibrationData::setState(uint8_t param_state)
 {
-    if (this->state != state) {
+    if (state != param_state) {
 
         // debug message:
         QString StrCalib = "Calibration state changing from ";
-        switch(this->state) {
-            case CALIBRATION_STATE_IDLE:
-                StrCalib += "IDLE";
-                break;
-            case CALIBRATION_STATE_REQUIRED:
-                StrCalib += "REQUIRED";
-                break;
-            case CALIBRATION_STATE_REQUESTED:
-                StrCalib += "REQUESTED";
-                break;
-            case CALIBRATION_STATE_STARTING:
-                StrCalib += "STARTING";
-                break;
-            case CALIBRATION_STATE_STARTED:
-                StrCalib += "STARTED";
-                break;
-            case CALIBRATION_STATE_SPEEDUP:
-                StrCalib += "SPEEDUP";
-                break;
-            case CALIBRATION_STATE_COAST:
-                StrCalib += "COAST";
-                break;
-            case CALIBRATION_STATE_SUCCESS:
-                StrCalib += "SUCCESS";
-                break;
-            case CALIBRATION_STATE_FAILURE:
-                StrCalib += "FAILURE";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-
-        StrCalib += " to ";
         switch(state) {
             case CALIBRATION_STATE_IDLE:
                 StrCalib += "IDLE";
@@ -158,24 +124,57 @@ static void CalibrationData::setState(uint8_t state)
             default:
                 StrCalib += "UNKNOWN";
         }
+
+        StrCalib += " to ";
+        switch(param_state) {
+            case CALIBRATION_STATE_IDLE:
+                StrCalib += "IDLE";
+                break;
+            case CALIBRATION_STATE_REQUIRED:
+                StrCalib += "REQUIRED";
+                break;
+            case CALIBRATION_STATE_REQUESTED:
+                StrCalib += "REQUESTED";
+                break;
+            case CALIBRATION_STATE_STARTING:
+                StrCalib += "STARTING";
+                break;
+            case CALIBRATION_STATE_STARTED:
+                StrCalib += "STARTED";
+                break;
+            case CALIBRATION_STATE_SPEEDUP:
+                StrCalib += "SPEEDUP";
+                break;
+            case CALIBRATION_STATE_COAST:
+                StrCalib += "COAST";
+                break;
+            case CALIBRATION_STATE_SUCCESS:
+                StrCalib += "SUCCESS";
+                break;
+            case CALIBRATION_STATE_FAILURE:
+                StrCalib += "FAILURE";
+                break;
+            default:
+                StrCalib += "UNKNOWN";
+        }
         qDebug() << qPrintable(StrCalib);
 
-        this->state = state;
+        state = param_state;
     }
 }
 
-static uint8_t CalibrationData::getTargetDevice()
+uint8_t CalibrationData::getTargetDevice()
 {
-    return this->target_device;
+    return target_device;
 }
 
-static void CalibrationData::setTargetDevice(uint8_t device)
+void CalibrationData::setTargetDevice(uint8_t device)
 {
-    if (this->target_device != device) {
+    if (target_device != device) {
 
         // debug message:
         QString StrCalib = "Calibration target device changing from ";
-        switch(this->target_device) {
+        switch(target_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
@@ -213,22 +212,22 @@ static void CalibrationData::setTargetDevice(uint8_t device)
         }
         qDebug() << qPrintable(StrCalib);
 
-        this->target_device = target_device;
+        target_device = target_device;
     }
 }
 
-static uint8_t CalibrationData::getCurrentDevice()
+uint8_t CalibrationData::getCurrentDevice()
 {
-    return this->current_device;
+    return current_device;
 }
 
-static void CalibrationData::setCurrentDevice(uint8_t device)
+void CalibrationData::setCurrentDevice(uint8_t device)
 {
-    if (this->current_device != device) {
+    if (current_device != device) {
 
         // debug message:
         QString StrCalib = "Calibration device changing from ";
-        switch(this->current_device) {
+        switch(current_device) {
             case CALIBRATION_DEVICE_NONE:
                 StrCalib += "NONE";
                 break;
@@ -264,11 +263,11 @@ static void CalibrationData::setCurrentDevice(uint8_t device)
         }
         qDebug() << qPrintable(StrCalib);
 
-        this->current_device = current_device;
+        current_device = current_device;
     }
 }
 
-uint16_t CalibrationData::getSpindownTime()
+uint16_t CalibrationData::getSpindownTime() const
 {
     return this->spindowntime;
 }
@@ -281,7 +280,7 @@ void CalibrationData::setSpindownTime(uint16_t time)
     }
 }
 
-uint16_t CalibrationData::getZeroOffset()
+uint16_t CalibrationData::getZeroOffset() const
 {
     return this->zerooffset;
 }
@@ -294,7 +293,7 @@ void CalibrationData::setZeroOffset(uint16_t offset)
     }
 }
 
-double CalibrationData::getTargetSpeed()
+double CalibrationData::getTargetSpeed() const
 {
     return this->targetspeed;
 }
@@ -307,12 +306,12 @@ void CalibrationData::setTargetSpeed(double speed)
     }
 }
 
-static QString CalibrationData::getMessage()
+QString CalibrationData::getMessage()
 {
-    return this->message;
+    return message;
 }
 
-static void CalibrationData::setMessage(QString message)
+void CalibrationData::setMessage(QString param_message)
 {
-    this->message = message;
+    message = param_message;
 }

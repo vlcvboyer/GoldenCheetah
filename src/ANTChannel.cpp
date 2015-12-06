@@ -798,6 +798,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 switch (antMessage.data_page) {
 
                 case FITNESS_EQUIPMENT_TRAINER_SPECIFIC_PAGE:
+                {
 
                     // when we receive this page we know that the trainer will be able to indicate its status
                     parent->setTrainerStatusAvailable(true);
@@ -852,7 +853,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     // Indicate whenever device has to be configured or not (typ. for trainer: athlete weight, wheel size...)
                     DeviceConfigurations allDevices;
                     QList<DeviceConfiguration> devices = allDevices.getList();
-                    if ((0<=this->device_number) && (this->device_number<devices.size()) {
+                    if ((0<=this->device_number) && (this->device_number<devices.size())) {
                         // if configuration is indicated as pending then we populate that this device supports configuration
                         devices[this->device_number].calibrationFeatures  |= (antMessage.fecUserConfigRequired?CALIBRATION_TYPE_CONFIGURATION:CALIBRATION_TYPE_NONE);
                         // if configuration is not indicated as required but device supports configuration then set ConfigurationCompleted
@@ -862,32 +863,6 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         if (antMessage.fecUserConfigRequired)
                             devices[this->device_number].calibrationCompleted &= ~CALIBRATION_TYPE_CONFIGURATION;
                     }
-
-
-
-
-
-    foreach(DeviceConfiguration x, Devices) delete x.controller;
-    Devices.clear();
-
-    DeviceConfigurations all;
-    Devices = all.getList();
-    for (int i=0; i<Devices.count(); i++) {
-
-        // add to the selection tree
-        QTreeWidgetItem *device = new QTreeWidgetItem(deviceTree->invisibleRootItem(), i);
-        device->setText(0, Devices.at(i).name);
-
-        // Create the controllers for each device
-        // we can call upon each of these when we need
-        // to interact with the device
-        if (Devices.at(i).type == DEV_CT) {
-            Devices[i].controller = new ComputrainerController(this, &Devices[i]);
-#if QT_VERSION >= 0x050000
-        } else if (Devices.at(i).type == DEV_MONARK) {
-            Devices[i].controller = new MonarkController(this, &Devices[i]);
-
-
 
                     if (antMessage.fecUserConfigRequired)
                     {
@@ -921,6 +896,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     parent->setTrainerReady(antMessage.fecState==FITNESS_EQUIPMENT_READY);
                     parent->setTrainerRunning(antMessage.fecState==FITNESS_EQUIPMENT_IN_USE);
                     break;
+                }
 
                 case FITNESS_EQUIPMENT_TRAINER_TORQUE_PAGE:
                     // TODO: Manage "wheelRevolutions" information

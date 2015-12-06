@@ -1170,9 +1170,9 @@ void TrainSidebar::Start()       // when start button is pressed
         //reset all calibration data
         calibrating = restartCalibration = false;
         calibrationSpindownTime = calibrationZeroOffset = calibrationTargetSpeed = calibrationCurrentSpeed = 0;
-        calibrationState = CALIBRATION_STATE_IDLE;
-        calibrationType = CALIBRATION_TYPE_NOT_SUPPORTED;
-        calibrationDeviceIndex = -1;
+// FIXME WIP //        calibrationState = CALIBRATION_STATE_IDLE;
+// FIXME WIP //        calibrationType = CALIBRATION_TYPE_NOT_SUPPORTED;
+// FIXME WIP //        calibrationDeviceIndex = -1;
 
         if (status & RT_WORKOUT) {
             load_timer->start(LOADRATE);      // start recording
@@ -1281,9 +1281,9 @@ void TrainSidebar::Stop(int deviceStatus)        // when stop button is pressed
     //reset all calibration data
     calibrating = restartCalibration = false;
     calibrationSpindownTime = calibrationZeroOffset = calibrationTargetSpeed = calibrationCurrentSpeed = 0;
-    calibrationState = CALIBRATION_STATE_IDLE;
-    calibrationType = CALIBRATION_TYPE_NOT_SUPPORTED;
-    calibrationDeviceIndex = -1;
+// FIXME WIP //    calibrationState = CALIBRATION_STATE_IDLE;
+// FIXME WIP //    calibrationType = CALIBRATION_TYPE_NOT_SUPPORTED;
+// FIXME WIP //    calibrationDeviceIndex = -1;
 
     load = 0;
     slope = 0.0;
@@ -1401,10 +1401,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     Devices[dev].controller->getRealtimeData(local);
                     calibrationCurrentSpeed = local.getSpeed();
 
-                    calibrationTargetSpeed = Devices[dev].controller->getCalibrationTargetSpeed();
+// FIXME WIP //                    calibrationTargetSpeed = Devices[dev].controller->getCalibrationTargetSpeed();
 
-                    calibrationSpindownTime =  Devices[dev].controller->getCalibrationSpindownTime();
-                    calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
+// FIXME WIP //                    calibrationSpindownTime =  Devices[dev].controller->getCalibrationSpindownTime();
+// FIXME WIP //                    calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
 
                     // if calibration was already requested, but not receiving updates, then try again..
                     if ((CalibrationData::getState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
@@ -1426,7 +1426,9 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
 
             // fetch the right data from each device...
             foreach(int dev, devices()) {
-
+// FIXME WIP :
+qDebug() << "device " << dev << " " << Devices[dev].name << " " << Devices[dev].portSpec << " " << Devices[dev].deviceProfile << " " << Devices[dev].defaultString; 
+    
                 RealtimeData local = rtData;
                 Devices[dev].controller->getRealtimeData(local);
 
@@ -1724,8 +1726,8 @@ void TrainSidebar::toggleCalibration()
         if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
         context->notifyUnPause(); // get video started again, amongst other things
 
-        CalibrationData::setState(CALIBRATION_STATE_IDLE);
-        CalibrationData::setCalibrationCurrentDevice(CALIBRATION_DEVICE_NONE);
+// FIXME WIP //        CalibrationData::setState(CALIBRATION_STATE_IDLE);
+// FIXME WIP //        CalibrationData::setCalibrationCurrentDevice(CALIBRATION_DEVICE_NONE);
         // back to ergo/slope mode and restore load/gradient
         if (status&RT_MODE_ERGO) {
 
@@ -1762,17 +1764,19 @@ void TrainSidebar::toggleCalibration()
         foreach(int dev, devices()) {
             if (calibrationDeviceIndex != -1)
                 break;
-            if (       (CalibrationData::target_device & Devices[dev].getCalibrationType())
-                    && (Devices[dev].CalibFeatures & ~Devices[dev].CalibCompleted))
-                calibrationDeviceIndex = dev;
+// FIXME WIP //
+            // if (       (CalibrationData::target_device & Devices[dev].getCalibrationType())
+                    // && (Devices[dev].CalibFeatures & ~Devices[dev].CalibCompleted))
+                // calibrationDeviceIndex = dev;
         }
 
         // otherwise select the first uncalibrated device that reports requested calibration capabilities
         foreach(int dev, devices()) {
             if (calibrationDeviceIndex != -1)
                 break;
-            if (CalibrationData::target_device & Devices[dev].getCalibrationType())
-                calibrationDeviceIndex = dev;
+// FIXME WIP //
+            // if (CalibrationData::target_device & Devices[dev].getCalibrationType())
+                // calibrationDeviceIndex = dev;
         }
 
         // only do this for the selected device
@@ -1823,95 +1827,96 @@ void TrainSidebar::updateCalibration()
         //qDebug() << "updating calibration dialog";
 
         // update dialog depending on calibration type and state
-        switch (calibrationType) {
+// FIXME WIP //
+        // switch (calibrationType) {
 
-        case CALIBRATION_TYPE_NOT_SUPPORTED:
-            status = tr("Calibration not supported for this device.");
-            break;
+        // case CALIBRATION_TYPE_NOT_SUPPORTED:
+            // status = tr("Calibration not supported for this device.");
+            // break;
 
-        case CALIBRATION_TYPE_COMPUTRAINER:
-            status = tr("Calibrating...\nPress F3 on Controller when done.");
-            break;
+        // case CALIBRATION_TYPE_COMPUTRAINER:
+            // status = tr("Calibrating...\nPress F3 on Controller when done.");
+            // break;
 
-        case CALIBRATION_TYPE_SPINDOWN:
+        // case CALIBRATION_TYPE_SPINDOWN:
 
-            switch (calibrationState) {
+            // switch (calibrationState) {
 
-            case CALIBRATION_STATE_IDLE:
-                break;
+            // case CALIBRATION_STATE_IDLE:
+                // break;
 
-            case CALIBRATION_STATE_REQUESTED:
-                status = QString("Requesting calibration..");
-                break;
+            // case CALIBRATION_STATE_REQUESTED:
+                // status = QString("Requesting calibration..");
+                // break;
 
-            case CALIBRATION_STATE_STARTING:
-                status = QString("Requesting calibration..");
-                // if just spinning here, the device has not responded to calibration request
-                if ((startingCount++ % 5) == 0)
-                    restartCalibration = true;
-                break;
+            // case CALIBRATION_STATE_STARTING:
+                // status = QString("Requesting calibration..");
+                // // if just spinning here, the device has not responded to calibration request
+                // if ((startingCount++ % 5) == 0)
+                    // restartCalibration = true;
+                // break;
 
-            case CALIBRATION_STATE_STARTED:
-                status = QString("Calibrating...");
-                break;
+            // case CALIBRATION_STATE_STARTED:
+                // status = QString("Calibrating...");
+                // break;
 
-            case CALIBRATION_STATE_SPEEDUP:
-                status = QString("Calibrating...\nCurrent speed %1 kph\nIncrease speed to %2 kph").arg(QString::number(calibrationCurrentSpeed, 'f', 1), QString::number(calibrationTargetSpeed, 'f', 1));
-                break;
+            // case CALIBRATION_STATE_SPEEDUP:
+                // status = QString("Calibrating...\nCurrent speed %1 kph\nIncrease speed to %2 kph").arg(QString::number(calibrationCurrentSpeed, 'f', 1), QString::number(calibrationTargetSpeed, 'f', 1));
+                // break;
 
-            case CALIBRATION_STATE_COAST:
-                status = QString("Calibrating...\nStop pedalling until speed drops to 0");
-                break;
+            // case CALIBRATION_STATE_COAST:
+                // status = QString("Calibrating...\nStop pedalling until speed drops to 0");
+                // break;
 
-            case CALIBRATION_STATE_SUCCESS:
-                // display zero offset and spindown stats
-                status = QString("Calibration completed successfully..\nSpindown %1 ms\nZero Offset %2").arg(QString::number(calibrationSpindownTime), QString::number(calibrationZeroOffset));;
-                break;
+            // case CALIBRATION_STATE_SUCCESS:
+                // // display zero offset and spindown stats
+                // status = QString("Calibration completed successfully..\nSpindown %1 ms\nZero Offset %2").arg(QString::number(calibrationSpindownTime), QString::number(calibrationZeroOffset));;
+                // break;
 
-            case CALIBRATION_STATE_FAILURE:
-                status = QString("Calibration failed..");
-                break;
+            // case CALIBRATION_STATE_FAILURE:
+                // status = QString("Calibration failed..");
+                // break;
 
-            }
-            break;
+            // }
+            // break;
 
-        case CALIBRATION_TYPE_ZERO_OFFSET:
+        // case CALIBRATION_TYPE_ZERO_OFFSET:
 
-            switch (calibrationState) {
+            // switch (calibrationState) {
 
-            case CALIBRATION_STATE_IDLE:
-                break;
+            // case CALIBRATION_STATE_IDLE:
+                // break;
 
-            case CALIBRATION_STATE_REQUESTED:
-                status = QString("Requesting calibration..");
-                break;
+            // case CALIBRATION_STATE_REQUESTED:
+                // status = QString("Requesting calibration..");
+                // break;
 
-            case CALIBRATION_STATE_STARTING:
-                break;
+            // case CALIBRATION_STATE_STARTING:
+                // break;
 
-            case CALIBRATION_STATE_STARTED:
-                break;
+            // case CALIBRATION_STATE_STARTED:
+                // break;
 
-            case CALIBRATION_STATE_SPEEDUP:
-                break;
+            // case CALIBRATION_STATE_SPEEDUP:
+                // break;
 
-            case CALIBRATION_STATE_COAST:
-                // todo: display current torque?
-                status = QString("Calibrating...\nStop pedalling until process is completed..");
-                break;
+            // case CALIBRATION_STATE_COAST:
+                // // todo: display current torque?
+                // status = QString("Calibrating...\nStop pedalling until process is completed..");
+                // break;
 
-            case CALIBRATION_STATE_SUCCESS:
-                // yuk, zero offset for FE-C devices is unsigned, but for power meters is signed..
-                status = QString("Calibration completed successfully..\nZero Offset %1").arg(QString::number((int16_t)calibrationZeroOffset));;
-                break;
+            // case CALIBRATION_STATE_SUCCESS:
+                // // yuk, zero offset for FE-C devices is unsigned, but for power meters is signed..
+                // status = QString("Calibration completed successfully..\nZero Offset %1").arg(QString::number((int16_t)calibrationZeroOffset));;
+                // break;
 
-            case CALIBRATION_STATE_FAILURE:
-                status = QString("Calibration failed..");
-                break;
+            // case CALIBRATION_STATE_FAILURE:
+                // status = QString("Calibration failed..");
+                // break;
 
-            }
-            break;
-        }
+            // }
+            // break;
+        // }
 
         bar->setLabelText(status);
         bar->show();

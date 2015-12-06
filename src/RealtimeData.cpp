@@ -32,8 +32,8 @@ RealtimeData::RealtimeData()
     trainerStatusAvailable = false;
     trainerReady = true;
     trainerRunning = true;
-    trainerCalibStatus = CALIBRATION_STATE_IDLE;
-    trainerConfigRequired = false;
+// FIXME WIP //    trainerCalibStatus = CALIBRATION_STATE_IDLE;
+// FIXME WIP //    trainerConfigRequired = false;
     trainerBrakeStatus = TRAINER_BRAKE_OK;
     memset(spinScan, 0, 24);
 }

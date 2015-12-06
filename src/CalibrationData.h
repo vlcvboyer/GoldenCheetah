@@ -20,6 +20,7 @@
 #define SRC_CALIBRATIONDATA_H_
 
 #include <stdint.h> // uint8_t etc
+#include <QString>
 
 #define CALIBRATION_TYPE_NONE           ((uint8_t) 0x00)
 #define CALIBRATION_TYPE_UNKNOWN        ((uint8_t) 0x00)
@@ -52,10 +53,10 @@ public:
     CalibrationData();
 
     static uint8_t getType();
-    static void setType(uint8_t type);
+    static void setType(uint8_t param_type);
 
     static uint8_t getState();
-    static void setState(uint8_t state);
+    static void setState(uint8_t param_state);
 
     static uint8_t getCurrentDevice();
     static void setCurrentDevice(uint8_t device);
@@ -73,7 +74,7 @@ public:
     void setTargetSpeed(double speed);
 
     static QString getMessage();
-    static void setMessage(QString message);
+    static void setMessage(QString param_message);
 
 private:
 

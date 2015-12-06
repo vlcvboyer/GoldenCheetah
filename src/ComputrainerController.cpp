@@ -25,7 +25,7 @@
 ComputrainerController::ComputrainerController(TrainSidebar *parent,  DeviceConfiguration *dc) : RealtimeController(parent, dc)
 {
     myComputrainer = new Computrainer (parent, dc ? dc->portSpec : ""); // we may get NULL passed when configuring
-    calibrationType = CALIBRATION_TYPE_COMPUTRAINER;
+// FIXME WIP //        calibrationType = CALIBRATION_TYPE_COMPUTRAINER;
 }
 
 
