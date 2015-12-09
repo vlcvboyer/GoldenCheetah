@@ -85,7 +85,7 @@ public:
     virtual void     _setCalibrationCompleted(uint8_t type) { calibrationCompleted=type; }
     virtual uint8_t  _getCalibrationCompleted() const { return calibrationCompleted; }
 
-    virtual void     _setCalibrationSate(uint8_t state) { if (calibrationState!=state) qDebug() << "Calibration type changing from " << typeDescr(calibrationState) << "to" << typeDescr(state); calibrationState=state; }
+    virtual void     _setCalibrationState(uint8_t state) { if (calibrationState!=state) qDebug() << "Calibration type changing from " << typeDescr(calibrationState) << "to" << typeDescr(state); calibrationState=state; }
     virtual uint8_t  _getCalibrationState() const  { return calibrationState; }
 
     virtual void     _startCalibration(uint8_t type) { calibrationState = CALIBRATION_STATE_REQUESTED; calibrationType=type; }

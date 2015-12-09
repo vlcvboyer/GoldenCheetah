@@ -415,7 +415,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     case ANT_SPORT_ZEROOFFSET_SUCCESS: //0xAC
                         if (parent->modeCALIBRATE()) {
                             qDebug() << "ANT Sport calibration succeeded";
-                            calibrationData.setState(CALIBRATION_STATE_SUCCESS);
+                            calibrationData._setCalibrationState(CALIBRATION_STATE_SUCCESS);
                         }
 
                         // pass calibrationOffset back up to display
@@ -426,7 +426,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     case ANT_SPORT_ZEROOFFSET_FAIL: //0xAF
                         if (parent->modeCALIBRATE()) {
                             qDebug() << "ANT Sport calibration failed";
-                            calibrationData.setState(CALIBRATION_STATE_FAILURE);
+                            calibrationData._setCalibrationState(CALIBRATION_STATE_FAILURE);
                         }
 
                         // pass calibrationOffset back up to display
@@ -780,7 +780,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 {
                     qDebug() << "Sending new calibration request to ANT FEC Device";
                     calibrationData.setCurrentDevice(CALIBRATION_DEVICE_ANT_FEC);
-                    calibrationData.setState(CALIBRATION_STATE_STARTING);
+                    calibrationData._setCalibrationState(CALIBRATION_STATE_STARTING);
                     if (fecCalibFeatures & ~fecCalibCompleted & CALIBRATION_TYPE_SPINDOWN)
                     {
                         calibrationData.setType(CALIBRATION_TYPE_SPINDOWN);
@@ -942,7 +942,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     qDebug() << "Calibration response received from ANT FEC Device";
 
                     if (antMessage.fecPowerCalibSuccess || antMessage.fecResisCalibSuccess)
-                        calibrationData.setState(CALIBRATION_STATE_SUCCESS);
+                        calibrationData._setCalibrationState(CALIBRATION_STATE_SUCCESS);
 
                     // qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
                     if (antMessage.fecPowerCalibSuccess)
@@ -951,7 +951,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         fecCalibCompleted |= CALIBRATION_TYPE_ZERO_OFFSET;
                     }
                     else if (fecCalibInProgress & CALIBRATION_TYPE_ZERO_OFFSET)
-                        calibrationData.setState(CALIBRATION_STATE_FAILURE);
+                        calibrationData._setCalibrationState(CALIBRATION_STATE_FAILURE);
 
                     if (antMessage.fecResisCalibSuccess)
                     {
@@ -960,7 +960,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     }
                     // if error here, roller tension could be too tight or too loose
                     else if (fecCalibInProgress & CALIBRATION_TYPE_SPINDOWN)
-                        calibrationData.setState(CALIBRATION_STATE_FAILURE);
+                        calibrationData._setCalibrationState(CALIBRATION_STATE_FAILURE);
 
                     // pass zero offset & spindown time back up for display
                     parent->setCalibrationZeroOffset(antMessage.fecZeroOffset);
@@ -975,18 +975,18 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         fecCalibInProgress |= CALIBRATION_TYPE_SPINDOWN;
 
                     if (calibrationData.getState() == CALIBRATION_STATE_STARTING)
-                        calibrationData.setState(CALIBRATION_STATE_STARTED);
+                        calibrationData._setCalibrationState(CALIBRATION_STATE_STARTED);
 
                     if (calibrationData.getState() == CALIBRATION_STATE_STARTED) {
                         if (((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_LO) ||
                             ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)) {
-                            calibrationData.setState(CALIBRATION_STATE_SPEEDUP);
+                            calibrationData._setCalibrationState(CALIBRATION_STATE_SPEEDUP);
                         }
                     }
 
                     if (calibrationData.getState() == CALIBRATION_STATE_SPEEDUP) {
                         if ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)
-                            calibrationData.setState(CALIBRATION_STATE_COAST);
+                            calibrationData._setCalibrationState(CALIBRATION_STATE_COAST);
                     }
 
                     if (antMessage.fecTargetSpeed != 0xFFFF){
