@@ -17,301 +17,321 @@
  */
 
 
-#include "CalibrationData.h"
 #include <QtDebug>
+#include "CalibrationData.h"
+#include "ANT.h"
+#include "ANTChannel.h"
 
-uint8_t CalibrationData::type = CALIBRATION_TYPE_NONE;
-uint8_t CalibrationData::state = CALIBRATION_STATE_IDLE;
-uint8_t CalibrationData::current_device = CALIBRATION_DEVICE_NONE;
 uint8_t CalibrationData::target_device = CALIBRATION_DEVICE_NONE;
-QString CalibrationData::message = "";
 
 CalibrationData::CalibrationData()
 {
-    type = CALIBRATION_TYPE_NOT_SUPPORTED;
-    targetspeed = spindowntime = zerooffset = 0;
+    targetDevice=CALIBRATION_TYPE_UNKNOWN;
+    calibrationSupported=CALIBRATION_TYPE_UNKNOWN;
+    calibrationInProgress=CALIBRATION_TYPE_UNKNOWN;
+    calibrationCompleted=CALIBRATION_TYPE_NONE;
+    calibrationState=CALIBRATION_STATE_IDLE;
+    resetCalibration=false;
+    calibrationSpeed=0.0;
+    zeroOffset=0;
+    spindownTime=0;
+    message=QString("");
 }
 
-uint8_t CalibrationData::getType()
+uint8_t CalibrationData::getCalibrationDevice()
+// the device that is under calibration process (if started) otherwise the first one with calibration support
 {
-    return type;
-}
+    uint8_t ret_val = CALIBRATION_DEVICE_NONE;
 
-void CalibrationData::setType(uint8_t param_type)
-{
-    if (type != param_type) {
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
 
-        // debug message:
-        QString StrCalib = "Calibration type changing from ";
-        switch(type) {
-            case CALIBRATION_TYPE_UNKNOWN:
-                StrCalib += "UNKNOWN";
-                break;
-            case CALIBRATION_TYPE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_TYPE_ZERO_OFFSET:
-                StrCalib += "ZERO_OFFSET";
-                break;
-            case CALIBRATION_TYPE_SPINDOWN:
-                StrCalib += "SPINDOWN";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-        StrCalib += " to ";
-        switch(param_type) {
-            case CALIBRATION_TYPE_UNKNOWN:
-                StrCalib += "UNKNOWN";
-                break;
-            case CALIBRATION_TYPE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_TYPE_ZERO_OFFSET:
-                StrCalib += "ZERO_OFFSET";
-                break;
-            case CALIBRATION_TYPE_SPINDOWN:
-                StrCalib += "SPINDOWN";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-        qDebug() << qPrintable(StrCalib);
-
-        type = param_type;
+    foreach(DeviceConfiguration x, Devices)
+    {
+        if (ret_val)
+            break;
+        else if (x.controller)
+            ret_val |= x.controller->calibrationData._getCalibrationDevice();
     }
+
+    return ret_val;
 }
 
-uint8_t CalibrationData::getState()
+uint8_t CalibrationData::getCalibrationSupported()
+// list all calibration that are supported  (by each realtime controllers)
 {
-    return state;
+    uint8_t ret_val = CALIBRATION_TYPE_NONE;
+
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+        if (x.controller)
+            ret_val |= x.controller->calibrationData._getCalibrationSupported();
+
+    return ret_val;
 }
 
-void CalibrationData::setState(uint8_t param_state)
+uint8_t CalibrationData::getCalibrationInProgress()
+// list all calibration that are in progress
 {
-    if (state != param_state) {
+    uint8_t ret_val = CALIBRATION_TYPE_NONE;
 
-        // debug message:
-        QString StrCalib = "Calibration state changing from ";
-        switch(state) {
-            case CALIBRATION_STATE_IDLE:
-                StrCalib += "IDLE";
-                break;
-            case CALIBRATION_STATE_REQUIRED:
-                StrCalib += "REQUIRED";
-                break;
-            case CALIBRATION_STATE_REQUESTED:
-                StrCalib += "REQUESTED";
-                break;
-            case CALIBRATION_STATE_STARTING:
-                StrCalib += "STARTING";
-                break;
-            case CALIBRATION_STATE_STARTED:
-                StrCalib += "STARTED";
-                break;
-            case CALIBRATION_STATE_SPEEDUP:
-                StrCalib += "SPEEDUP";
-                break;
-            case CALIBRATION_STATE_COAST:
-                StrCalib += "COAST";
-                break;
-            case CALIBRATION_STATE_SUCCESS:
-                StrCalib += "SUCCESS";
-                break;
-            case CALIBRATION_STATE_FAILURE:
-                StrCalib += "FAILURE";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
 
-        StrCalib += " to ";
-        switch(param_state) {
-            case CALIBRATION_STATE_IDLE:
-                StrCalib += "IDLE";
-                break;
-            case CALIBRATION_STATE_REQUIRED:
-                StrCalib += "REQUIRED";
-                break;
-            case CALIBRATION_STATE_REQUESTED:
-                StrCalib += "REQUESTED";
-                break;
-            case CALIBRATION_STATE_STARTING:
-                StrCalib += "STARTING";
-                break;
-            case CALIBRATION_STATE_STARTED:
-                StrCalib += "STARTED";
-                break;
-            case CALIBRATION_STATE_SPEEDUP:
-                StrCalib += "SPEEDUP";
-                break;
-            case CALIBRATION_STATE_COAST:
-                StrCalib += "COAST";
-                break;
-            case CALIBRATION_STATE_SUCCESS:
-                StrCalib += "SUCCESS";
-                break;
-            case CALIBRATION_STATE_FAILURE:
-                StrCalib += "FAILURE";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-        qDebug() << qPrintable(StrCalib);
+    foreach(DeviceConfiguration x, Devices)
+        if (x.controller)
+            ret_val |= x.controller->calibrationData._getCalibrationInProgress();
 
-        state = param_state;
+    return ret_val;
+}
+
+uint8_t CalibrationData::getCalibrationCompleted()
+// list all calibration that are completed
+{
+    uint8_t ret_val = CALIBRATION_TYPE_NONE;
+
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+        if (x.controller)
+            ret_val |= x.controller->calibrationData._getCalibrationCompleted();
+
+    return ret_val;
+}
+
+uint8_t CalibrationData::getCalibrationState()
+{
+    uint8_t ret_val = CALIBRATION_STATE_IDLE;
+
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+    {
+        if (ret_val)
+            break;
+        else if (x.controller)
+            ret_val = x.controller->calibrationData._getCalibrationState();
     }
+
+    return ret_val;
 }
 
-uint8_t CalibrationData::getTargetDevice()
+void CalibrationData::startCalibration(uint8_t device)
 {
-    return target_device;
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    if (getCalibrationState()==CALIBRATION_STATE_IDLE)
+        foreach(DeviceConfiguration x, Devices)
+            if ((x.controller) &&
+                (x.controller->calibrationData._getCalibrationDevice() & device) &&
+                (x.controller->calibrationData._getCalibrationSupported() & ~x.controller->calibrationData._getCalibrationCompleted())
+            {
+                for (uint8_t calibrationType = 0x01; !(calibrationType & x.controller->calibrationData._getCalibrationSupported() & ~x.controller->calibrationData._getCalibrationCompleted()); calibrationType<<1)
+                    ;
+                qDebug() << "Start " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData._getCalibrationDevice()); 
+                x.controller->calibrationData._startCalibration(calibrationType);
+                break;
+            }
+
+    if (getCalibrationState()==CALIBRATION_STATE_IDLE)
+        foreach(DeviceConfiguration x, Devices)
+            if ((x.controller) &&
+                (x.controller->calibrationData._getCalibrationDevice() & device) &&
+                (x.controller->calibrationData._getCalibrationSupported()))
+            {
+                for (uint8_t calibrationType = 0x01; !(calibrationType & x.controller->calibrationData._getCalibrationSupported()); calibrationType<<1)
+                    ;
+                qDebug() << "Force " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData._getCalibrationDevice()); 
+                x.controller->calibrationData._forceCalibration(calibrationType);
+                break;
+            }
 }
 
-void CalibrationData::setTargetDevice(uint8_t device)
+void CalibrationData::resetCalibrationProcess(uint8_t device)
 {
-    if (target_device != device) {
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
 
-        // debug message:
-        QString StrCalib = "Calibration target device changing from ";
-        switch(target_device) {
-            case CALIBRATION_DEVICE_NONE:
-                StrCalib += "NONE";
-                break;
-            case CALIBRATION_DEVICE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_DEVICE_ANT_SPORT:
-                StrCalib += "ANT_SPORT";
-                break;
-            case CALIBRATION_DEVICE_ANT_FEC:
-                StrCalib += "ANT FEC";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-
-        StrCalib += " to ";
-        switch(device) {
-            case CALIBRATION_DEVICE_NONE:
-                StrCalib += "NONE";
-                break;
-            case CALIBRATION_DEVICE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_DEVICE_ANT_SPORT:
-                StrCalib += "ANT_SPORT";
-                break;
-            case CALIBRATION_DEVICE_ANT_FEC:
-                StrCalib += "ANT FEC";
-            case CALIBRATION_DEVICE_ALL:
-                StrCalib += "ALL";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-        qDebug() << qPrintable(StrCalib);
-
-        target_device = target_device;
-    }
-}
-
-uint8_t CalibrationData::getCurrentDevice()
-{
-    return current_device;
-}
-
-void CalibrationData::setCurrentDevice(uint8_t device)
-{
-    if (current_device != device) {
-
-        // debug message:
-        QString StrCalib = "Calibration device changing from ";
-        switch(current_device) {
-            case CALIBRATION_DEVICE_NONE:
-                StrCalib += "NONE";
-                break;
-            case CALIBRATION_DEVICE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_DEVICE_ANT_SPORT:
-                StrCalib += "ANT_SPORT";
-                break;
-            case CALIBRATION_DEVICE_ANT_FEC:
-                StrCalib += "ANT FEC";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-
-        StrCalib += " to ";
-        switch(device) {
-            case CALIBRATION_DEVICE_NONE:
-                StrCalib += "NONE";
-                break;
-            case CALIBRATION_DEVICE_COMPUTRAINER:
-                StrCalib += "COMPUTRAINER";
-                break;
-            case CALIBRATION_DEVICE_ANT_SPORT:
-                StrCalib += "ANT_SPORT";
-                break;
-            case CALIBRATION_DEVICE_ANT_FEC:
-                StrCalib += "ANT FEC";
-                break;
-            default:
-                StrCalib += "UNKNOWN";
-        }
-        qDebug() << qPrintable(StrCalib);
-
-        current_device = current_device;
-    }
-}
-
-uint16_t CalibrationData::getSpindownTime() const
-{
-    return this->spindowntime;
-}
-
-void CalibrationData::setSpindownTime(uint16_t time)
-{
-    if (this->spindowntime != time) {
-        qDebug() << "calibration spindown time changing to " << time;
-        this->spindowntime = time;
-    }
-}
-
-uint16_t CalibrationData::getZeroOffset() const
-{
-    return this->zerooffset;
-}
-
-void CalibrationData::setZeroOffset(uint16_t offset)
-{
-    if (this->zerooffset != offset) {
-        qDebug() << "calibration zero offset changing to " << offset;
-        this->zerooffset = offset;
-    }
-}
-
-double CalibrationData::getTargetSpeed() const
-{
-    return this->targetspeed;
-}
-
-void CalibrationData::setTargetSpeed(double speed)
-{
-    if (this->targetspeed != speed) {
-        qDebug() << "calibration target speed changing to " << speed;
-        this->targetspeed = speed;
-    }
+    foreach(DeviceConfiguration x, Devices)
+        if ((x.controller) && (x.controller->calibrationData._getCalibrationState()!=CALIBRATION_STATE_IDLE))
+            x.controller->calibrationData._resetCalibrationProcess();
 }
 
 QString CalibrationData::getMessage()
 {
-    return message;
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+        if ((x.controller) && (x.controller->calibrationData._getMessage()!=""))
+            return x.controller->calibrationData._getMessage();
 }
 
-void CalibrationData::setMessage(QString param_message)
+QString CalibrationData::typeDescr(uint8_t param_type)
 {
-    message = param_message;
+    switch(param_type) {
+        case CALIBRATION_TYPE_UNKNOWN:
+            return qPrintable("UNKNOWN");
+            break;
+        case CALIBRATION_TYPE_COMPUTRAINER:
+            return qPrintable("COMPUTRAINER");
+            break;
+        case CALIBRATION_TYPE_ZERO_OFFSET:
+            return qPrintable("ZERO_OFFSET");
+            break;
+        case CALIBRATION_TYPE_SPINDOWN:
+            return qPrintable("SPINDOWN");
+            break;
+        default:
+            return qPrintable("UNKNOWN");
+    }
+}
+
+QString CalibrationData::stateDescr(uint8_t param_state)
+{
+    switch(param_state) {
+        case CALIBRATION_STATE_IDLE:
+            return qPrintable("IDLE");
+        case CALIBRATION_STATE_REQUIRED:
+            return qPrintable("REQUIRED");
+        case CALIBRATION_STATE_REQUESTED:
+            return qPrintable("REQUESTED");
+        case CALIBRATION_STATE_STARTING:
+            return qPrintable("STARTING");
+        case CALIBRATION_STATE_STARTED:
+            return qPrintable("STARTED");
+        case CALIBRATION_STATE_SPEEDUP:
+            return qPrintable("SPEEDUP");
+        case CALIBRATION_STATE_COAST:
+            return qPrintable("COAST");
+        case CALIBRATION_STATE_SUCCESS:
+            return qPrintable("SUCCESS");
+        case CALIBRATION_STATE_FAILURE:
+            return qPrintable("FAILURE");
+        default:
+            return qPrintable("UNKNOWN");
+    }
+}
+
+QString CalibrationData::deviceDescr(uint8_t param_device)
+{
+    switch(param_device) {
+        case CALIBRATION_DEVICE_NONE:
+            return qPrintable("NONE");
+        case CALIBRATION_DEVICE_COMPUTRAINER:
+            return qPrintable("COMPUTRAINER");
+        case CALIBRATION_DEVICE_ANT_SPORT:
+            return qPrintable("ANT_SPORT");
+        case CALIBRATION_DEVICE_ANT_FEC:
+            return qPrintable("ANT FEC");
+        case CALIBRATION_DEVICE_ALL:
+            return qPrintable("ALL");
+        default:
+            Sreturn qPrintable("UNKNOWN");
+    }
+}
+
+uint8_t  ANTCalibrationData::_getCalibrationDevice() const
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData._getCalibrationDevice())
+                return parent->antChannel[i]->calibrationData._getCalibrationDevice();
+
+    return CALIBRATION_DEVICE_NONE;
+}
+
+uint8_t  ANTCalibrationData::_getCalibrationSupported() const
+{
+    uint8_t supported=CALIBRATION_TYPE_NONE;
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            supported |=parent->antChannel[i]->calibrationData._getCalibrationSupported();
+
+    return supported;
+}
+
+uint8_t  ANTCalibrationData::_getCalibrationInProgress() const
+{
+    uint8_t inProgress=CALIBRATION_TYPE_NONE;
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            inProgress |=parent->antChannel[i]->calibrationData._getCalibrationInProgress();
+
+    return inProgress;
+}
+
+uint8_t  ANTCalibrationData::_getCalibrationCompleted() const
+{
+    uint8_t completed=CALIBRATION_TYPE_NONE;
+    uint8_t notCompleted=CALIBRATION_TYPE_NONE;
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+        {
+            completed    |= parent->antChannel[i]->calibrationData._getCalibrationCompleted();
+            notCompleted |= parent->antChannel[i]->calibrationData._getCalibrationSupported() & ~parent->antChannel[i]->calibrationData._getCalibrationCompleted();
+        }
+
+    return completed & ~notCompleted;
+}
+
+uint8_t  ANTCalibrationData::_getCalibrationState() const;
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData._getCalibrationState())
+                return parent->antChannel[i]->calibrationData._getCalibrationState();
+
+    return CALIBRATION_STATE_IDLE;
+}
+
+void     ANTCalibrationData::_startCalibration(uint8_t type)
+{
+    if (_getCalibrationState()==CALIBRATION_STATE_IDLE)
+        for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+            if (parent && parent->antChannel[i] && 
+               (parent->antChannel[i]->calibrationData._getCalibrationSupported()
+               & ~parent->antChannel[i]->calibrationData._getCalibrationCompleted() 
+               & type))
+                parent->antChannel[i]->calibrationData._startCalibration;
+}
+
+void     ANTCalibrationData::_forceCalibration(uint8_t type)
+{
+    if (_getCalibrationState()==CALIBRATION_STATE_IDLE)
+        for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+            if (parent && parent->antChannel[i] && 
+               (parent->antChannel[i]->calibrationData._getCalibrationSupported()
+               & type))
+                parent->antChannel[i]->calibrationData._forceCalibration;
+}
+
+void     ANTCalibrationData::_resetCalibrationProcess();
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            parent->antChannel[i]->calibrationData._resetCalibrationProcess();
+}
+
+QString  ANTCalibrationData::_getMessage() const
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData._getMessage()!="")
+                return parent->antChannel[i]->calibrationData._getMessage();
+
+    return "";
 }

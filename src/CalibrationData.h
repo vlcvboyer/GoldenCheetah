@@ -22,6 +22,8 @@
 #include <stdint.h> // uint8_t etc
 #include <QString>
 
+class ANT;
+
 #define CALIBRATION_TYPE_NONE           ((uint8_t) 0x00)
 #define CALIBRATION_TYPE_UNKNOWN        ((uint8_t) 0x00)
 #define CALIBRATION_TYPE_NOT_SUPPORTED  ((uint8_t) 0x00)
@@ -37,8 +39,9 @@
 #define CALIBRATION_STATE_STARTED       0x04
 #define CALIBRATION_STATE_SPEEDUP       0x05
 #define CALIBRATION_STATE_COAST         0x06
-#define CALIBRATION_STATE_SUCCESS       0x07
-#define CALIBRATION_STATE_FAILURE       0x08
+#define CALIBRATION_STATE_SUCCESS       0x80
+#define CALIBRATION_STATE_FAILURE       0x81
+#define CALIBRATION_STATE_ABORT         0x82
 
 #define CALIBRATION_DEVICE_NONE         ((uint8_t) 0x00)
 #define CALIBRATION_DEVICE_COMPUTRAINER ((uint8_t) 0x01)
@@ -48,45 +51,84 @@
 
 class CalibrationData
 {
+// This class is used in each RealTime controller in order to manage calibration process
 public:
-
     CalibrationData();
 
-    static uint8_t getType();
-    static void setType(uint8_t param_type);
+    static uint8_t getCalibrationDevice();     // the device that is under calibration process (if started) otherwise the first one with calibration support
 
-    static uint8_t getState();
-    static void setState(uint8_t param_state);
+    static uint8_t getCalibrationSupported();  // list all calibration that are supported  (by each realtime controllers)
+    static uint8_t getCalibrationInProgress(); // list all calibration that are in progress
+    static uint8_t getCalibrationCompleted();  // list all calibration that are completed
 
-    static uint8_t getCurrentDevice();
-    static void setCurrentDevice(uint8_t device);
+    static uint8_t getCalibrationState();      // give calibration process state (current step)
 
-    static uint8_t getTargetDevice();
-    static void setTargetDevice(uint8_t device);
+    // the TargetDevice defined below will allow each class to give information
+    // related to devices to be calibrated (based on user choice), or all (CALIBRATION_DEVICE_ALL)
+    static  void    startCalibration(uint8_t device);
 
-    uint16_t getZeroOffset() const;
-    void setZeroOffset(uint16_t offset);
+    static  void    resetCalibrationProcess();                // this reset calibration process (for each realtime controllers)
 
-    uint16_t getSpindownTime() const;
-    void setSpindownTime(uint16_t time);
+    static  QString getMessage();
 
-    double getTargetSpeed() const;
-    void setTargetSpeed(double speed);
+    static QString typeDescr(uint8_t param_type);
+    static QString deviceDescr(uint8_t param_device);
+    static QString stateDescr(uint8_t param_state);
 
-    static QString getMessage();
-    static void setMessage(QString param_message);
+    virtual void     _setCalibrationDevice(uint8_t device) { calibrationDevice=device; }
+    virtual uint8_t  _getCalibrationDevice() const { return calibrationDevice; }
+
+    virtual void     _setCalibrationSupported(uint8_t type) { calibrationSupported=type; }
+    virtual uint8_t  _getCalibrationSupported() const { return calibrationSupported; }
+    virtual void     _setCalibrationInProgress(uint8_t type) { calibrationInProgress=type; }
+    virtual uint8_t  _getCalibrationInProgress() const { return calibrationInProgress; }
+    virtual void     _setCalibrationCompleted(uint8_t type) { calibrationCompleted=type; }
+    virtual uint8_t  _getCalibrationCompleted() const { return calibrationCompleted; }
+
+    virtual void     _setCalibrationSate(uint8_t state) { if (calibrationState!=state) qDebug() << "Calibration type changing from " << typeDescr(calibrationState) << "to" << typeDescr(state); calibrationState=state; }
+    virtual uint8_t  _getCalibrationState() const  { return calibrationState; }
+
+    virtual void     _startCalibration(uint8_t type) { calibrationState = CALIBRATION_STATE_REQUESTED; calibrationType=type; }
+    virtual void     _forceCalibration(uint8_t type) { calibrationState = CALIBRATION_STATE_REQUESTED; calibrationType=type; }
+    virtual void     _resetCalibrationProcess() { calibrationState = CALIBRATION_STATE_ABORT; }              // this reset calibration process (for this calibration class)
+
+    virtual void     _setMessage() { this->message = message; }
+    virtual QString  _getMessage() const { return message; }
 
 private:
+    uint8_t calibrationSupported;
+    uint8_t calibrationInProgress;
+    uint8_t calibrationCompleted;
+    uint8_t calibrationState;
+    uint8_t calibrationType;
+    uint8_t calibrationDevice;
+    QString  message;
+};
 
-    static uint8_t  type;
-    static uint8_t  state;
-    static uint8_t  current_device;
-    static uint8_t  target_device;
-    static QString  message;
-    uint16_t zerooffset;
-    uint16_t spindowntime;
-    double   targetspeed;
+class ANTCalibrationData : CalibrationData
+{
+// This class is used in ANT RealTime controller in order to manage calibration process
+// it will read data in each ANTChannel CalibrationData in order to give the overall information
+public:
 
+    ANTCalibrationData(ANT* parent) : parent(parent) {};
+
+    virtual uint8_t  _getCalibrationDevice() const;
+
+    virtual uint8_t  _getCalibrationSupported() const;
+    virtual uint8_t  _getCalibrationInProgress() const;
+    virtual uint8_t  _getCalibrationCompleted() const;
+
+    virtual uint8_t  _getCalibrationState() const;
+
+    virtual void     _startCalibration(uint8_t type);
+    virtual void     _forceCalibration(uint8_t type);
+    virtual void     _resetCalibrationProcess();
+
+    virtual QString  _getMessage() const;
+
+private:
+    ANT* parent;
 };
 
 #endif /* SRC_CALIBRATIONDATA_H_ */

@@ -214,6 +214,8 @@ class ANTChannel : public QObject {
 
         void setAlt(bool value) { is_alt = value; }
 
+        CalibrationData calibrationData;
+
     signals:
 
         void channelInfo(int number, int device_number, int device_id); // we got a channel info message
