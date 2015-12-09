@@ -66,6 +66,8 @@ public:
     void processRealtimeData(RealtimeData &rtData);
     void processSetup();
 
+    CalibrationData calibrationData;
+
 private:
     DeviceConfiguration *dc;
     DeviceConfiguration devConf;

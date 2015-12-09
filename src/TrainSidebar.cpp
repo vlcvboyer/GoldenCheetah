@@ -451,7 +451,6 @@ intensity->hide(); //XXX!!! temporary
     ergFile = NULL;
     videosyncFile = NULL;
     calibrating = false;
-    calibrationDeviceIndex = -1;
 
     // now the GUI is setup lets sort our control variables
     gui_timer = new QTimer(this);
@@ -1394,25 +1393,25 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             foreach(int dev, devices()) { // Do for selected device only
                 RealtimeData local = rtData;
 
-                if (calibrationDeviceIndex == dev) {
-                    // need telemetry for calibration dialog updates
-                    // (and F3 button press for Computrainer)
+// FIXME WIP //
+                // if (calibrationDeviceIndex == dev) {
+                    // // need telemetry for calibration dialog updates
+                    // // (and F3 button press for Computrainer)
 
-                    Devices[dev].controller->getRealtimeData(local);
-                    calibrationCurrentSpeed = local.getSpeed();
+                    // Devices[dev].controller->getRealtimeData(local);
+                    // calibrationCurrentSpeed = local.getSpeed();
 
-// FIXME WIP //                    calibrationTargetSpeed = Devices[dev].controller->getCalibrationTargetSpeed();
+                    // calibrationTargetSpeed = Devices[dev].controller->getCalibrationTargetSpeed();
+                    // calibrationSpindownTime =  Devices[dev].controller->getCalibrationSpindownTime();
+                    // calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
 
-// FIXME WIP //                    calibrationSpindownTime =  Devices[dev].controller->getCalibrationSpindownTime();
-// FIXME WIP //                    calibrationZeroOffset =  Devices[dev].controller->getCalibrationZeroOffset();
-
-                    // if calibration was already requested, but not receiving updates, then try again..
-                    if ((CalibrationData::getState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
-                        restartCalibration = false;
-                        qDebug() << "No response to our calibration request, re-requesting..";
-                        CalibrationData::setState(CALIBRATION_STATE_REQUESTED);
-                    }
-                }
+                    // // if calibration was already requested, but not receiving updates, then try again..
+                    // if ((CalibrationData::getState() == CALIBRATION_STATE_STARTING) && restartCalibration) {
+                        // restartCalibration = false;
+                        // qDebug() << "No response to our calibration request, re-requesting..";
+                        // CalibrationData::setState(CALIBRATION_STATE_REQUESTED);
+                    // }
+                // }
             }
 
             // Update the calibration dialog if necessary
@@ -1761,36 +1760,17 @@ void TrainSidebar::toggleCalibration()
         context->notifyPause(); // get video started again, amongst other things
 
         // select the first uncalibrated device that reports requested calibration capabilities
-        foreach(int dev, devices()) {
-            if (calibrationDeviceIndex != -1)
-                break;
-// FIXME WIP //
-            // if (       (CalibrationData::target_device & Devices[dev].getCalibrationType())
-                    // && (Devices[dev].CalibFeatures & ~Devices[dev].CalibCompleted))
-                // calibrationDeviceIndex = dev;
-        }
+        CalibrationData::startCalibration(CALIBRATION_DEVICE_ALL); // FIXME : shall indicate the device requested by user not ALL
 
-        // otherwise select the first uncalibrated device that reports requested calibration capabilities
-        foreach(int dev, devices()) {
-            if (calibrationDeviceIndex != -1)
-                break;
-// FIXME WIP //
-            // if (CalibrationData::target_device & Devices[dev].getCalibrationType())
-                // calibrationDeviceIndex = dev;
-        }
-
-        // only do this for the selected device
-        foreach(int dev, devices()) {
-            if (calibrationDeviceIndex == dev) {
-
-                // trainer (tacx vortex smart) doesn't appear to reduce resistance automatically when entering calibration mode
+        // trainer (tacx vortex smart) doesn't appear to reduce resistance automatically when entering calibration mode
+        if (CalibrationData::getCalibrationInProgress()) {
+            foreach(int dev, devices()) {
                 if (status&RT_MODE_ERGO)
                     Devices[dev].controller->setLoad(0);
                 else
                     Devices[dev].controller->setGradient(0);
 
                 Devices[dev].controller->setMode(RT_MODE_CALIBRATE);
-                CalibrationData::setState(CALIBRATION_STATE_REQUESTED);
             }
         }
 

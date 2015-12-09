@@ -241,11 +241,6 @@ class TrainSidebar : public GcWindow
         ErgFile *ergFile;       // workout file
         VideoSyncFile *videosyncFile;       // videosync file
 
-        bool     restartCalibration;
-        int      calibrationDeviceIndex;
-        uint16_t calibrationSpindownTime, calibrationZeroOffset;
-        double   calibrationTargetSpeed, calibrationCurrentSpeed;
-
         long total_msecs,
              lap_msecs,
              load_msecs;

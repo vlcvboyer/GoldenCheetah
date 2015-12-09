@@ -99,9 +99,6 @@ class ANTChannel : public QObject {
         double last_message_timestamp;
         uint8_t fecPrevRawDistance;
         uint8_t fecCapabilities;
-        uint8_t fecCalibFeatures;
-        uint8_t fecCalibInProgress;
-        uint8_t fecCalibCompleted;
         double blanking_timestamp;
         int blanked;
         char id[10]; // short identifier
@@ -197,12 +194,6 @@ class ANTChannel : public QObject {
         double channelValue2() { return value2; }
         double value,value2; // used during config, rather than rtData
         uint8_t capabilities();
-        uint8_t getFecCalibFeatures() const { return fecCalibFeatures; }
-        void    setFecCalibFeatures(uint8_t val) { fecCalibFeatures=val; }
-        uint8_t getFecCalibInProgress() const { return fecCalibInProgress; }
-        void    setFecCalibInProgress(uint8_t val) { fecCalibInProgress=val; }
-        uint8_t getFecCalibCompleted() const { return fecCalibCompleted; }
-        void    setFecCalibCompleted(uint8_t val) { fecCalibCompleted=val; }
         // search
         int isSearching();
 

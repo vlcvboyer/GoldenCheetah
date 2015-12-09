@@ -314,9 +314,9 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
         else if (p_meterWidget->Source() == QString("TrainerStatus"))
         {
             // First print message related to calibration if available
-            if (CalibrationData::getMessage()!="") {
+            if (CalibrationData::getCalibrationMessage()!="") {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = CalibrationData::getMessage();
+                p_meterWidget->Text = CalibrationData::getCalibrationMessage();
             }
             else if (!rtd.getTrainerStatusAvailable())
             {  // we don't have status from trainer thus we cannot indicate anything on screen

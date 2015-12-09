@@ -55,6 +55,10 @@ class CalibrationData
 public:
     CalibrationData();
 
+    // here are functions that manage overall calibration process
+    // this is the single point of contact to manage calibration process
+    // it will go through all devices and check/actuate calibration
+
     static uint8_t getCalibrationDevice();     // the device that is under calibration process (if started) otherwise the first one with calibration support
 
     static uint8_t getCalibrationSupported();  // list all calibration that are supported  (by each realtime controllers)
@@ -69,40 +73,51 @@ public:
 
     static  void    resetCalibrationProcess();                // this reset calibration process (for each realtime controllers)
 
-    static  QString getMessage();
+    static  QString getCalibrationMessage();
+    static  QList<QString>  getCalibrationMessageList();
+    static  uint8_t  getCalibrationMessageIndex();
 
     static QString typeDescr(uint8_t param_type);
     static QString deviceDescr(uint8_t param_device);
     static QString stateDescr(uint8_t param_state);
 
-    virtual void     _setCalibrationDevice(uint8_t device) { calibrationDevice=device; }
-    virtual uint8_t  _getCalibrationDevice() const { return calibrationDevice; }
+    static QList<QString> ProcessMessageList(uint8_t type);
 
-    virtual void     _setCalibrationSupported(uint8_t type) { calibrationSupported=type; }
-    virtual uint8_t  _getCalibrationSupported() const { return calibrationSupported; }
-    virtual void     _setCalibrationInProgress(uint8_t type) { calibrationInProgress=type; }
-    virtual uint8_t  _getCalibrationInProgress() const { return calibrationInProgress; }
-    virtual void     _setCalibrationCompleted(uint8_t type) { calibrationCompleted=type; }
-    virtual uint8_t  _getCalibrationCompleted() const { return calibrationCompleted; }
+    // here are functions to address the device linked to this class instance only 
+    // (and sub-classes when sub-nodes are present such as ANT devices connected to ANT controller)
+    virtual void     setDevice(uint8_t device);
+    virtual uint8_t  getDevice() const;
 
-    virtual void     _setCalibrationState(uint8_t state) { if (calibrationState!=state) qDebug() << "Calibration type changing from " << typeDescr(calibrationState) << "to" << typeDescr(state); calibrationState=state; }
-    virtual uint8_t  _getCalibrationState() const  { return calibrationState; }
+    virtual void     setSupported(uint8_t type);
+    virtual uint8_t  getSupported() const;
+    virtual void     setInProgress(uint8_t type);
+    virtual uint8_t  getInProgress() const;
+    virtual void     setCompleted(uint8_t type);
+    virtual uint8_t  getCompleted() const;
 
-    virtual void     _startCalibration(uint8_t type) { calibrationState = CALIBRATION_STATE_REQUESTED; calibrationType=type; }
-    virtual void     _forceCalibration(uint8_t type) { calibrationState = CALIBRATION_STATE_REQUESTED; calibrationType=type; }
-    virtual void     _resetCalibrationProcess() { calibrationState = CALIBRATION_STATE_ABORT; }              // this reset calibration process (for this calibration class)
+    virtual void     setState(uint8_t state);
+    virtual uint8_t  getState() const;
 
-    virtual void     _setMessage() { this->message = message; }
-    virtual QString  _getMessage() const { return message; }
+    virtual void     setTargetSpeed(double target_speed);
+    virtual void     start(uint8_t type);
+    virtual void     force(uint8_t type);
+    virtual void     resetProcess();     // this reset calibration process (for this calibration class)
+
+    virtual void     setMessageList(QList<QString> messageList);
+    virtual QList<QString>  getMessageList() const;
+    virtual void     setMessageIndex(uint8_t index);
+    virtual uint8_t  getMessageIndex() const;
 
 private:
-    uint8_t calibrationSupported;
-    uint8_t calibrationInProgress;
-    uint8_t calibrationCompleted;
-    uint8_t calibrationState;
-    uint8_t calibrationType;
-    uint8_t calibrationDevice;
-    QString  message;
+    uint8_t supported;
+    uint8_t inProgress;
+    uint8_t completed;
+    uint8_t state;
+    uint8_t type;
+    uint8_t device;
+    QList<QString> messageList;
+    uint8_t messageIndex;
+    double targetSpeed;
 };
 
 class ANTCalibrationData : CalibrationData
@@ -113,19 +128,22 @@ public:
 
     ANTCalibrationData(ANT* parent) : parent(parent) {};
 
-    virtual uint8_t  _getCalibrationDevice() const;
+    virtual uint8_t  getDevice() const;
 
-    virtual uint8_t  _getCalibrationSupported() const;
-    virtual uint8_t  _getCalibrationInProgress() const;
-    virtual uint8_t  _getCalibrationCompleted() const;
+    virtual uint8_t  getSupported() const;
+    virtual uint8_t  getInProgress() const;
+    virtual uint8_t  getCompleted() const;
 
-    virtual uint8_t  _getCalibrationState() const;
+    virtual uint8_t  getState() const;
 
-    virtual void     _startCalibration(uint8_t type);
-    virtual void     _forceCalibration(uint8_t type);
-    virtual void     _resetCalibrationProcess();
+    virtual void     start(uint8_t type);
+    virtual void     force(uint8_t type);
+    virtual void     resetProcess();
 
-    virtual QString  _getMessage() const;
+    virtual void     setMessageList(QList<QString> messageList);
+    virtual QList<QString>  getMessageList() const;
+    virtual void     setMessageIndex(uint8_t index);
+    virtual uint8_t  getMessageIndex() const;
 
 private:
     ANT* parent;
