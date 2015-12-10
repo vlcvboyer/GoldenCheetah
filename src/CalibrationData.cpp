@@ -23,6 +23,8 @@
 #include "ANTChannel.h"
 #include "RealtimeController.h"
 
+QList<QString> CalibrationData::emptyMessageList;
+
 CalibrationData::CalibrationData()
 {
     device=CALIBRATION_TYPE_UNKNOWN;
@@ -184,6 +186,39 @@ QString CalibrationData::getCalibrationMessage()
     return "";
 }
 
+const QList<QString>& CalibrationData::getCalibrationMessageList()
+{
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+        if (x.controller)
+        {
+            if (x.controller->calibrationData.getMessageList().size())
+                return  x.controller->calibrationData.getMessageList();
+        }
+
+    return CalibrationData::emptyMessageList;
+}
+
+uint8_t CalibrationData::getCalibrationMessageIndex()
+{
+    DeviceConfigurations all;
+    QList<DeviceConfiguration> Devices;
+    Devices = all.getList();
+
+    foreach(DeviceConfiguration x, Devices)
+        if (x.controller)
+        {
+            QList<QString> messageList = x.controller->calibrationData.getMessageList();
+            int8_t index = x.controller->calibrationData.getMessageIndex();
+            if (index)
+                return index;
+        }
+    return 0;
+}
+
 QString CalibrationData::typeDescr(uint8_t param_type)
 {
     switch(param_type) {
@@ -243,36 +278,11 @@ QString CalibrationData::stateDescr(uint8_t param_state)
             return qPrintable("SUCCESS");
         case CALIBRATION_STATE_FAILURE:
             return qPrintable("FAILURE");
+        case CALIBRATION_STATE_ABORT:
+            return qPrintable("ABORT");
         default:
             return qPrintable("UNKNOWN");
     }
-}
-
-QList<QString> ProcessMessageList(uint8_t type)
-{
-    QList<QString> ret_val;
-    switch (type)
-    {
-        case CALIBRATION_TYPE_COMPUTRAINER:
-            ret_val.append("step 1");
-            ret_val.append("step 2");
-            ret_val.append("done");
-            break;
-        case CALIBRATION_TYPE_ZERO_OFFSET:
-            ret_val.append("remove foot from pedals");
-            ret_val.append("done");
-            break;
-        case CALIBRATION_TYPE_SPINDOWN:
-            ret_val.append("speed up to 30kph");
-            ret_val.append("coast freewheel");
-            ret_val.append("done");
-            break;
-        case CALIBRATION_TYPE_CONFIGURATION:
-            ret_val.append("configuring");
-            ret_val.append("done");
-            break;
-    }
-    return ret_val;
 }
 
 void     CalibrationData::setDevice(uint8_t device)
@@ -317,7 +327,48 @@ uint8_t  CalibrationData::getCompleted() const
 void     CalibrationData::setState(uint8_t state)
 {
     if (this->state!=state)
-        qDebug() << "Calibration type changing from " << typeDescr(this->state) << "to" << typeDescr(state);
+    {
+        qDebug() << "Calibration step changing from " << typeDescr(this->state) << "to" << typeDescr(state);
+        if (state==CALIBRATION_STATE_IDLE)
+        {
+            messageIndex=0;
+            messageList.clear();
+            inProgress = CALIBRATION_TYPE_NONE;
+        }
+
+        if (state==CALIBRATION_STATE_REQUESTED)
+        {
+            messageIndex=0;
+            messageList.clear();
+            switch (type)
+            {
+              case CALIBRATION_TYPE_COMPUTRAINER:
+                messageList.append(QObject::tr("starting"));
+                messageList.append(QObject::tr("step 1"));
+                messageList.append(QObject::tr("step 2"));
+                messageList.append(QObject::tr("done"));
+                break;
+              case CALIBRATION_TYPE_ZERO_OFFSET:
+                messageList.append(QObject::tr("starting"));
+                messageList.append(QObject::tr("remove foot from pedals"));
+                messageList.append(QObject::tr("done"));
+                break;
+              case CALIBRATION_TYPE_SPINDOWN:
+                messageList.append(QObject::tr("starting"));
+                messageList.append(QObject::tr("speedup to 30kph"));
+                messageList.append(QObject::tr("coast freewheel"));
+                messageList.append(QObject::tr("done"));
+                break;
+              case CALIBRATION_TYPE_CONFIGURATION:
+                messageList.append(QObject::tr("starting"));
+                messageList.append(QObject::tr("configuring"));
+                messageList.append(QObject::tr("done"));
+                break;
+
+            }
+        }
+    }
+
     this->state=state;
 }
 
@@ -329,23 +380,33 @@ uint8_t  CalibrationData::getState() const
 void     CalibrationData::setTargetSpeed(double target_speed)
 {
     targetSpeed = target_speed;
+
+    switch (inProgress)
+    {
+      case CALIBRATION_TYPE_SPINDOWN:
+        messageList[1] = QString(QObject::tr("speedup to %1 kph")).arg(targetSpeed, 0, 'f', 1);
+        break;
+    }
 }
 
 void     CalibrationData::start(uint8_t type)
 {
-    state = CALIBRATION_STATE_REQUESTED;
+    setState(CALIBRATION_STATE_REQUESTED);
+    attempts = 0;
     this->type=type;
 }
 
 void     CalibrationData::force(uint8_t type)
 {
-    state = CALIBRATION_STATE_REQUESTED;
-    this->type=type;
+    start(type);
 }
 
 void     CalibrationData::resetProcess()
 {
-    state = CALIBRATION_STATE_ABORT;
+    setState(CALIBRATION_STATE_ABORT);
+    messageIndex=0;
+    messageList.clear();
+    messageList.append("aborting");
 }
 
 void     CalibrationData::setMessageList(QList<QString> messageList)
@@ -353,7 +414,7 @@ void     CalibrationData::setMessageList(QList<QString> messageList)
     this->messageList = messageList;
 }
 
-QList<QString>  CalibrationData::getMessageList() const
+const QList<QString>&  CalibrationData::getMessageList() const
 {
     return messageList;
 }
@@ -368,7 +429,7 @@ uint8_t  CalibrationData::getMessageIndex() const
     return messageIndex;
 }
 
-uint8_t  ANTCalibrationData::getDevice() const
+uint8_t ANTCalibrationData::getDevice() const
 {
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
         if (parent && parent->antChannel[i])
@@ -378,7 +439,7 @@ uint8_t  ANTCalibrationData::getDevice() const
     return CALIBRATION_DEVICE_NONE;
 }
 
-uint8_t  ANTCalibrationData::getSupported() const
+uint8_t ANTCalibrationData::getSupported() const
 {
     uint8_t supported=CALIBRATION_TYPE_NONE;
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
@@ -388,7 +449,7 @@ uint8_t  ANTCalibrationData::getSupported() const
     return supported;
 }
 
-uint8_t  ANTCalibrationData::getInProgress() const
+uint8_t ANTCalibrationData::getInProgress() const
 {
     uint8_t inProgress=CALIBRATION_TYPE_NONE;
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
@@ -398,7 +459,7 @@ uint8_t  ANTCalibrationData::getInProgress() const
     return inProgress;
 }
 
-uint8_t  ANTCalibrationData::getCompleted() const
+uint8_t ANTCalibrationData::getCompleted() const
 {
     uint8_t completed=CALIBRATION_TYPE_NONE;
     uint8_t notCompleted=CALIBRATION_TYPE_NONE;
@@ -412,7 +473,7 @@ uint8_t  ANTCalibrationData::getCompleted() const
     return completed & ~notCompleted;
 }
 
-uint8_t  ANTCalibrationData::getState() const
+uint8_t ANTCalibrationData::getState() const
 {
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
         if (parent && parent->antChannel[i])
@@ -422,7 +483,7 @@ uint8_t  ANTCalibrationData::getState() const
     return CALIBRATION_STATE_IDLE;
 }
 
-void     ANTCalibrationData::start(uint8_t type)
+void ANTCalibrationData::start(uint8_t type)
 {
     if (getState()==CALIBRATION_STATE_IDLE)
         for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
@@ -433,7 +494,7 @@ void     ANTCalibrationData::start(uint8_t type)
                 parent->antChannel[i]->calibrationData.start(type);
 }
 
-void     ANTCalibrationData::force(uint8_t type)
+void ANTCalibrationData::force(uint8_t type)
 {
     if (getState()==CALIBRATION_STATE_IDLE)
         for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
@@ -443,9 +504,30 @@ void     ANTCalibrationData::force(uint8_t type)
                 parent->antChannel[i]->calibrationData.force(type);
 }
 
-void     ANTCalibrationData::resetProcess()
+void ANTCalibrationData::resetProcess()
 {
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
         if (parent && parent->antChannel[i])
             parent->antChannel[i]->calibrationData.resetProcess();
+}
+
+const QList<QString>&  ANTCalibrationData::getMessageList() const
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData.getMessageList().size())
+                return parent->antChannel[i]->calibrationData.getMessageList();
+
+    return  CalibrationData::emptyMessageList;
+}
+
+uint8_t ANTCalibrationData::getMessageIndex() const
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData.getMessageIndex())
+                return parent->antChannel[i]->calibrationData.getMessageIndex();
+
+    // else
+    return 0;
 }

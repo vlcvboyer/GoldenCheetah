@@ -74,14 +74,12 @@ public:
     static  void    resetCalibrationProcess();                // this reset calibration process (for each realtime controllers)
 
     static  QString getCalibrationMessage();
-    static  QList<QString>  getCalibrationMessageList();
+    static  const QList<QString>&  getCalibrationMessageList();
     static  uint8_t  getCalibrationMessageIndex();
 
     static QString typeDescr(uint8_t param_type);
     static QString deviceDescr(uint8_t param_device);
     static QString stateDescr(uint8_t param_state);
-
-    static QList<QString> ProcessMessageList(uint8_t type);
 
     // here are functions to address the device linked to this class instance only 
     // (and sub-classes when sub-nodes are present such as ANT devices connected to ANT controller)
@@ -104,9 +102,11 @@ public:
     virtual void     resetProcess();     // this reset calibration process (for this calibration class)
 
     virtual void     setMessageList(QList<QString> messageList);
-    virtual QList<QString>  getMessageList() const;
+    virtual const QList<QString>&  getMessageList() const;
     virtual void     setMessageIndex(uint8_t index);
     virtual uint8_t  getMessageIndex() const;
+    
+    static QList<QString> emptyMessageList;
 
 private:
     uint8_t supported;
@@ -115,6 +115,7 @@ private:
     uint8_t state;
     uint8_t type;
     uint8_t device;
+    uint8_t attempts;
     QList<QString> messageList;
     uint8_t messageIndex;
     double targetSpeed;
@@ -140,9 +141,7 @@ public:
     virtual void     force(uint8_t type);
     virtual void     resetProcess();
 
-    virtual void     setMessageList(QList<QString> messageList);
-    virtual QList<QString>  getMessageList() const;
-    virtual void     setMessageIndex(uint8_t index);
+    virtual const QList<QString>&  getMessageList() const;
     virtual uint8_t  getMessageIndex() const;
 
 private:
