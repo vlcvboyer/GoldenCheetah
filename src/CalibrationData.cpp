@@ -24,6 +24,7 @@
 #include "RealtimeController.h"
 
 QList<QString> CalibrationData::emptyMessageList;
+TrainSidebar* CalibrationData::trainSidebar = NULL;
 
 CalibrationData::CalibrationData()
 {
@@ -41,17 +42,13 @@ uint8_t CalibrationData::getCalibrationDevice()
 {
     uint8_t ret_val = CALIBRATION_DEVICE_NONE;
 
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-    {
-        if (ret_val)
-            break;
-        else if (x.controller)
-            ret_val |= x.controller->calibrationData.getDevice();
-    }
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList()) {
+            if (ret_val)
+                break;
+            else if (x.controller)
+                ret_val |= x.controller->calibrationData.getDevice();
+        }
 
     return ret_val;
 }
@@ -61,13 +58,10 @@ uint8_t CalibrationData::getCalibrationSupported()
 {
     uint8_t ret_val = CALIBRATION_TYPE_NONE;
 
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-            ret_val |= x.controller->calibrationData.getSupported();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+                ret_val |= x.controller->calibrationData.getSupported();
 
     return ret_val;
 }
@@ -77,13 +71,10 @@ uint8_t CalibrationData::getCalibrationInProgress()
 {
     uint8_t ret_val = CALIBRATION_TYPE_NONE;
 
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-            ret_val |= x.controller->calibrationData.getInProgress();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+                ret_val |= x.controller->calibrationData.getInProgress();
 
     return ret_val;
 }
@@ -93,13 +84,10 @@ uint8_t CalibrationData::getCalibrationCompleted()
 {
     uint8_t ret_val = CALIBRATION_TYPE_NONE;
 
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-            ret_val |= x.controller->calibrationData.getCompleted();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+                ret_val |= x.controller->calibrationData.getCompleted();
 
     return ret_val;
 }
@@ -108,114 +96,116 @@ uint8_t CalibrationData::getCalibrationState()
 {
     uint8_t ret_val = CALIBRATION_STATE_IDLE;
 
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-    {
-        if (ret_val)
-            break;
-        else if (x.controller)
-            ret_val = x.controller->calibrationData.getState();
-    }
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList()) {
+            if (ret_val)
+                break;
+            else if (x.controller)
+                ret_val = x.controller->calibrationData.getState();
+        }
 
     return ret_val;
 }
 
-void CalibrationData::startCalibration(uint8_t device)
-{
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
+void CalibrationData::startCalibration(uint8_t device) {
+    qDebug() << "start calibration...";
+    if (!trainSidebar) {
+        qDebug() << "ERROR: trainSidebar not defined";
+        return;
+    }
 
     if (getCalibrationState()==CALIBRATION_STATE_IDLE)
-        foreach(DeviceConfiguration x, Devices)
-            if ((x.controller) &&
-                (x.controller->calibrationData.getDevice() & device) &&
-                (x.controller->calibrationData.getSupported() & ~x.controller->calibrationData.getCompleted()))
-            {
-                uint8_t calibrationType = 0x01;
-                while (!(calibrationType & x.controller->calibrationData.getSupported() & ~x.controller->calibrationData.getCompleted()))
-                    calibrationType = calibrationType<<1;
-                qDebug() << "Start " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData.getDevice()); 
-                x.controller->calibrationData.start(calibrationType);
-                break;
+        foreach(DeviceConfiguration x, trainSidebar->devicesList()) {
+            if (x.controller) {
+                qDebug() << "... device" << x.name << x.controller->calibrationData.getDevice() 
+                         << "supported" << x.controller->calibrationData.getSupported() 
+                         << "completed" << x.controller->calibrationData.getCompleted();
+                if ((x.controller->calibrationData.getDevice() & device) &&
+                    (x.controller->calibrationData.getSupported() & ~x.controller->calibrationData.getCompleted())) {
+
+                    uint8_t calibrationType = 0x01;
+                    while (!(calibrationType & x.controller->calibrationData.getSupported() & ~x.controller->calibrationData.getCompleted()))
+                        calibrationType = calibrationType<<1;
+                    qDebug() << "Start " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData.getDevice()); 
+                    x.controller->calibrationData.start(calibrationType);
+                    break;
+                }
             }
+            else
+                qDebug() << "... device" << x.name << "does not have active controller";
+        }
+
 
     if (getCalibrationState()==CALIBRATION_STATE_IDLE)
-        foreach(DeviceConfiguration x, Devices)
-            if ((x.controller) &&
-                (x.controller->calibrationData.getDevice() & device) &&
-                (x.controller->calibrationData.getSupported()))
-            {
-                uint8_t calibrationType = 0x01;
-                while (!(calibrationType & x.controller->calibrationData.getSupported()))
-                    calibrationType = calibrationType<<1;
-                qDebug() << "Force " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData.getDevice()); 
-                x.controller->calibrationData.force(calibrationType);
-                break;
-            }
+    {
+        qDebug() << "force calibration...";
+        if (trainSidebar)
+            foreach(DeviceConfiguration x, trainSidebar->devicesList())
+                if (x.controller)
+                {
+                    qDebug() << "... device" << x.controller->calibrationData.getDevice() << "supported" << x.controller->calibrationData.getSupported() << "completed" << x.controller->calibrationData.getCompleted();
+                    if ((x.controller->calibrationData.getDevice() & device) &&
+                        (x.controller->calibrationData.getSupported()))
+                    {
+                        uint8_t calibrationType = 0x01;
+                        while (!(calibrationType & x.controller->calibrationData.getSupported()))
+                            calibrationType = calibrationType<<1;
+                        qDebug() << "Force " << typeDescr(calibrationType) << "calibration of " << deviceDescr(x.controller->calibrationData.getDevice()); 
+                        x.controller->calibrationData.force(calibrationType);
+                        break;
+                    }
+                }
+    }
 }
 
 void CalibrationData::resetCalibrationProcess()
 {
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-        if ((x.controller) && (x.controller->calibrationData.getState()!=CALIBRATION_STATE_IDLE))
-            x.controller->calibrationData.resetProcess();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if ((x.controller) && (x.controller->calibrationData.getState()!=CALIBRATION_STATE_IDLE))
+                x.controller->calibrationData.resetProcess();
 }
 
 QString CalibrationData::getCalibrationMessage()
 {
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+            {
+                QList<QString> messageList = x.controller->calibrationData.getMessageList();
+                int8_t index = x.controller->calibrationData.getMessageIndex();
+                if (index<messageList.size())
+                    return messageList[index];
+            }
 
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-        {
-            QList<QString> messageList = x.controller->calibrationData.getMessageList();
-            int8_t index = x.controller->calibrationData.getMessageIndex();
-            if (index<messageList.size())
-                return messageList[index];
-        }
     return "";
 }
 
 const QList<QString>& CalibrationData::getCalibrationMessageList()
 {
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
-
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-        {
-            if (x.controller->calibrationData.getMessageList().size())
-                return  x.controller->calibrationData.getMessageList();
-        }
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+            {
+                if (x.controller->calibrationData.getMessageList().size())
+                    return  x.controller->calibrationData.getMessageList();
+            }
 
     return CalibrationData::emptyMessageList;
 }
 
 uint8_t CalibrationData::getCalibrationMessageIndex()
 {
-    DeviceConfigurations all;
-    QList<DeviceConfiguration> Devices;
-    Devices = all.getList();
+    if (trainSidebar)
+        foreach(DeviceConfiguration x, trainSidebar->devicesList())
+            if (x.controller)
+            {
+                QList<QString> messageList = x.controller->calibrationData.getMessageList();
+                int8_t index = x.controller->calibrationData.getMessageIndex();
+                if (index)
+                    return index;
+            }
 
-    foreach(DeviceConfiguration x, Devices)
-        if (x.controller)
-        {
-            QList<QString> messageList = x.controller->calibrationData.getMessageList();
-            int8_t index = x.controller->calibrationData.getMessageIndex();
-            if (index)
-                return index;
-        }
     return 0;
 }
 
@@ -433,8 +423,9 @@ uint8_t  CalibrationData::getState()
     if ((state==CALIBRATION_STATE_SUCCESS || state==CALIBRATION_STATE_FAILURE || state==CALIBRATION_STATE_ABORT)
         &&  (stepTimestamp.secsTo(QTime::currentTime())>2)) 
     {
-        // keep calibration completion state during 3 seconds then go back to IDLE mode (will allow to keep a message shown on screen)
+        // keep calibration completion state during few seconds then go back to IDLE mode (will allow to keep a message shown on screen)
         setState(CALIBRATION_STATE_IDLE);
+        setInProgress(CALIBRATION_TYPE_NONE);
     }
 
     return state;

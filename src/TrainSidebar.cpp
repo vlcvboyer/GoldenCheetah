@@ -66,6 +66,7 @@
 
 TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(context)
 {
+    CalibrationData::trainSidebar = this;
     QWidget *c = new QWidget;
     //c->setContentsMargins(0,0,0,0); // bit of space is useful
     QVBoxLayout *cl = new QVBoxLayout(c);
@@ -443,7 +444,7 @@ intensity->hide(); //XXX!!! temporary
     connect(context, SIGNAL(configChanged(qint32)), this, SLOT(configChanged(qint32)));
     connect(context, SIGNAL(selectWorkout(QString)), this, SLOT(selectWorkout(QString)));
     connect(trainDB, SIGNAL(dataChanged()), this, SLOT(refresh()));
-    connect(context, SIGNAL(calibrationRequest(uint8_t)), this, SLOT(Calibrate()));
+    connect(context, SIGNAL(calibrationRequest(uint8_t)), this, SLOT(Calibrate(uint8_t)));
 
     connect(workoutTree->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(workoutTreeWidgetSelectionChanged()));
 
@@ -490,6 +491,11 @@ intensity->hide(); //XXX!!! temporary
     toolbarButtons->hide();
 #endif
 
+}
+
+TrainSidebar::~TrainSidebar()
+{
+    CalibrationData::trainSidebar = NULL;
 }
 
 void
@@ -747,6 +753,12 @@ TrainSidebar::devices()
             returning << item->type();
 
     return returning;
+}
+
+QList<DeviceConfiguration>
+TrainSidebar::devicesList()
+{
+    return Devices;
 }
 
 /*----------------------------------------------------------------------
@@ -1699,8 +1711,15 @@ void TrainSidebar::loadUpdate()
     }
 }
 
+void TrainSidebar::calibrationAbort()
+{
+    Calibrate(CALIBRATION_DEVICE_NONE);
+}
+
 void TrainSidebar::Calibrate(uint8_t device)
 {
+    qDebug() << "Calibration request for " << CalibrationData::deviceDescr(device);
+
     // todo: can enter calibration if not running, maybe prevent that (as will get no updates)?
     if (!device) {
         // device == 0 means abort calibration request
@@ -1770,7 +1789,6 @@ void TrainSidebar::updateCalibration()
 {
     static QProgressDialog *bar=NULL;
     static QString status;
-    static uint8_t startingCount;
 
     if (!calibrating) {
         if (bar)
@@ -1782,7 +1800,7 @@ void TrainSidebar::updateCalibration()
             bar->setWindowModality(Qt::WindowModal);
             bar->setMinimumDuration(0);
             bar->setAutoClose(true); // hide when reset
-            connect(bar, SIGNAL(canceled()), this, SLOT(Calibrate()));
+            connect(bar, SIGNAL(canceled()), this, SLOT(calibrationAbort())); // FIXME : to be connected to dedicated Abort SLOT
         }
 
         qDebug() << "updating calibration dialog";

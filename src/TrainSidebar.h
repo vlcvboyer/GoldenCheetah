@@ -84,6 +84,7 @@ class TrainSidebar : public GcWindow
     public:
 
         TrainSidebar(Context *context);
+        ~TrainSidebar();
         Context *context;
 
         QStringList listWorkoutFiles(const QDir &) const;
@@ -104,6 +105,8 @@ class TrainSidebar : public GcWindow
         void updateData(RealtimeData &);      // to update telemetry by push devices
         void nextDisplayMode();     // show next display mode
         void setStreamController();     // based upon selected device
+
+        QList<DeviceConfiguration> devicesList();
 
         // this
         QTabWidget  *trainTabs;
@@ -159,6 +162,7 @@ class TrainSidebar : public GcWindow
         void Stop(int status=0);        // when controller wants to stop
 
         void Calibrate(uint8_t device = 0xFF);   // Launch calibration mode
+        void calibrationAbort();
         void FFwd();        // jump forward when in a workout
         void Rewind();      // jump backwards when in a workout
         void FFwdLap();     // jump forward to next Lap marker

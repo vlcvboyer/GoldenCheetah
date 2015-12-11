@@ -50,6 +50,8 @@ class ANT;
 #define CALIBRATION_DEVICE_ANT_FEC      ((uint8_t) 0x04)
 #define CALIBRATION_DEVICE_ALL          ((uint8_t) 0xFF)
 
+class TrainSidebar;
+
 class CalibrationData
 {
 // This class is used in each RealTime controller in order to manage calibration process
@@ -110,6 +112,7 @@ public:
     virtual QTime    getStepTimestamp() const;
     
     static QList<QString> emptyMessageList;
+    static TrainSidebar* trainSidebar;
 
     uint8_t attempts;
 

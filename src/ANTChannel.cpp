@@ -105,7 +105,10 @@ void ANTChannel::open(int device, int chan_type)
     setId();
 
     // lets open the channel
-    qDebug()<<"** OPENING CHANNEL"<<number<<"**";
+    qDebug() << qPrintable("Opening ANT channel #" + QString("%1").arg(number, 1, 10, QLatin1Char( '0' )) 
+            + " device:0x" + QString("%1").arg(device_number, 4, 16, QLatin1Char( '0' )).toUpper()
+            + " type:0x" + QString("%1").arg(channel_type, 2, 16, QLatin1Char( '0' )).toUpper()
+            + ">" + getDescription());
     status = Opening;
 
     // start the transition process
@@ -121,6 +124,7 @@ void ANTChannel::open(int device, int chan_type)
         parent->setFecChannel(number);
         break;
     }
+    qDebug() << "Supported calibration:" << qPrintable("0x" + QString("%1").arg(calibrationData.getSupported(), 2, 16, QLatin1Char( '0' )).toUpper());
 }
 
 // close an ant channel assignment
@@ -130,7 +134,10 @@ void ANTChannel::close()
     lastMessage = ANTMessage();
 
     // lets shutdown
-    qDebug()<<"** CLOSING CHANNEL"<<number<<"**";
+    qDebug() << qPrintable("Closing ANT channel #" + QString("%1").arg(number, 1, 10, QLatin1Char( '0' )) 
+            + " device:0x" + QString("%1").arg(device_number, 4, 16, QLatin1Char( '0' )).toUpper()
+            + " type:0x" + QString("%1").arg(channel_type, 2, 16, QLatin1Char( '0' )).toUpper()
+            + ">" + getDescription());
     status = Closing;
 
     parent->sendMessage(ANTMessage::close(number));
