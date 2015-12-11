@@ -19,13 +19,14 @@
 #include "ComputrainerController.h"
 #include "Computrainer.h"
 #include "RealtimeData.h"
+#include "CalibrationData.h"
 
 #include <QMessageBox>
 
 ComputrainerController::ComputrainerController(TrainSidebar *parent,  DeviceConfiguration *dc) : RealtimeController(parent, dc)
 {
     myComputrainer = new Computrainer (parent, dc ? dc->portSpec : ""); // we may get NULL passed when configuring
-// FIXME WIP //        calibrationType = CALIBRATION_TYPE_COMPUTRAINER;
+    calibrationData.setSupported(CALIBRATION_TYPE_COMPUTRAINER);
 }
 
 

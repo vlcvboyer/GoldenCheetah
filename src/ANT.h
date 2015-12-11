@@ -435,38 +435,6 @@ public:
     void handleChannelEvent(void);
     void processMessage(void);
 
-// FIXME WIP :
-    // // calibration
-    // double getCalibrationTargetSpeed()
-    // {
-        // return calibration.getTargetSpeed();
-    // }
-
-    // uint16_t getCalibrationZeroOffset()
-    // {
-        // return calibration.getZeroOffset();
-    // }
-
-    // uint16_t getCalibrationSpindownTime()
-    // {
-        // return calibration.getZeroOffset();
-    // }
-
-    // void setCalibrationTargetSpeed(double target)
-    // {
-        // calibration.setTargetSpeed(target);
-    // }
-
-    // void setCalibrationZeroOffset(uint16_t offset)
-    // {
-        // calibration.setZeroOffset(offset);
-    // }
-
-    // void setCalibrationSpindownTime(uint16_t time)
-    // {
-        // calibration.setSpindownTime(time);
-    // }
-
     // serial i/o lifted from Computrainer.cpp
     void setDevice(QString devname);
     void setBaud(int baud);

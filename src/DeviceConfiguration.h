@@ -32,10 +32,6 @@ class DeviceConfiguration
     DeviceConfiguration();
 
     int type;
-    uint8_t calibrationType;
-    uint8_t calibrationFeatures;   // what type of calibration and configuration is supported by this device
-    uint8_t calibrationCompleted;  // indicate what calibration / configuration is completed
-    uint8_t calibrationInProgress; // indicate what calibration / configuration is in progress
     QString name,
          portSpec,
          deviceProfile;        // device specific data

@@ -37,10 +37,6 @@ DeviceConfiguration::DeviceConfiguration()
     wheelSize=2100;
     postProcess=0;
     controller=NULL;
-    calibrationType = CALIBRATION_TYPE_UNKNOWN;
-    calibrationFeatures=CALIBRATION_TYPE_UNKNOWN;
-    calibrationInProgress=CALIBRATION_TYPE_NONE;
-    calibrationCompleted=CALIBRATION_TYPE_NONE;
 }
 
 

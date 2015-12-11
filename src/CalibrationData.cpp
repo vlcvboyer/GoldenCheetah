@@ -329,6 +329,9 @@ void     CalibrationData::setState(uint8_t state)
     if (this->state!=state)
     {
         qDebug() << "Calibration step changing from " << typeDescr(this->state) << "to" << typeDescr(state);
+
+        stepTimestamp = QTime::currentTime();
+
         if (state==CALIBRATION_STATE_IDLE)
         {
             messageIndex=0;
@@ -344,8 +347,7 @@ void     CalibrationData::setState(uint8_t state)
             {
               case CALIBRATION_TYPE_COMPUTRAINER:
                 messageList.append(QObject::tr("starting"));
-                messageList.append(QObject::tr("step 1"));
-                messageList.append(QObject::tr("step 2"));
+                messageList.append(QObject::tr("Calibrating...\nPress F3 on Controller when done."));
                 messageList.append(QObject::tr("done"));
                 break;
               case CALIBRATION_TYPE_ZERO_OFFSET:
@@ -356,7 +358,7 @@ void     CalibrationData::setState(uint8_t state)
               case CALIBRATION_TYPE_SPINDOWN:
                 messageList.append(QObject::tr("starting"));
                 messageList.append(QObject::tr("speedup to 30kph"));
-                messageList.append(QObject::tr("coast freewheel"));
+                messageList.append(QObject::tr("Stop pedalling until process is completed"));
                 messageList.append(QObject::tr("done"));
                 break;
               case CALIBRATION_TYPE_CONFIGURATION:
@@ -367,13 +369,74 @@ void     CalibrationData::setState(uint8_t state)
 
             }
         }
+
+        if (state==CALIBRATION_STATE_STARTED)
+        {
+            switch (type)
+            {
+              case CALIBRATION_TYPE_COMPUTRAINER:
+                messageIndex=1;
+                break;
+
+            }
+        }
+
+        if (state==CALIBRATION_STATE_SPEEDUP)
+        {
+            switch (type)
+            {
+              case CALIBRATION_TYPE_SPINDOWN:
+                messageIndex=1;
+                break;
+
+            }
+        }
+
+        if (state==CALIBRATION_STATE_COAST)
+        {
+            switch (type)
+            {
+              case CALIBRATION_TYPE_SPINDOWN:
+                messageIndex=2;
+                break;
+              case CALIBRATION_TYPE_ZERO_OFFSET:
+                messageIndex=1;
+                break;
+
+            }
+        }
+
+        if (state==CALIBRATION_STATE_SUCCESS || state==CALIBRATION_STATE_FAILURE)
+        {
+            switch (type)
+            {
+              case CALIBRATION_TYPE_COMPUTRAINER:
+                messageIndex=2;
+                break;
+              case CALIBRATION_TYPE_SPINDOWN:
+                messageIndex=3;
+                break;
+              case CALIBRATION_TYPE_ZERO_OFFSET:
+              case CALIBRATION_TYPE_CONFIGURATION:
+                messageIndex=2;
+                break;
+
+            }
+        }
     }
 
     this->state=state;
 }
 
-uint8_t  CalibrationData::getState() const
+uint8_t  CalibrationData::getState()
 {
+    if ((state==CALIBRATION_STATE_SUCCESS || state==CALIBRATION_STATE_FAILURE || state==CALIBRATION_STATE_ABORT)
+        &&  (stepTimestamp.secsTo(QTime::currentTime())>2)) 
+    {
+        // keep calibration completion state during 3 seconds then go back to IDLE mode (will allow to keep a message shown on screen)
+        setState(CALIBRATION_STATE_IDLE);
+    }
+
     return state;
 }
 
@@ -429,6 +492,11 @@ uint8_t  CalibrationData::getMessageIndex() const
     return messageIndex;
 }
 
+QTime CalibrationData::getStepTimestamp() const
+{
+    return stepTimestamp;
+}
+
 uint8_t ANTCalibrationData::getDevice() const
 {
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
@@ -473,7 +541,7 @@ uint8_t ANTCalibrationData::getCompleted() const
     return completed & ~notCompleted;
 }
 
-uint8_t ANTCalibrationData::getState() const
+uint8_t ANTCalibrationData::getState()
 {
     for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
         if (parent && parent->antChannel[i])
@@ -530,4 +598,15 @@ uint8_t ANTCalibrationData::getMessageIndex() const
 
     // else
     return 0;
+}
+
+QTime ANTCalibrationData::getStepTimestamp() const
+{
+    for (uint8_t i=0; i<ANT_MAX_CHANNELS; i++)
+        if (parent && parent->antChannel[i])
+            if (parent->antChannel[i]->calibrationData.getState()!=CALIBRATION_STATE_IDLE)
+                return parent->antChannel[i]->calibrationData.getStepTimestamp();
+
+    // else
+    return QTime::currentTime();
 }

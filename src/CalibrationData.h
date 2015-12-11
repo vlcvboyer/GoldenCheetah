@@ -21,6 +21,7 @@
 
 #include <stdint.h> // uint8_t etc
 #include <QString>
+#include <QTime>
 
 class ANT;
 
@@ -30,7 +31,7 @@ class ANT;
 #define CALIBRATION_TYPE_COMPUTRAINER   ((uint8_t) 0x01)
 #define CALIBRATION_TYPE_ZERO_OFFSET    ((uint8_t) 0x02)
 #define CALIBRATION_TYPE_SPINDOWN       ((uint8_t) 0x04)
-#define CALIBRATION_TYPE_CONFIGURATION  ((uint8_t) 0x08) // FIXME: TODO !!! merge previous method with  this one
+#define CALIBRATION_TYPE_CONFIGURATION  ((uint8_t) 0x08)
 
 #define CALIBRATION_STATE_IDLE          0x00
 #define CALIBRATION_STATE_REQUIRED      0x01
@@ -74,7 +75,7 @@ public:
     static  void    resetCalibrationProcess();                // this reset calibration process (for each realtime controllers)
 
     static  QString getCalibrationMessage();
-    static  const QList<QString>&  getCalibrationMessageList();
+    static  const QList<QString>&  getCalibrationMessageList(); // this allows to display all steps to user and highlight current one in bold
     static  uint8_t  getCalibrationMessageIndex();
 
     static QString typeDescr(uint8_t param_type);
@@ -94,7 +95,7 @@ public:
     virtual uint8_t  getCompleted() const;
 
     virtual void     setState(uint8_t state);
-    virtual uint8_t  getState() const;
+    virtual uint8_t  getState();
 
     virtual void     setTargetSpeed(double target_speed);
     virtual void     start(uint8_t type);
@@ -105,8 +106,12 @@ public:
     virtual const QList<QString>&  getMessageList() const;
     virtual void     setMessageIndex(uint8_t index);
     virtual uint8_t  getMessageIndex() const;
+
+    virtual QTime    getStepTimestamp() const;
     
     static QList<QString> emptyMessageList;
+
+    uint8_t attempts;
 
 private:
     uint8_t supported;
@@ -115,10 +120,10 @@ private:
     uint8_t state;
     uint8_t type;
     uint8_t device;
-    uint8_t attempts;
     QList<QString> messageList;
     uint8_t messageIndex;
     double targetSpeed;
+    QTime  stepTimestamp;
 };
 
 class ANTCalibrationData : CalibrationData
@@ -135,7 +140,7 @@ public:
     virtual uint8_t  getInProgress() const;
     virtual uint8_t  getCompleted() const;
 
-    virtual uint8_t  getState() const;
+    virtual uint8_t  getState();
 
     virtual void     start(uint8_t type);
     virtual void     force(uint8_t type);
@@ -143,6 +148,8 @@ public:
 
     virtual const QList<QString>&  getMessageList() const;
     virtual uint8_t  getMessageIndex() const;
+
+    virtual QTime    getStepTimestamp() const;
 
 private:
     ANT* parent;

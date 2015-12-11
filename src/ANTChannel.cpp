@@ -20,7 +20,8 @@
 #include <QDebug>
 #include <QTime>
 #include "ANT.h"
-#include "calibrationData.h"
+#include "CalibrationData.h"
+#include "TrainSidebar.h"
 
 static float timeout_blanking=2.0;  // time before reporting stale data, seconds
 static float timeout_drop=2.0; // time before reporting dropped message
@@ -109,6 +110,17 @@ void ANTChannel::open(int device, int chan_type)
 
     // start the transition process
     attemptTransition(TRANSITION_START);
+
+    // preset presumed supported calibration and other characteristics
+    switch (channel_type) {
+      case CHANNEL_TYPE_POWER:
+        calibrationData.setSupported(CALIBRATION_TYPE_ZERO_OFFSET);
+        break;
+      case CHANNEL_TYPE_FITNESS_EQUIPMENT:
+        calibrationData.setDevice(CALIBRATION_DEVICE_ANT_FEC);
+        parent->setFecChannel(number);
+        break;
+    }
 }
 
 // close an ant channel assignment
@@ -162,7 +174,6 @@ void ANTChannel::receiveMessage(unsigned char *ant_message)
         }
     } else blanked=0;
 }
-
 
 // process a channel event message
 // would be good to refactor to use ANTMessage at some point
@@ -350,20 +361,21 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
            // Power
            case CHANNEL_TYPE_POWER:
                 qDebug() << "ANT power meter on channel " << number;
-                calibrationData.setSupported(CALIBRATION_TYPE_ZERO_OFFSET); // TODO : to be relocated when channel is started only
 
-                // TODO : manage calibration support by populating a CalibFeatures & CalibCompleted variables like it is done for ANT FE-C:
-                // => preset to CALIBRATION_TYPE_ZERO_OFFSET as a default value (and reset if we receive a calibration failed ??? does it mean that calibration is not supported?)
-
-                // calibration has been manually requested
+                // calibration has been requested
                 // Device is a power meter, so assume we support manual zero offset calibration
-                if (parent->modeCALIBRATE() && (calibrationData.getState() == CALIBRATION_STATE_REQUESTED))
-                {
-                    qDebug() << "Sending new calibration request to ANT+ power meter";
+                if (calibrationData.getState() == CALIBRATION_STATE_REQUESTED) {
+                    if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET) {
+                        parent->setMode(RT_MODE_CALIBRATE);
+                        // note: no obvious feedback that calibration is underway, therefore go straight to COAST
+                        calibrationData.setState(CALIBRATION_STATE_COAST);
 
-                    // note: no obvious feedback that calibration is underway, therefore go straight to COAST
-                    calibrationData.setState(CALIBRATION_STATE_COAST);
-                    parent->requestCalibration(ANT_SPORT_CALIBRATION_REQUEST_MANUALZERO);
+                        qDebug() << "Sending new calibration request to ANT+ power meter";
+                        parent->requestCalibration(ANT_SPORT_CALIBRATION_REQUEST_MANUALZERO);
+                    } else {
+                        qDebug() << "Discrepant calibration request";
+                        calibrationData.resetProcess();
+                    }
                 }
 
                 // what kind of power device is this?
@@ -410,8 +422,10 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         break;
 
                     case ANT_SPORT_ZEROOFFSET_SUCCESS: //0xAC
-                        if (parent->modeCALIBRATE()) {
+                        if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET) {
                             qDebug() << "ANT Sport calibration succeeded";
+                            calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_ZERO_OFFSET);
+                            calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_ZERO_OFFSET);
                             calibrationData.setState(CALIBRATION_STATE_SUCCESS);
                         }
 
@@ -423,11 +437,12 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     case ANT_SPORT_ZEROOFFSET_FAIL: //0xAF
                         if (parent->modeCALIBRATE()) {
                             qDebug() << "ANT Sport calibration failed";
+                            calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_ZERO_OFFSET);
+                            calibrationData.setCompleted(calibrationData.getCompleted()  & ~CALIBRATION_TYPE_ZERO_OFFSET);
                             calibrationData.setState(CALIBRATION_STATE_FAILURE);
+                            // we reset zero_offset calibration support when calibration fails. is there another way to know if calibration is supported by device?
+                            calibrationData.setSupported(calibrationData.getSupported()  & ~CALIBRATION_TYPE_ZERO_OFFSET);
                         }
-
-                        // pass calibrationOffset back up to display
-                        // parent->setCalibrationZeroOffset(antMessage.calibrationOffset);
 
                         break;
 
@@ -754,10 +769,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
             case CHANNEL_TYPE_FITNESS_EQUIPMENT:
             {
-                calibrationData.setDevice(CALIBRATION_DEVICE_ANT_FEC); // FIXME : to be relocated when we start ant channel
                 static int fecRefreshCounter = 1;
-
-                parent->setFecChannel(number);
                 // we don't seem to receive ACK messages, so use this workaround
                 // to ensure load/gradient is always set correctly
                 // TODO : use acknowledge sent by FE-C devices, see FITNESS_EQUIPMENT_GENERAL_PAGE below
@@ -771,16 +783,31 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                 // calibration is requested manually
                     // or automatically stated at beginning of training session if user preference ask for it:
-                // FIXME : WIP : need to take care of "parent->modeCALIBRATE()" when starting calibration
                     // TODO: add automatic calibration feature (from preference)
-                if (parent->modeCALIBRATE() && (calibrationData.getState() == CALIBRATION_STATE_REQUESTED))
-                {
-                    qDebug() << "Sending new calibration request to ANT FEC Device";
-                    calibrationData.setState(CALIBRATION_STATE_STARTING);
-                    if (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)
+                if (calibrationData.getState() == CALIBRATION_STATE_REQUESTED) {
+                    if (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN) {
+                        parent->setMode(RT_MODE_CALIBRATE);
+                        qDebug() << "Sending new spindown calibration request to ANT FEC Device";
+                        calibrationData.setState(CALIBRATION_STATE_STARTING);
                         parent->requestFecCalibration(FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
-                    else if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET)
+                    }
+                    else if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET) {
+                        parent->setMode(RT_MODE_CALIBRATE);
+                        qDebug() << "Sending new zero offset calibration request to ANT FEC Device";
+                        calibrationData.setState(CALIBRATION_STATE_STARTING);
                         parent->requestFecCalibration(FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
+                    }
+                    else if (calibrationData.getInProgress() & CALIBRATION_TYPE_CONFIGURATION) {
+                        calibrationData.setState(CALIBRATION_STATE_STARTED);
+                        qDebug() << "Applying current GC settings for configuring trainer parameters...";
+                        
+                        float wheelSize = appsettings->cvalue(parent->getTrainAthlete(), GC_WHEELSIZE, 2100).toFloat() / MATHCONST_PI;
+                        float kgCyclistWeight = appsettings->cvalue(parent->getTrainAthlete(), GC_WEIGHT, 75).toFloat();
+                        float gearRatio = 0.5; // TODO : add a parameter? Not really needed if we have external cadence meter.
+                        float kgCycleWeight = appsettings->value(NULL, GC_DPDP_BIKEWEIGHT, "9.5").toFloat();
+                        qDebug() << "wheel diam.: " << qPrintable(QString::number(wheelSize)) << "mm, cyclist: " << qPrintable(QString::number(kgCyclistWeight)) << "kg, cycle: " << qPrintable(QString::number(kgCycleWeight)) << "kg, gear ratio: " << qPrintable(QString::number(gearRatio));
+                        parent->fecUserConfig(kgCyclistWeight, kgCycleWeight, wheelSize, gearRatio);
+                    }
                 }
 
                 switch (antMessage.data_page) {
@@ -802,31 +829,31 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         parent->setSecondaryCadence(antMessage.fecCadence);
 
                     // Manage calibration features and status
-                    if (antMessage.fecPowerCalibRequired)
-                    {
+                    if (antMessage.fecPowerCalibRequired) {
                         qDebug() << "Trainer calibration required (power / zero offset)";
                         calibrationData.setSupported(calibrationData.getSupported() | CALIBRATION_TYPE_ZERO_OFFSET);
                         calibrationData.setCompleted(calibrationData.getCompleted() & ~CALIBRATION_TYPE_ZERO_OFFSET);
                     }
-                    else if (calibrationData.getSupported() & CALIBRATION_TYPE_ZERO_OFFSET)
-                    {
+                    else if (calibrationData.getSupported() & CALIBRATION_TYPE_ZERO_OFFSET) {
                         // if trainer have power (zero offset) calibration feature but do not indicate
                         //    that calibration is requested then we know that calibration is completed
                         calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_ZERO_OFFSET);
+                        if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET)
+                            calibrationData.setState(CALIBRATION_STATE_SUCCESS);
                         calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_ZERO_OFFSET);
                     }
 
-                    if (antMessage.fecResisCalibRequired)
-                    {
+                    if (antMessage.fecResisCalibRequired) {
                         qDebug() << "Trainer calibration required (resistance / spindown)";
                         calibrationData.setSupported(calibrationData.getSupported() | CALIBRATION_TYPE_SPINDOWN);
                         calibrationData.setCompleted(calibrationData.getCompleted() & ~CALIBRATION_TYPE_SPINDOWN);
                     }
-                    else if (calibrationData.getSupported() & CALIBRATION_TYPE_SPINDOWN)
-                    {
+                    else if (calibrationData.getSupported() & CALIBRATION_TYPE_SPINDOWN) {
                         // if trainer have spindown (resistance) calibration feature but do not indicate
                         //      that calibration is requested then we know that calibration is completed
                         calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_SPINDOWN);
+                        if (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)
+                            calibrationData.setState(CALIBRATION_STATE_SUCCESS);
                         calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_SPINDOWN);
                     }
 
@@ -835,22 +862,18 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     {
                         calibrationData.setSupported(calibrationData.getSupported() | CALIBRATION_TYPE_CONFIGURATION);
                         calibrationData.setCompleted(calibrationData.getCompleted() & ~CALIBRATION_TYPE_CONFIGURATION);
+                        qDebug() << "Trainer configuration required. Applying automatically current GC settings...";
+                        if (!CalibrationData::getCalibrationInProgress()) {
+                            calibrationData.setState(CALIBRATION_STATE_REQUESTED);
+                            calibrationData.setInProgress(CALIBRATION_TYPE_CONFIGURATION);
+                        }
                     }
                     else if (calibrationData.getSupported() & CALIBRATION_TYPE_CONFIGURATION)
                     {
                         calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_CONFIGURATION);
+                        if (calibrationData.getInProgress() & CALIBRATION_TYPE_CONFIGURATION)
+                            calibrationData.setState(CALIBRATION_STATE_SUCCESS);
                         calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_CONFIGURATION);
-                    }
-
-                    if (antMessage.fecUserConfigRequired)
-                    {
-                        qDebug() << "Trainer configuration required. Applying current GC settings...";
-                        float wheelSize = appsettings->cvalue(parent->getTrainAthlete(), GC_WHEELSIZE, 2100).toFloat() / MATHCONST_PI;
-                        float kgCyclistWeight = appsettings->cvalue(parent->getTrainAthlete(), GC_WEIGHT, 75).toFloat();
-                        float gearRatio = 0.5; // TODO : add a parameter? Not really needed if we have external cadence meter.
-                        float kgCycleWeight = appsettings->value(NULL, GC_DPDP_BIKEWEIGHT, "9.5").toFloat();
-                        qDebug() << "wheel diam.: " << qPrintable(QString::number(wheelSize)) << "mm, cyclist: " << qPrintable(QString::number(kgCyclistWeight)) << "kg, cycle: " << qPrintable(QString::number(kgCycleWeight)) << "kg, gear ratio: " << qPrintable(QString::number(gearRatio));
-                        parent->fecUserConfig(kgCyclistWeight, kgCycleWeight, wheelSize, gearRatio);
                     }
 
                     // Manage trainer status (over limits...)
@@ -921,28 +944,26 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     qDebug() << "Calibration response received from ANT FEC Device";
 
-                    if ((antMessage.fecPowerCalibSuccess || antMessage.fecResisCalibSuccess) && calibrationData.getInProgress())
+                    if (antMessage.fecPowerCalibSuccess && (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET)) {
+                        qDebug() << "Zero offset calibration successful, (offset = " << antMessage.fecZeroOffset << ")";
                         calibrationData.setState(CALIBRATION_STATE_SUCCESS);
-
-                    // qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
-                    if (antMessage.fecPowerCalibSuccess)
-                    {
                         calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_ZERO_OFFSET);
                         calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_ZERO_OFFSET);
-                        qDebug() << "Calibration result: zero offset = " << antMessage.fecZeroOffset;
                     }
-                    else if (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET)
-                        calibrationData.setState(CALIBRATION_STATE_FAILURE);
 
-                    if (antMessage.fecResisCalibSuccess)
-                    {
+                    if (antMessage.fecResisCalibSuccess && (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)) {
+                        qDebug() << "Spindown calibration success (spindown time = " << antMessage.fecSpindownTime << ")";
+                        calibrationData.setState(CALIBRATION_STATE_SUCCESS);
                         calibrationData.setInProgress(calibrationData.getInProgress() & ~CALIBRATION_TYPE_SPINDOWN);
                         calibrationData.setCompleted(calibrationData.getCompleted() | CALIBRATION_TYPE_SPINDOWN);
-                        qDebug() << "Calibration result: spindown time = " << antMessage.fecSpindownTime;
                     }
-                    // if error here, roller tension could be too tight or too loose
-                    else if (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)
+
+                    if ((!antMessage.fecPowerCalibSuccess && (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET)) 
+                     || (!antMessage.fecResisCalibSuccess && (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)) )  {
+                        // if error here, roller tension could be too tight or too loose
+                        qDebug() << "Calibration failed";
                         calibrationData.setState(CALIBRATION_STATE_FAILURE);
+                    }
 
                     break;
 
@@ -954,13 +975,15 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         calibrationData.setInProgress(calibrationData.getInProgress() | CALIBRATION_TYPE_SPINDOWN);
 
                     if (calibrationData.getState() == CALIBRATION_STATE_STARTING)
-                        calibrationData.setState(CALIBRATION_STATE_STARTED);
+                        if  (( antMessage.fecPowerCalibInProgress && (calibrationData.getInProgress() & CALIBRATION_TYPE_ZERO_OFFSET))
+                            || (antMessage.fecResisCalibInProgress && (calibrationData.getInProgress() & CALIBRATION_TYPE_SPINDOWN)))
+                            calibrationData.setState(CALIBRATION_STATE_STARTED);
+
 
                     if (calibrationData.getState() == CALIBRATION_STATE_STARTED) {
                         if (((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_LO) ||
-                            ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK)) {
+                            ((antMessage.fecCalibrationConditions & 0xC0) == FITNESS_EQUIPMENT_CAL_COND_SPEED_OK))
                             calibrationData.setState(CALIBRATION_STATE_SPEEDUP);
-                        }
                     }
 
                     if (calibrationData.getState() == CALIBRATION_STATE_SPEEDUP) {
@@ -968,7 +991,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                             calibrationData.setState(CALIBRATION_STATE_COAST);
                     }
 
-                    if (antMessage.fecTargetSpeed != 0xFFFF){
+                    if (antMessage.fecTargetSpeed != 0xFFFF) {
                         calibrationData.setTargetSpeed((uint32_t)antMessage.fecTargetSpeed * 0.0036);
                     }
 
