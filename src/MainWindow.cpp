@@ -656,10 +656,12 @@ MainWindow::MainWindow(const QDir &home)
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
     optionsMenu->addSeparator();
     // TODO : create submenu?
-    optionsMenu->addAction(tr("Calibrate sensors: Any"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ALL)));
-    optionsMenu->addAction(tr("Calibrate sensors: Computrainer"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_COMPUTRAINER)));
-    optionsMenu->addAction(tr("Calibrate sensors: ANT trainer"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ANT_FEC)));
-    optionsMenu->addAction(tr("Calibrate sensors: ANT powermeter"), this, SLOT (calibrationRequest(CALIBRATION_DEVICE_ANT_SPORT)));
+    QMenu *calMenu = optionsMenu->addMenu(tr("Calibrate sensors..."));
+    calMenu->addAction(tr("Any"), this, SLOT (calibrationRequestAll()));
+    calMenu->addAction(tr("Computrainer"), this, SLOT (calibrationRequestComputrainer()));
+    calMenu->addAction(tr("ANT trainer"), this, SLOT (calibrationRequestAntFec()));
+    calMenu->addAction(tr("ANT powermeter"), this, SLOT (calibrationRequestAntSport()));
+    calMenu->addAction(tr("...Abort"), this, SLOT (calibrationAbort()));
     optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
@@ -2192,12 +2194,41 @@ MainWindow::calibrationRequest(uint8_t target_device)
 {
     if (currentTab && currentTab->context)
         currentTab->context->notifyCalibrationRequest(target_device);
-    // TODO: add a submenu including:
-    // "All uncalibrated"
-    // "Powermeter"
-    // "ANT FE-C Trainer"
-    // ...
-    // send send it as a parameter to "context->notifyCalibrationRequest();"
+}
+
+void
+MainWindow::calibrationRequestAll()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ALL);
+}
+
+void
+MainWindow::calibrationRequestComputrainer()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_COMPUTRAINER);
+}
+
+void
+MainWindow::calibrationRequestAntFec()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ANT_FEC);
+}
+
+void
+MainWindow::calibrationRequestAntSport()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ANT_SPORT);
+}
+
+void
+MainWindow::calibrationAbort()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_NONE);
 }
 
 /*----------------------------------------------------------------------

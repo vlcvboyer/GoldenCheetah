@@ -175,7 +175,7 @@ class Context : public QObject
         void notifyCompareDateRanges(bool state);
         void notifyCompareDateRangesChanged();
 
-        void notifyCalibrationRequest(uint8_t target = 0) { emit calibrationRequest(target); }
+        void notifyCalibrationRequest(uint8_t target = 0xFF) { emit calibrationRequest(target); }
 
     signals:
 
@@ -237,6 +237,6 @@ class Context : public QObject
         void compareDateRangesStateChanged(bool);
         void compareDateRangesChanged();
 
-        void calibrationRequest(uint8_t target = 0);
+        void calibrationRequest(uint8_t target = 0xFF);
 };
 #endif // _GC_Context_h

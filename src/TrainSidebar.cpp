@@ -1699,40 +1699,37 @@ void TrainSidebar::loadUpdate()
     }
 }
 
-void TrainSidebar::Calibrate()
+void TrainSidebar::Calibrate(uint8_t device)
 {
     // todo: can enter calibration if not running, maybe prevent that (as will get no updates)?
-    toggleCalibration();
-    updateCalibration();
-}
+    if (!device) {
+        // device == 0 means abort calibration request
+        if (calibrating) {
 
-void TrainSidebar::toggleCalibration()
-{
-    if (calibrating) {
+            // restart gui etc
+            session_time.start();
+            lap_time.start();
+            load_period.restart();
+            if (status & RT_WORKOUT) load_timer->start(LOADRATE);
+            if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
+            context->notifyUnPause(); // get video started again, amongst other things
 
-        // restart gui etc
-        session_time.start();
-        lap_time.start();
-        load_period.restart();
-        if (status & RT_WORKOUT) load_timer->start(LOADRATE);
-        if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
-        context->notifyUnPause(); // get video started again, amongst other things
-
-        CalibrationData::resetCalibrationProcess();
-        // back to ergo/slope mode and restore load/gradient
-        if (status&RT_MODE_ERGO) {
-            foreach(int dev, devices()) {
-                Devices[dev].controller->setMode(RT_MODE_ERGO);
-                Devices[dev].controller->setLoad(load);
-            }
-        } else {
-            foreach(int dev, devices()) {
-                Devices[dev].controller->setMode(RT_MODE_SPIN);
-                Devices[dev].controller->setGradient(slope);
+            CalibrationData::resetCalibrationProcess();
+            // back to ergo/slope mode and restore load/gradient
+            if (status&RT_MODE_ERGO) {
+                foreach(int dev, devices()) {
+                    Devices[dev].controller->setMode(RT_MODE_ERGO);
+                    Devices[dev].controller->setLoad(load);
+                }
+            } else {
+                foreach(int dev, devices()) {
+                    Devices[dev].controller->setMode(RT_MODE_SPIN);
+                    Devices[dev].controller->setGradient(slope);
+                }
             }
         }
-    } else {
-
+    }
+    else { // calibrate
         // pause gui/load, streaming and recording
         // but keep the gui ticking so we get realtime telemetry to detect the F3 keypad =button press
         session_elapsed_msec += session_time.elapsed();
@@ -1745,7 +1742,7 @@ void TrainSidebar::toggleCalibration()
         context->notifyPause(); // get video started again, amongst other things
 
         // select the first uncalibrated device that reports requested calibration capabilities
-        CalibrationData::startCalibration(CALIBRATION_DEVICE_ALL); // FIXME : shall indicate the device requested by user not ALL
+        CalibrationData::startCalibration(device);
 
         // trainer (tacx vortex smart) doesn't appear to reduce resistance automatically when entering calibration mode
         if (CalibrationData::getCalibrationInProgress()) {
@@ -1766,7 +1763,7 @@ void TrainSidebar::toggleCalibration()
 
     }
 
-    calibrating = !calibrating; // toggle calibration
+    updateCalibration();
 }
 
 void TrainSidebar::updateCalibration()

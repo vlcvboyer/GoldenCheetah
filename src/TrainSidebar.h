@@ -158,7 +158,7 @@ class TrainSidebar : public GcWindow
         void Pause();       // when Paude is pressed
         void Stop(int status=0);        // when controller wants to stop
 
-        void Calibrate();   // toggle calibration mode
+        void Calibrate(uint8_t device = 0xFF);   // Launch calibration mode
         void FFwd();        // jump forward when in a workout
         void Rewind();      // jump backwards when in a workout
         void FFwdLap();     // jump forward to next Lap marker
@@ -167,7 +167,6 @@ class TrainSidebar : public GcWindow
         void newLap();      // start new Lap!
         void resetLapTimer(); //reset the lap timer
 
-        void toggleCalibration();
         void updateCalibration();
 
         // Timed actions
