@@ -353,8 +353,10 @@ class ANT : public QThread
 
 
 public:
-    ANT(QObject *parent = 0, DeviceConfiguration *dc=0, QString cyclist="");
+    ANT(ANTlocalController* myANTlocalController, QObject *parent = 0, DeviceConfiguration *dc=0, QString cyclist="");
     ~ANT();
+
+    ANTlocalController* myANTlocalController;
 
 signals:
     void foundDevice(int channel, int device_number, int device_id); // channelInfo
@@ -521,7 +523,6 @@ private:
     void run();
 
     RealtimeData telemetry;
-    CalibrationData calibration;
 
     QMutex pvars;  // lock/unlock access to telemetry data between thread and controller
     int Status;     // what status is the client in?

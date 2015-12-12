@@ -167,6 +167,7 @@ class ANTChannel : public QObject {
         int srm_offset;
 
         ANTChannel(int number, ANT *parent);
+        ~ANTChannel();
 
         // What kind of channel
         const char *getDescription();
@@ -205,7 +206,7 @@ class ANTChannel : public QObject {
 
         void setAlt(bool value) { is_alt = value; }
 
-        CalibrationData calibrationData;
+        CalibrationData* calibrationData;
 
     signals:
 

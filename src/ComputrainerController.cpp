@@ -26,9 +26,14 @@
 ComputrainerController::ComputrainerController(TrainSidebar *parent,  DeviceConfiguration *dc) : RealtimeController(parent, dc)
 {
     myComputrainer = new Computrainer (parent, dc ? dc->portSpec : ""); // we may get NULL passed when configuring
-    calibrationData.setSupported(CALIBRATION_TYPE_COMPUTRAINER);
+    if (calibrationData)
+        calibrationData->setSupported(CALIBRATION_TYPE_COMPUTRAINER);
 }
 
+QString ComputrainerController::name() const
+{
+    return QString("COMPUTRAINER");
+}
 
 int
 ComputrainerController::start()

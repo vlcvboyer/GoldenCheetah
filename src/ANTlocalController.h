@@ -37,6 +37,8 @@ class ANTlocalController : public RealtimeController
 public:
     ANTlocalController (TrainSidebar *parent =0, DeviceConfiguration *dc =0);
 
+    virtual QString name() const;
+
     ANT *myANTlocal;               // the device itself
 
     int start();
@@ -82,8 +84,6 @@ signals:
 private:
     QQueue<setChannelAtom> channelQueue;
     ANTLogger logger;
-
-
 };
 
 #endif // _GC_ANTlocalController_h

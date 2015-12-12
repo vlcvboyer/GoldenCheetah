@@ -32,6 +32,8 @@ class ComputrainerController : public RealtimeController
 public:
     ComputrainerController (TrainSidebar *, DeviceConfiguration *);
 
+    virtual QString name() const;
+
     Computrainer *myComputrainer;               // the device itself
 
     int start();

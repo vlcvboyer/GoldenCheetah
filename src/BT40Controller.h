@@ -34,6 +34,8 @@ public:
     BT40Controller (TrainSidebar *parent =0, DeviceConfiguration *dc =0);
     ~BT40Controller();
 
+    virtual QString name() const;
+
     BT40 *myBT40;               // the device itself
 
     int start();

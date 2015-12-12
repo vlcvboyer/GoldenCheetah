@@ -82,7 +82,7 @@ const ant_sensor_type_t ANT::ant_sensor_types[] = {
 // thread and is part of the GC architecture NOT related to the
 // hardware controller.
 //
-ANT::ANT(QObject *parent, DeviceConfiguration *devConf, QString cyclist) : QThread(parent), devConf(devConf)
+ANT::ANT(ANTlocalController* myANTlocalController, QObject *parent, DeviceConfiguration *devConf, QString cyclist) : QThread(parent), myANTlocalController(myANTlocalController), devConf(devConf)
 {
     qRegisterMetaType<ANTMessage>("ANTMessage");
     qRegisterMetaType<uint16_t>("uint16_t");

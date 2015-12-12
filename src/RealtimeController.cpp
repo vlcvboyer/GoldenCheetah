@@ -23,7 +23,7 @@
 
 // Abstract base class for Realtime device controllers
 
-RealtimeController::RealtimeController(TrainSidebar *parent, DeviceConfiguration *dc) : parent(parent), dc(dc)
+RealtimeController::RealtimeController(TrainSidebar *parent, DeviceConfiguration *dc) :parent(parent),  dc(dc)
 {
     if (dc != NULL)
     {
@@ -34,8 +34,16 @@ RealtimeController::RealtimeController(TrainSidebar *parent, DeviceConfiguration
         this->dc = NULL;
     }
 
+    calibrationData = new CalibrationData(this);
+
     // setup algorithm
     processSetup();
+}
+
+RealtimeController::~RealtimeController()
+{
+    if (calibrationData)
+        delete calibrationData;
 }
 
 int RealtimeController::start() { return 0; }
@@ -49,6 +57,11 @@ bool RealtimeController::doesPush() { return false; }
 bool RealtimeController::doesLoad() { return false; }
 void RealtimeController::getRealtimeData(RealtimeData &) { }
 void RealtimeController::pushRealtimeData(RealtimeData &) { } // update realtime data with current values
+
+QString RealtimeController::name() const
+{
+    return QString("UNKNOWN");
+}
 
 void
 RealtimeController::processRealtimeData(RealtimeData &rtData)

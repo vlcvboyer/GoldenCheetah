@@ -1397,26 +1397,26 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             foreach(int dev, devices()) { // Do for selected device only
                 RealtimeData local = rtData;
 
-                if (Devices[dev].controller 
-                   && (   Devices[dev].controller->calibrationData.getInProgress() 
-                       || Devices[dev].controller->calibrationData.getState()  )) {
+                if (Devices[dev].controller && Devices[dev].controller->calibrationData
+                   && (Devices[dev].controller->calibrationData->getInProgress() 
+                       || Devices[dev].controller->calibrationData->getState()  )) {
                     // need telemetry for calibration dialog updates
                     // (and F3 button press for Computrainer)
 
                     Devices[dev].controller->getRealtimeData(local);
 
                     // if calibration was already requested, but not receiving updates, then try again..
-                    if ((Devices[dev].controller->calibrationData.getState() == CALIBRATION_STATE_STARTING)
-                        && Devices[dev].controller->calibrationData.attempts++<3
-                        && Devices[dev].controller->calibrationData.getStepTimestamp().secsTo(QTime::currentTime())>1) {
+                    if ((Devices[dev].controller->calibrationData->getState() == CALIBRATION_STATE_STARTING)
+                        && Devices[dev].controller->calibrationData->attempts++<3
+                        && Devices[dev].controller->calibrationData->getStepTimestamp().secsTo(QTime::currentTime())>1) {
                         qDebug() << "No response to our calibration request, re-requesting..";
-                        Devices[dev].controller->calibrationData.setState(CALIBRATION_STATE_REQUESTED);
+                        Devices[dev].controller->calibrationData->setState(CALIBRATION_STATE_REQUESTED);
                     }
 
                     // if too long then indicate failure
-                    if (Devices[dev].controller->calibrationData.getStepTimestamp().secsTo(QTime::currentTime())>10) {
+                    if (Devices[dev].controller->calibrationData->getStepTimestamp().secsTo(QTime::currentTime())>10) {
                         qDebug() << "Calibration timeout. Cancelling.";
-                        Devices[dev].controller->calibrationData.setState(CALIBRATION_STATE_ABORT);
+                        Devices[dev].controller->calibrationData->setState(CALIBRATION_STATE_ABORT);
                     }
                 }
             }

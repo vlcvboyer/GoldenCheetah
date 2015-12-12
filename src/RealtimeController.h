@@ -37,7 +37,9 @@ public:
     TrainSidebar *parent;                     // for push devices
 
     RealtimeController (TrainSidebar *parent, DeviceConfiguration *dc = 0);
-    virtual ~RealtimeController() {}
+    virtual ~RealtimeController();
+
+    virtual QString name() const;
 
     virtual int start();
     virtual int restart();                              // restart after paused
@@ -66,7 +68,7 @@ public:
     void processRealtimeData(RealtimeData &rtData);
     void processSetup();
 
-    CalibrationData calibrationData;
+    CalibrationData* calibrationData;
 
 private:
     DeviceConfiguration *dc;

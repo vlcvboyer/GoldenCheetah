@@ -23,8 +23,6 @@
 #include <QString>
 #include <QTime>
 
-class ANT;
-
 #define CALIBRATION_TYPE_NONE           ((uint8_t) 0x00)
 #define CALIBRATION_TYPE_UNKNOWN        ((uint8_t) 0x00)
 #define CALIBRATION_TYPE_NOT_SUPPORTED  ((uint8_t) 0x00)
@@ -50,13 +48,18 @@ class ANT;
 #define CALIBRATION_DEVICE_ANT_FEC      ((uint8_t) 0x04)
 #define CALIBRATION_DEVICE_ALL          ((uint8_t) 0xFF)
 
+class ANT;
 class TrainSidebar;
+class RealtimeController;
+class ANTlocalController;
 
 class CalibrationData
 {
 // This class is used in each RealTime controller in order to manage calibration process
 public:
-    CalibrationData();
+    CalibrationData(RealtimeController* realtimeController=NULL);
+    CalibrationData(CalibrationData* parentCalibrationData);
+    virtual ~CalibrationData();
 
     // here are functions that manage overall calibration process
     // this is the single point of contact to manage calibration process
@@ -109,6 +112,9 @@ public:
     virtual void     setMessageIndex(uint8_t index);
     virtual uint8_t  getMessageIndex() const;
 
+    virtual const QString& getName() const;
+    virtual void     setName(const QString& name);
+
     virtual QTime    getStepTimestamp() const;
     
     static QList<QString> emptyMessageList;
@@ -116,7 +122,13 @@ public:
 
     uint8_t attempts;
 
-private:
+    virtual void     setParent(CalibrationData* parentCalibrationData);
+    virtual void     setParent(RealtimeController* realtimeController);
+
+protected:
+    RealtimeController* realtimeController;
+    CalibrationData* parentCalibrationData;
+    QList<CalibrationData*> childsCalibrationData;
     uint8_t supported;
     uint8_t inProgress;
     uint8_t completed;
@@ -127,35 +139,7 @@ private:
     uint8_t messageIndex;
     double targetSpeed;
     QTime  stepTimestamp;
-};
-
-class ANTCalibrationData : CalibrationData
-{
-// This class is used in ANT RealTime controller in order to manage calibration process
-// it will read data in each ANTChannel CalibrationData in order to give the overall information
-public:
-
-    ANTCalibrationData(ANT* parent) : parent(parent) {};
-
-    virtual uint8_t  getDevice() const;
-
-    virtual uint8_t  getSupported() const;
-    virtual uint8_t  getInProgress() const;
-    virtual uint8_t  getCompleted() const;
-
-    virtual uint8_t  getState();
-
-    virtual void     start(uint8_t type);
-    virtual void     force(uint8_t type);
-    virtual void     resetProcess();
-
-    virtual const QList<QString>&  getMessageList() const;
-    virtual uint8_t  getMessageIndex() const;
-
-    virtual QTime    getStepTimestamp() const;
-
-private:
-    ANT* parent;
+    QString name;
 };
 
 #endif /* SRC_CALIBRATIONDATA_H_ */

@@ -32,7 +32,7 @@ ANTlocalController::ANTlocalController(TrainSidebar *parent, DeviceConfiguration
     } else {
         cyclist = QString();
     }
-    myANTlocal = new ANT (parent, dc, cyclist);
+    myANTlocal = new ANT (this, parent, dc, cyclist);
     connect(myANTlocal, SIGNAL(foundDevice(int,int,int)), this, SIGNAL(foundDevice(int,int,int)));
     connect(myANTlocal, SIGNAL(lostDevice(int)), this, SIGNAL(lostDevice(int)));
     connect(myANTlocal, SIGNAL(searchTimeout(int)), this, SIGNAL(searchTimeout(int)));
@@ -42,6 +42,11 @@ ANTlocalController::ANTlocalController(TrainSidebar *parent, DeviceConfiguration
 
     // Connect a logger
     connect(myANTlocal, SIGNAL(receivedAntMessage(const ANTMessage ,const timeval )), &logger, SLOT(logRawAntMessage(const ANTMessage ,const timeval)));
+}
+
+QString ANTlocalController::name() const
+{
+    return QString("ANT");
 }
 
 void
