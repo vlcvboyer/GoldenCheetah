@@ -25,7 +25,6 @@
 //
 #include "GoldenCheetah.h"
 #include "RealtimeData.h"
-#include "CalibrationData.h"
 #include "DeviceConfiguration.h"
 
 //
@@ -86,6 +85,7 @@
 
 class ANTMessage;
 class ANTChannel;
+class ANTlocalController;
 
 typedef struct ant_sensor_type {
   bool user; // can user select this when calibrating ?

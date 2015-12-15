@@ -30,6 +30,7 @@
 #define CALIBRATION_TYPE_ZERO_OFFSET    ((uint8_t) 0x02)
 #define CALIBRATION_TYPE_SPINDOWN       ((uint8_t) 0x04)
 #define CALIBRATION_TYPE_CONFIGURATION  ((uint8_t) 0x08)
+#define CALIBRATION_TYPE_ALL            ((uint8_t) 0xFF)
 
 #define CALIBRATION_STATE_IDLE          0x00
 #define CALIBRATION_STATE_REQUIRED      0x01
@@ -48,10 +49,7 @@
 #define CALIBRATION_DEVICE_ANT_FEC      ((uint8_t) 0x04)
 #define CALIBRATION_DEVICE_ALL          ((uint8_t) 0xFF)
 
-class ANT;
-class TrainSidebar;
 class RealtimeController;
-class ANTlocalController;
 
 class CalibrationData
 {
@@ -61,34 +59,14 @@ public:
     CalibrationData(CalibrationData* parentCalibrationData);
     virtual ~CalibrationData();
 
-    // here are functions that manage overall calibration process
-    // this is the single point of contact to manage calibration process
-    // it will go through all devices and check/actuate calibration
-
-    static uint8_t getCalibrationDevice();     // the device that is under calibration process (if started) otherwise the first one with calibration support
-
-    static uint8_t getCalibrationSupported();  // list all calibration that are supported  (by each realtime controllers)
-    static uint8_t getCalibrationInProgress(); // list all calibration that are in progress
-    static uint8_t getCalibrationCompleted();  // list all calibration that are completed
-
-    static uint8_t getCalibrationState();      // give calibration process state (current step)
-
-    // the TargetDevice defined below will allow each class to give information
-    // related to devices to be calibrated (based on user choice), or all (CALIBRATION_DEVICE_ALL)
-    static  void    startCalibration(uint8_t device);
-
-    static  void    resetCalibrationProcess();                // this reset calibration process (for each realtime controllers)
-
-    static  QString getCalibrationMessage();
-    static  const QList<QString>&  getCalibrationMessageList(); // this allows to display all steps to user and highlight current one in bold
-    static  uint8_t  getCalibrationMessageIndex();
-
     static QString typeDescr(uint8_t param_type);
     static QString deviceDescr(uint8_t param_device);
     static QString stateDescr(uint8_t param_state);
 
     // here are functions to address the device linked to this class instance only 
     // (and sub-classes when sub-nodes are present such as ANT devices connected to ANT controller)
+    virtual void update();
+
     virtual void     setDevice(uint8_t device);
     virtual uint8_t  getDevice() const;
 
@@ -103,14 +81,14 @@ public:
     virtual uint8_t  getState();
 
     virtual void     setTargetSpeed(double target_speed);
-    virtual void     start(uint8_t type);
+    virtual void     start(uint8_t type = CALIBRATION_DEVICE_ALL, bool allowForce=false);
     virtual void     force(uint8_t type);
     virtual void     resetProcess();     // this reset calibration process (for this calibration class)
 
-    virtual void     setMessageList(QList<QString> messageList);
-    virtual const QList<QString>&  getMessageList() const;
     virtual void     setMessageIndex(uint8_t index);
     virtual uint8_t  getMessageIndex() const;
+    virtual const QList<QString>&  getMessageList() const;
+    virtual const QString&  getMessage() const;
 
     virtual const QString& getName() const;
     virtual void     setName(const QString& name);
@@ -118,12 +96,11 @@ public:
     virtual QTime    getStepTimestamp() const;
     
     static QList<QString> emptyMessageList;
-    static TrainSidebar* trainSidebar;
+    static QString emptyMessage;
+    static CalibrationData* calibrationDataRootPtr; // to be removed as we will intanciate the root CalibrationData in TrainSidebar
+    static uint8_t requestType;
 
     uint8_t attempts;
-
-    virtual void     setParent(CalibrationData* parentCalibrationData);
-    virtual void     setParent(RealtimeController* realtimeController);
 
 protected:
     RealtimeController* realtimeController;

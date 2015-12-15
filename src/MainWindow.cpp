@@ -659,8 +659,8 @@ MainWindow::MainWindow(const QDir &home)
     QMenu *calMenu = optionsMenu->addMenu(tr("Calibrate sensors..."));
     calMenu->addAction(tr("Any"), this, SLOT (calibrationRequestAll()));
     calMenu->addAction(tr("Computrainer"), this, SLOT (calibrationRequestComputrainer()));
-    calMenu->addAction(tr("ANT trainer"), this, SLOT (calibrationRequestAntFec()));
-    calMenu->addAction(tr("ANT powermeter"), this, SLOT (calibrationRequestAntSport()));
+    calMenu->addAction(tr("Trainer power"), this, SLOT (calibrationRequestZeroOffset()));
+    calMenu->addAction(tr("Trainer resistance"), this, SLOT (calibrationRequestSpinDown()));
     calMenu->addAction(tr("...Abort"), this, SLOT (calibrationAbort()));
     optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
@@ -2190,38 +2190,38 @@ MainWindow::configChanged(qint32)
  *--------------------------------------------------------------------*/
 
 void
-MainWindow::calibrationRequest(uint8_t target_device)
+MainWindow::calibrationRequest(uint8_t type)
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest(target_device);
+        currentTab->context->notifyCalibrationRequest(type);
 }
 
 void
 MainWindow::calibrationRequestAll()
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ALL);
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_ALL);
 }
 
 void
 MainWindow::calibrationRequestComputrainer()
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_COMPUTRAINER);
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_COMPUTRAINER);
 }
 
 void
-MainWindow::calibrationRequestAntFec()
+MainWindow::calibrationRequestZeroOffset()
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ANT_FEC);
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_ZERO_OFFSET);
 }
 
 void
-MainWindow::calibrationRequestAntSport()
+MainWindow::calibrationRequestSpindown()
 {
     if (currentTab && currentTab->context)
-        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_ANT_SPORT);
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_SPINDOWN);
 }
 
 void

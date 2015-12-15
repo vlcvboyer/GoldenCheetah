@@ -64,9 +64,11 @@
 #include "TrainDB.h"
 #include "Library.h"
 
-TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(context)
+TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(context), calibrationDataRoot(NULL)
 {
-    CalibrationData::trainSidebar = this;
+    calibrationDataRoot = new CalibrationData((CalibrationData*) NULL);
+    CalibrationData::calibrationDataRootPtr = calibrationDataRoot;
+
     QWidget *c = new QWidget;
     //c->setContentsMargins(0,0,0,0); // bit of space is useful
     QVBoxLayout *cl = new QVBoxLayout(c);
@@ -495,7 +497,12 @@ intensity->hide(); //XXX!!! temporary
 
 TrainSidebar::~TrainSidebar()
 {
-    CalibrationData::trainSidebar = NULL;
+    if (calibrationDataRoot) {
+        CalibrationData::calibrationDataRootPtr = NULL;
+        delete calibrationDataRoot;
+        calibrationDataRoot = NULL;
+    }
+        
 }
 
 void
@@ -1713,15 +1720,15 @@ void TrainSidebar::loadUpdate()
 
 void TrainSidebar::calibrationAbort()
 {
-    Calibrate(CALIBRATION_DEVICE_NONE);
+    Calibrate(CALIBRATION_TYPE_NONE);
 }
 
-void TrainSidebar::Calibrate(uint8_t device)
+void TrainSidebar::Calibrate(uint8_t type)
 {
-    qDebug() << "Calibration request for " << CalibrationData::deviceDescr(device);
+    qDebug() << "Calibration request for " << CalibrationData::typeDescr(type);
 
     // todo: can enter calibration if not running, maybe prevent that (as will get no updates)?
-    if (!device) {
+    if (!type) {
         // device == 0 means abort calibration request
         if (calibrating) {
 
@@ -1733,7 +1740,8 @@ void TrainSidebar::Calibrate(uint8_t device)
             if (status & RT_RECORDING) disk_timer->start(SAMPLERATE);
             context->notifyUnPause(); // get video started again, amongst other things
 
-            CalibrationData::resetCalibrationProcess();
+            if (calibrationDataRoot)
+                calibrationDataRoot->resetProcess();
             // back to ergo/slope mode and restore load/gradient
             if (status&RT_MODE_ERGO) {
                 foreach(int dev, devices()) {
@@ -1761,10 +1769,12 @@ void TrainSidebar::Calibrate(uint8_t device)
         context->notifyPause(); // get video started again, amongst other things
 
         // select the first uncalibrated device that reports requested calibration capabilities
-        CalibrationData::startCalibration(device);
+        // FIXME : here we have to take care of type...
+        if (calibrationDataRoot)
+            calibrationDataRoot->start(type);
 
         // trainer (tacx vortex smart) doesn't appear to reduce resistance automatically when entering calibration mode
-        if (CalibrationData::getCalibrationInProgress()) {
+        if (calibrationDataRoot && calibrationDataRoot->getInProgress()) {
             foreach(int dev, devices()) {
                 if (status&RT_MODE_ERGO)
                     Devices[dev].controller->setLoad(0);
@@ -1775,10 +1785,10 @@ void TrainSidebar::Calibrate(uint8_t device)
             }
         }
 
-        if (!CalibrationData::getCalibrationInProgress())
+        if (calibrationDataRoot && !calibrationDataRoot->getInProgress())
             qDebug() << "No device(s) found with calibration support";
-        else
-            qDebug() << "Device" << CalibrationData::getCalibrationDevice() << "being used for calibration";
+        else if (calibrationDataRoot)
+            qDebug() << "Device" << calibrationDataRoot->getDevice() << "being used for calibration";
 
     }
 
@@ -1806,19 +1816,20 @@ void TrainSidebar::updateCalibration()
         qDebug() << "updating calibration dialog";
 
         // update dialog depending on calibration type and state
-        switch (CalibrationData::getCalibrationInProgress()) {
-        case CALIBRATION_TYPE_NOT_SUPPORTED:
-            status = tr("Calibration not supported for this device.");
-            break;
-        case CALIBRATION_STATE_SUCCESS:
-            status = QString(tr("Calibration completed successfully..."));
-            break;
-        case CALIBRATION_STATE_FAILURE:
-            status = QString(tr("Calibration failed.."));
-            break;
-        default:
-            status = CalibrationData::getCalibrationMessage();
-        }
+        if (calibrationDataRoot)
+            switch (calibrationDataRoot->getInProgress()) {
+            case CALIBRATION_TYPE_NOT_SUPPORTED:
+                status = tr("Calibration not supported for this device.");
+                break;
+            case CALIBRATION_STATE_SUCCESS:
+                status = QString(tr("Calibration completed successfully..."));
+                break;
+            case CALIBRATION_STATE_FAILURE:
+                status = QString(tr("Calibration failed.."));
+                break;
+            default:
+                status = calibrationDataRoot->getMessage();
+            }
 
         bar->setLabelText(status);
         bar->show();

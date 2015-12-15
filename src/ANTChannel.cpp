@@ -889,7 +889,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         calibrationData->setSupported(calibrationData->getSupported() | CALIBRATION_TYPE_CONFIGURATION);
                         calibrationData->setCompleted(calibrationData->getCompleted() & ~CALIBRATION_TYPE_CONFIGURATION);
                         qDebug() << "Trainer configuration required. Applying automatically current GC settings...";
-                        if (!CalibrationData::getCalibrationInProgress()) {
+                        if (CalibrationData::calibrationDataRootPtr && !CalibrationData::calibrationDataRootPtr->getInProgress()) {
                             calibrationData->setState(CALIBRATION_STATE_REQUESTED);
                             calibrationData->setInProgress(CALIBRATION_TYPE_CONFIGURATION);
                         }

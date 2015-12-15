@@ -75,6 +75,7 @@ class NullController;
 class RealtimePlot;
 class RealtimeData;
 class MultiDeviceDialog;
+class CalibrationData;
 
 class TrainSidebar : public GcWindow
 {
@@ -86,6 +87,7 @@ class TrainSidebar : public GcWindow
         TrainSidebar(Context *context);
         ~TrainSidebar();
         Context *context;
+        CalibrationData* calibrationDataRoot;
 
         QStringList listWorkoutFiles(const QDir &) const;
 
@@ -161,7 +163,7 @@ class TrainSidebar : public GcWindow
         void Pause();       // when Paude is pressed
         void Stop(int status=0);        // when controller wants to stop
 
-        void Calibrate(uint8_t device = 0xFF);   // Launch calibration mode
+        void Calibrate(uint8_t type = 0xFF);   // Launch calibration mode
         void calibrationAbort();
         void FFwd();        // jump forward when in a workout
         void Rewind();      // jump backwards when in a workout
