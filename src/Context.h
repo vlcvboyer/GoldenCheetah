@@ -180,6 +180,8 @@ class Context : public QObject
         void notifyCompareDateRanges(bool state);
         void notifyCompareDateRangesChanged();
 
+        void notifyCalibrationRequest(uint8_t target = 0xFF) { emit calibrationRequest(target); }
+
     protected:
 
         // we need to act since the user metric config changed
@@ -247,5 +249,7 @@ class Context : public QObject
         void compareIntervalsChanged();
         void compareDateRangesStateChanged(bool);
         void compareDateRangesChanged();
+
+        void calibrationRequest(uint8_t target = 0xFF);
 };
 #endif // _GC_Context_h

@@ -654,6 +654,15 @@ MainWindow::MainWindow(const QDir &home)
     // TOOLS MENU
     QMenu *optionsMenu = menuBar()->addMenu(tr("&Tools"));
     optionsMenu->addAction(tr("&Options..."), this, SLOT(showOptions()));
+    optionsMenu->addSeparator();
+    // TODO : create submenu?
+    QMenu *calMenu = optionsMenu->addMenu(tr("Calibrate sensors..."));
+    calMenu->addAction(tr("Any"), this, SLOT (calibrationRequestAll()));
+    calMenu->addAction(tr("Computrainer"), this, SLOT (calibrationRequestComputrainer()));
+    calMenu->addAction(tr("Trainer power"), this, SLOT (calibrationRequestZeroOffset()));
+    calMenu->addAction(tr("Trainer resistance"), this, SLOT (calibrationRequestSpinDown()));
+    calMenu->addAction(tr("...Abort"), this, SLOT (calibrationAbort()));
+    optionsMenu->addSeparator();
     optionsMenu->addAction(tr("CP and W' Estimator..."), this, SLOT(showTools()));
     optionsMenu->addAction(tr("Air Density (Rho) Estimator..."), this, SLOT(showRhoEstimator()));
     optionsMenu->addAction(tr("VDOT and T-Pace Calculator..."), this, SLOT(showVDOTCalculator()));
@@ -2174,6 +2183,52 @@ MainWindow::configChanged(qint32)
     head->updateGeometry();
     repaint();
 
+}
+
+/*----------------------------------------------------------------------
+ * Sensor calibration
+ *--------------------------------------------------------------------*/
+
+void
+MainWindow::calibrationRequest(uint8_t type)
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(type);
+}
+
+void
+MainWindow::calibrationRequestAll()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_ALL);
+}
+
+void
+MainWindow::calibrationRequestComputrainer()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_COMPUTRAINER);
+}
+
+void
+MainWindow::calibrationRequestZeroOffset()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_ZERO_OFFSET);
+}
+
+void
+MainWindow::calibrationRequestSpindown()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_TYPE_SPINDOWN);
+}
+
+void
+MainWindow::calibrationAbort()
+{
+    if (currentTab && currentTab->context)
+        currentTab->context->notifyCalibrationRequest(CALIBRATION_DEVICE_NONE);
 }
 
 /*----------------------------------------------------------------------

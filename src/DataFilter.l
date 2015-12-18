@@ -134,4 +134,3 @@ void DataFilter_clearString()
 {
     DataFilterlex_destroy();
 }
-

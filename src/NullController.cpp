@@ -30,6 +30,11 @@ NullController::NullController(TrainSidebar *parent,
 {
 }
 
+QString NullController::name() const
+{
+    return QString("NULL");
+}
+
 int NullController::start() {
   count = 0;
   return 0;

@@ -26,6 +26,11 @@ KickrController::KickrController(TrainSidebar *parent, DeviceConfiguration *dc) 
     connect(myKickr, SIGNAL(foundDevice(QString,int)), this, SIGNAL(foundDevice(QString,int)));
 }
 
+QString KickrController::name() const
+{
+    return QString("KICKR");
+}
+
 void
 KickrController::setDevice(QString)
 {

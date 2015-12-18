@@ -32,7 +32,7 @@ ANTlocalController::ANTlocalController(TrainSidebar *parent, DeviceConfiguration
     } else {
         cyclist = QString();
     }
-    myANTlocal = new ANT (parent, dc, cyclist);
+    myANTlocal = new ANT (this, parent, dc, cyclist);
     connect(myANTlocal, SIGNAL(foundDevice(int,int,int)), this, SIGNAL(foundDevice(int,int,int)));
     connect(myANTlocal, SIGNAL(lostDevice(int)), this, SIGNAL(lostDevice(int)));
     connect(myANTlocal, SIGNAL(searchTimeout(int)), this, SIGNAL(searchTimeout(int)));
@@ -42,6 +42,11 @@ ANTlocalController::ANTlocalController(TrainSidebar *parent, DeviceConfiguration
 
     // Connect a logger
     connect(myANTlocal, SIGNAL(receivedAntMessage(const ANTMessage ,const timeval )), &logger, SLOT(logRawAntMessage(const ANTMessage ,const timeval)));
+}
+
+QString ANTlocalController::name() const
+{
+    return QString("ANT");
 }
 
 void
@@ -137,42 +142,5 @@ ANTlocalController::getRealtimeData(RealtimeData &rtData)
     myANTlocal->getRealtimeData(rtData);
     processRealtimeData(rtData);
 }
-
-uint8_t
-ANTlocalController::getCalibrationType()
-{
-    return myANTlocal->getCalibrationType();
-}
-
-double
-ANTlocalController::getCalibrationTargetSpeed()
-{
-    return myANTlocal->getCalibrationTargetSpeed();
-}
-
-uint8_t
-ANTlocalController::getCalibrationState()
-{
-    return myANTlocal->getCalibrationState();
-}
-
-uint16_t
-ANTlocalController::getCalibrationSpindownTime()
-{
-    return myANTlocal->getCalibrationSpindownTime();
-}
-
-uint16_t
-ANTlocalController::getCalibrationZeroOffset()
-{
-    return myANTlocal->getCalibrationZeroOffset();
-}
-
-void
-ANTlocalController::setCalibrationState(uint8_t state)
-{
-    myANTlocal->setCalibrationState(state);
-}
-
 
 void ANTlocalController::pushRealtimeData(RealtimeData &) { } // update realtime data with current values

@@ -29,6 +29,11 @@ MonarkController::MonarkController(TrainSidebar *parent,  DeviceConfiguration *d
     m_monark = new Monark(this, dc ? dc->portSpec : "");
 }
 
+QString MonarkController::name() const
+{
+    return QString("MONARK");
+}
+
 bool MonarkController::find()
 {
     return false;

@@ -43,6 +43,8 @@ class NullController : public RealtimeController
         NullController(TrainSidebar *parent, DeviceConfiguration *dc);
         ~NullController() { }
 
+        virtual QString name() const;
+
         int start();
         int stop();
         int pause();

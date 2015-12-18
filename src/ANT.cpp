@@ -82,7 +82,7 @@ const ant_sensor_type_t ANT::ant_sensor_types[] = {
 // thread and is part of the GC architecture NOT related to the
 // hardware controller.
 //
-ANT::ANT(QObject *parent, DeviceConfiguration *devConf, QString athlete) : QThread(parent), devConf(devConf)
+ANT::ANT(ANTlocalController* myANTlocalController, QObject *parent, DeviceConfiguration *devConf, QString athlete) : QThread(parent), myANTlocalController(myANTlocalController), devConf(devConf)
 {
     qRegisterMetaType<ANTMessage>("ANTMessage");
     qRegisterMetaType<uint16_t>("uint16_t");
@@ -326,12 +326,26 @@ void ANT::requestFecCapabilities()
 
 void ANT::requestFecCalibration(uint8_t type)
 {
+    if (fecChannel == -1)
+        return;
+
     sendMessage(ANTMessage::fecRequestCalibration(fecChannel, type));
 }
 
 void ANT::requestCalibration(uint8_t type)
 {
+    if (fecChannel == -1)
+        return;
+
     sendMessage(ANTMessage::requestCalibration(fecChannel, type));
+}
+
+void ANT::fecUserConfig(const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio)
+{
+    if (fecChannel == -1)
+        return;
+
+    sendMessage(ANTMessage::fecUserConfig(fecChannel, kgCyclistWeight, kgCycleWeight, mmDiameter, gearRatio));
 }
 
 void ANT::refreshVortexLoad()
@@ -782,7 +796,7 @@ void
 ANT::dropInfo(int channel, int drops, int received)    // we dropped a message
 {
     double reliability = 100.00f - (100.00f * double(drops) / double(received));
-    qDebug()<<"Channel"<<channel<<"reliability is"<< (int)(reliability)<<"%";
+    // qDebug()<<"Channel"<<channel<<"reliability is"<< (int)(reliability)<<"%";
     emit signalStrength(channel, reliability);
     return;
 }
@@ -801,7 +815,7 @@ ANT::staleInfo(int number)   // info is now stale - set to zero
 {
     if (number < 0 || number >= channels) return; // ignore out of bound
 
-    qDebug()<<"stale info for channel"<<number;
+    // qDebug()<<"stale info for channel"<<number;
 }
 
 void
@@ -819,7 +833,7 @@ ANT::slotSearchComplete(int number) // search completed successfully
     if (number < 0 || number >= channels) return; // ignore out of bound
 
     emit searchComplete(number);
-    qDebug()<<"search completed on channel"<<number;
+    // qDebug()<<"search completed on channel"<<number;
 }
 
 /*----------------------------------------------------------------------

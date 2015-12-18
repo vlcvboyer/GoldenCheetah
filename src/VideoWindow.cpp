@@ -24,7 +24,7 @@
 #include "RideFile.h"
 #include "MeterWidget.h"
 #include "VideoLayoutParser.h"
-
+#include "CalibrationData.h"
 
 VideoWindow::VideoWindow(Context *context)  :
     GcWindow(context), context(context), m_MediaChanged(false)
@@ -313,21 +313,26 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
         }
         else if (p_meterWidget->Source() == QString("TrainerStatus"))
         {
-            if (!rtd.getTrainerStatusAvailable())
+            // First print message related to calibration if available
+            if (CalibrationData::calibrationDataRootPtr && CalibrationData::calibrationDataRootPtr->getMessage()!="") {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = CalibrationData::calibrationDataRootPtr->getMessage();
+            }
+            else if (!rtd.getTrainerStatusAvailable())
             {  // we don't have status from trainer thus we cannot indicate anything on screen
                 p_meterWidget->Text = tr("");
             }
-            else if (rtd.getTrainerCalibRequired())
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_LOWSPEED)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Calibration required");
+                p_meterWidget->Text = tr("brake fault\nspeed too low");
             }
-            else if (rtd.getTrainerConfigRequired())
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_HIGHSPEED)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
-                p_meterWidget->Text = tr("Configuration required");
+                p_meterWidget->Text = tr("brake fault\nspeed too high");
             }
-            else if (rtd.getTrainerBrakeFault())
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK)
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("brake fault");

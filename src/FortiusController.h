@@ -34,6 +34,8 @@ class FortiusController : public RealtimeController
 public:
     FortiusController (TrainSidebar *, DeviceConfiguration *);
 
+    virtual QString name() const;
+
     Fortius *myFortius;               // the device itself
 
     int start();

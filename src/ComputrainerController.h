@@ -32,6 +32,8 @@ class ComputrainerController : public RealtimeController
 public:
     ComputrainerController (TrainSidebar *, DeviceConfiguration *);
 
+    virtual QString name() const;
+
     Computrainer *myComputrainer;               // the device itself
 
     int start();
@@ -48,9 +50,6 @@ public:
     void setLoad(double);
     void setGradient(double);
     void setMode(int);
-
-    // calibration
-    uint8_t  getCalibrationType() { return CALIBRATION_TYPE_COMPUTRAINER; }
 };
 
 #endif // _GC_ComputrainerController_h

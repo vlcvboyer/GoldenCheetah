@@ -37,7 +37,9 @@ public:
     TrainSidebar *parent;                     // for push devices
 
     RealtimeController (TrainSidebar *parent, DeviceConfiguration *dc = 0);
-    virtual ~RealtimeController() {}
+    virtual ~RealtimeController();
+
+    virtual QString name() const;
 
     virtual int start();
     virtual int restart();                              // restart after paused
@@ -62,16 +64,11 @@ public:
     virtual void setGradient(double) { return; }
     virtual void setMode(int) { return; }
 
-    virtual uint8_t  getCalibrationType() { return CALIBRATION_TYPE_NOT_SUPPORTED; }
-    virtual double   getCalibrationTargetSpeed() { return 0; }
-    virtual uint8_t  getCalibrationState() { return CALIBRATION_STATE_IDLE; }
-    virtual void     setCalibrationState(uint8_t) {return; }
-    virtual uint16_t getCalibrationSpindownTime() { return 0; }
-    virtual uint16_t getCalibrationZeroOffset() { return 0; }
-
     // post process, based upon device configuration
     void processRealtimeData(RealtimeData &rtData);
     void processSetup();
+
+    CalibrationData* calibrationData;
 
 private:
     DeviceConfiguration *dc;

@@ -86,7 +86,8 @@ class ANTMessage {
 
         // Power meter calibration
         static ANTMessage requestCalibration(const uint8_t channel, const uint8_t type);
-
+        static ANTMessage fecUserConfig(const uint8_t channel, const float kgCyclistWeight, const float kgCycleWeight,
+                                        const float mmDiameter, const float gearRatio);
         // kickr command channel messages all sent as broadcast data
         // over the command channel as type 0x4E
         static ANTMessage kickrErgMode(const unsigned char channel, ushort usDeviceId, ushort usWatts, bool bSimSpeed);
@@ -163,7 +164,6 @@ class ANTMessage {
         uint8_t  fecEqtType, fecCapabilities;
         bool     fecResistModeCapability, fecPowerModeCapability, fecSimulModeCapability;
         uint16_t fecMaxResistance;
-
         // for details and equations see ANT+ Fitness Equipment Device Profile, Rev 4.1 p 66... "6.8  Control Data Pages"
         uint8_t  fecLastCommandReceived, fecLastCommandSeq, fecLastCommandStatus;
         double   fecSetResistanceAck;        //    0  /   +100 %
@@ -174,6 +174,8 @@ class ANTMessage {
         int8_t   fecSetWindSpeedAck;         // -127  /   +127 km/h
         uint8_t  fecSetDraftingFactorAck;    //    0  /    100 %
 
+        bool     fecResisCalibInProgress, fecPowerCalibInProgress;
+        bool     fecResisCalibSuccess, fecPowerCalibSuccess;
         uint8_t  fecCalibrationReq, fecCalibrationStatus, fecTemperature, fecCalibrationConditions;
         uint16_t fecZeroOffset, fecSpindownTime, fecTargetSpeed, fecTargetSpindownTime;
 

@@ -32,6 +32,8 @@ class MonarkController : public RealtimeController
 public:
     MonarkController (TrainSidebar *, DeviceConfiguration *);
 
+    virtual QString name() const;
+
     Monark *m_monark;               // the device itself
 
     int start();

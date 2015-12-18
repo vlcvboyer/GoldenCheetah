@@ -29,6 +29,7 @@
 #include "RideItem.h"
 #include "TimeUtils.h"
 #include "DragBar.h"
+#include "CalibrationData.h"
 
 #ifdef Q_OS_MAC
 // What versions are supported by this SDK?
@@ -165,6 +166,14 @@ class MainWindow : public QMainWindow
 #ifdef GC_HAVE_ICAL
         void uploadCalendar(); // upload ride to calendar
 #endif
+
+        // Sensors calibration
+        void calibrationRequest(uint8_t target_device=CALIBRATION_TYPE_ALL);
+        void calibrationRequestAll();
+        void calibrationRequestComputrainer();
+        void calibrationRequestZeroOffset();
+        void calibrationRequestSpindown();
+        void calibrationAbort();
 
         // Measures View
         void downloadMeasures();

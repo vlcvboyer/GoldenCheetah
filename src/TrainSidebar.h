@@ -75,6 +75,7 @@ class NullController;
 class RealtimePlot;
 class RealtimeData;
 class MultiDeviceDialog;
+class CalibrationData;
 
 class TrainSidebar : public GcWindow
 {
@@ -84,7 +85,9 @@ class TrainSidebar : public GcWindow
     public:
 
         TrainSidebar(Context *context);
+        ~TrainSidebar();
         Context *context;
+        CalibrationData* calibrationDataRoot;
 
         QStringList listWorkoutFiles(const QDir &) const;
 
@@ -104,6 +107,8 @@ class TrainSidebar : public GcWindow
         void updateData(RealtimeData &);      // to update telemetry by push devices
         void nextDisplayMode();     // show next display mode
         void setStreamController();     // based upon selected device
+
+        QList<DeviceConfiguration> devicesList();
 
         // this
         QTabWidget  *trainTabs;
@@ -158,7 +163,8 @@ class TrainSidebar : public GcWindow
         void Pause();       // when Paude is pressed
         void Stop(int status=0);        // when controller wants to stop
 
-        void Calibrate();   // toggle calibration mode
+        void Calibrate(uint8_t type = 0xFF);   // Launch calibration mode
+        void calibrationAbort();
         void FFwd();        // jump forward when in a workout
         void Rewind();      // jump backwards when in a workout
         void FFwdLap();     // jump forward to next Lap marker
@@ -167,7 +173,6 @@ class TrainSidebar : public GcWindow
         void newLap();      // start new Lap!
         void resetLapTimer(); //reset the lap timer
 
-        void toggleCalibration();
         void updateCalibration();
 
         // Timed actions
@@ -240,13 +245,6 @@ class TrainSidebar : public GcWindow
         QFile *recordFile;      // where we record!
         ErgFile *ergFile;       // workout file
         VideoSyncFile *videosyncFile;       // videosync file
-
-        bool     restartCalibration;
-        int      calibrationDeviceIndex;
-        uint8_t  calibrationType;
-        uint8_t  calibrationState;
-        uint16_t calibrationSpindownTime, calibrationZeroOffset;
-        double   calibrationTargetSpeed, calibrationCurrentSpeed;
 
         long total_msecs,
              lap_msecs,

@@ -25,7 +25,6 @@
 //
 #include "GoldenCheetah.h"
 #include "RealtimeData.h"
-#include "CalibrationData.h"
 #include "DeviceConfiguration.h"
 
 //
@@ -86,6 +85,7 @@
 
 class ANTMessage;
 class ANTChannel;
+class ANTlocalController;
 
 typedef struct ant_sensor_type {
   bool user; // can user select this when calibrating ?
@@ -210,39 +210,39 @@ struct setChannelAtom {
 #define INVALID_NETWORK_NUMBER         41
 
 // ANT+sport
-#define ANT_SPORT_HR_PERIOD 8070
-#define ANT_SPORT_POWER_PERIOD 8182
-#define ANT_SPORT_SPEED_PERIOD 8118
-#define ANT_SPORT_CADENCE_PERIOD 8102
-#define ANT_SPORT_SandC_PERIOD 8086
-#define ANT_SPORT_CONTROL_PERIOD 8192
-#define ANT_SPORT_KICKR_PERIOD 2048
-#define ANT_SPORT_MOXY_PERIOD 8192
-#define ANT_SPORT_TACX_VORTEX_PERIOD 8192
-#define ANT_SPORT_FITNESS_EQUIPMENT_PERIOD 8192
-#define ANT_FAST_QUARQ_PERIOD (8182/16)
-#define ANT_QUARQ_PERIOD (8182*4)
+#define ANT_SPORT_HR_PERIOD                 8070
+#define ANT_SPORT_POWER_PERIOD              8182
+#define ANT_SPORT_SPEED_PERIOD              8118
+#define ANT_SPORT_CADENCE_PERIOD            8102
+#define ANT_SPORT_SandC_PERIOD              8086
+#define ANT_SPORT_CONTROL_PERIOD            8192
+#define ANT_SPORT_KICKR_PERIOD              2048
+#define ANT_SPORT_MOXY_PERIOD               8192
+#define ANT_SPORT_TACX_VORTEX_PERIOD        8192
+#define ANT_SPORT_FITNESS_EQUIPMENT_PERIOD  8192
+#define ANT_FAST_QUARQ_PERIOD              (8182/16)
+#define ANT_QUARQ_PERIOD                   (8182*4)
 
-#define ANT_SPORT_HR_TYPE 0x78
-#define ANT_SPORT_POWER_TYPE 11
-#define ANT_SPORT_SPEED_TYPE 0x7B
-#define ANT_SPORT_CADENCE_TYPE 0x7A
-#define ANT_SPORT_SandC_TYPE 0x79
-#define ANT_SPORT_MOXY_TYPE 0x1F
-#define ANT_SPORT_CONTROL_TYPE 0x10
-#define ANT_SPORT_TACX_VORTEX_TYPE 61
-#define ANT_SPORT_FITNESS_EQUIPMENT_TYPE 0x11
-#define ANT_FAST_QUARQ_TYPE_WAS 11 // before release 1.8
-#define ANT_FAST_QUARQ_TYPE 0x60
-#define ANT_QUARQ_TYPE 0x60
+#define ANT_SPORT_HR_TYPE                  0x78
+#define ANT_SPORT_POWER_TYPE               0x0B
+#define ANT_SPORT_SPEED_TYPE               0x7B
+#define ANT_SPORT_CADENCE_TYPE             0x7A
+#define ANT_SPORT_SandC_TYPE               0x79
+#define ANT_SPORT_MOXY_TYPE                0x1F
+#define ANT_SPORT_CONTROL_TYPE             0x10
+#define ANT_SPORT_TACX_VORTEX_TYPE         0x3D // (61)
+#define ANT_SPORT_FITNESS_EQUIPMENT_TYPE   0x11
+#define ANT_FAST_QUARQ_TYPE_WAS            0x0B // before release 1.8
+#define ANT_FAST_QUARQ_TYPE                0x60
+#define ANT_QUARQ_TYPE                     0x60
 
-#define ANT_SPORT_FREQUENCY 57
-#define ANT_FAST_QUARQ_FREQUENCY 61
-#define ANT_QUARQ_FREQUENCY 61
-#define ANT_KICKR_FREQUENCY 52
-#define ANT_MOXY_FREQUENCY 57
-#define ANT_TACX_VORTEX_FREQUENCY 66
-#define ANT_FITNESS_EQUIPMENT_FREQUENCY 57
+#define ANT_SPORT_FREQUENCY               57
+#define ANT_FAST_QUARQ_FREQUENCY          61
+#define ANT_QUARQ_FREQUENCY               61
+#define ANT_KICKR_FREQUENCY               52
+#define ANT_MOXY_FREQUENCY                57
+#define ANT_TACX_VORTEX_FREQUENCY         66
+#define ANT_FITNESS_EQUIPMENT_FREQUENCY   57
 
 #define ANT_SPORT_CALIBRATION_MESSAGE                 0x01
 
@@ -285,12 +285,13 @@ struct setChannelAtom {
 #define TACX_VORTEX_DATA_CALIBRATION   3
 
 // ant+ fitness equipment profile data pages
-#define FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE  0x01
+#define FITNESS_EQUIPMENT_CALIBRATION_PAGE          0x01
 #define FITNESS_EQUIPMENT_CALIBRATION_PROGRESS_PAGE 0x02
 #define FITNESS_EQUIPMENT_GENERAL_PAGE              0x10
 #define FITNESS_EQUIPMENT_TRAINER_SPECIFIC_PAGE     0x19
 #define FITNESS_EQUIPMENT_TRAINER_TORQUE_PAGE       0x20
 #define FITNESS_EQUIPMENT_TRAINER_CAPABILITIES_PAGE 0x36
+#define FITNESS_EQUIPMENT_TRAINER_USER_CONFIG_PAGE  0x37
 #define FITNESS_EQUIPMENT_REQUEST_DATA_PAGE         0x46
 #define FITNESS_EQUIPMENT_COMMAND_STATUS_PAGE       0x47
 
@@ -352,8 +353,10 @@ class ANT : public QThread
 
 
 public:
-    ANT(QObject *parent = 0, DeviceConfiguration *dc=0, QString athlete="");
+    ANT(ANTlocalController* myANTlocalController, QObject *parent = 0, DeviceConfiguration *dc=0, QString athlete="");
     ~ANT();
+
+    ANTlocalController* myANTlocalController;
 
 signals:
     void foundDevice(int channel, int device_number, int device_id); // channelInfo
@@ -434,57 +437,6 @@ public:
     void handleChannelEvent(void);
     void processMessage(void);
 
-    // calibration
-    uint8_t getCalibrationType()
-    {
-        return calibration.getType();
-    }
-
-    uint8_t getCalibrationState()
-    {
-        return calibration.getState();
-    }
-
-    double getCalibrationTargetSpeed()
-    {
-        return calibration.getTargetSpeed();
-    }
-
-    uint16_t getCalibrationZeroOffset()
-    {
-        return calibration.getZeroOffset();
-    }
-
-    uint16_t getCalibrationSpindownTime()
-    {
-        return calibration.getZeroOffset();
-    }
-
-    void setCalibrationState(uint8_t state)
-    {
-        calibration.setState(state);
-    }
-
-    void setCalibrationType(uint8_t type)
-    {
-        calibration.setType(type);
-    }
-
-    void setCalibrationTargetSpeed(double target)
-    {
-        calibration.setTargetSpeed(target);
-    }
-
-    void setCalibrationZeroOffset(uint16_t offset)
-    {
-        calibration.setZeroOffset(offset);
-    }
-
-    void setCalibrationSpindownTime(uint16_t time)
-    {
-        calibration.setSpindownTime(time);
-    }
-
     // serial i/o lifted from Computrainer.cpp
     void setDevice(QString devname);
     void setBaud(int baud);
@@ -549,21 +501,23 @@ public:
         telemetry.setRPS(rps);
     }
 
+    const QString& getTrainAthlete() const {
+        return trainAthlete;
+    }
+
     void setFecChannel(int channel);
     void refreshFecLoad();
     void refreshFecGradient();
     void requestFecCapabilities();
     void requestFecCalibration(uint8_t type);
-
     void requestCalibration(uint8_t type);
+    void fecUserConfig(const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio);
 
     void setVortexData(int channel, int id);
     void refreshVortexLoad();
 
     void setTrainerStatusAvailable(bool status) { telemetry.setTrainerStatusAvailable(status); }
-    void setTrainerCalibRequired(bool status) { telemetry.setTrainerCalibRequired(status); }
-    void setTrainerConfigRequired(bool status) { telemetry.setTrainerConfigRequired(status); }
-    void setTrainerBrakeFault(bool status) { telemetry.setTrainerBrakeFault(status); }
+    void setTrainerBrakeStatus(uint8_t status) { telemetry.setTrainerBrakeStatus(status); }
     void setTrainerReady(bool status) { telemetry.setTrainerReady(status); }
     void setTrainerRunning(bool status) { telemetry.setTrainerRunning(status); }
 
@@ -572,7 +526,6 @@ private:
     void run();
 
     RealtimeData telemetry;
-    CalibrationData calibration;
 
     QMutex pvars;  // lock/unlock access to telemetry data between thread and controller
     int Status;     // what status is the client in?

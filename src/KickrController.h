@@ -33,6 +33,8 @@ class KickrController : public RealtimeController
 public:
     KickrController (TrainSidebar *parent =0, DeviceConfiguration *dc =0);
 
+    virtual QString name() const;
+
     Kickr *myKickr;               // the device itself
 
     int start();

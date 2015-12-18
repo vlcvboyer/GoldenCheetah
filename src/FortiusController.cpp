@@ -25,6 +25,10 @@ FortiusController::FortiusController(TrainSidebar *parent,  DeviceConfiguration 
     myFortius = new Fortius (parent);
 }
 
+QString FortiusController::name() const
+{
+    return QString("FORTIUS");
+}
 
 int
 FortiusController::start()

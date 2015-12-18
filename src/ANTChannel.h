@@ -25,6 +25,10 @@
 #include <QObject>
 #include <QTime>
 
+#ifndef MATHCONST_PI
+#define MATHCONST_PI 		    3.141592653589793238462643383279502884L /* pi */
+#endif
+
 #define CHANNEL_TYPE_QUICK_SEARCH 0x10 // or'ed with current channel type
 /* after fast search, wait for slow search.  Otherwise, starting slow
    search might postpone the fast search on another channel. */
@@ -94,8 +98,7 @@ class ANTChannel : public QObject {
         int dualNullCount, nullCount, stdNullCount;
         double last_message_timestamp;
         uint8_t fecPrevRawDistance;
-        uint8_t  fecCapabilities;
-
+        uint8_t fecCapabilities;
         double blanking_timestamp;
         int blanked;
         char id[10]; // short identifier
@@ -164,6 +167,7 @@ class ANTChannel : public QObject {
         int srm_offset;
 
         ANTChannel(int number, ANT *parent);
+        ~ANTChannel();
 
         // What kind of channel
         const char *getDescription();
@@ -191,7 +195,6 @@ class ANTChannel : public QObject {
         double channelValue2() { return value2; }
         double value,value2; // used during config, rather than rtData
         uint8_t capabilities();
-
         // search
         int isSearching();
 
@@ -202,6 +205,8 @@ class ANTChannel : public QObject {
         void checkMoxy();
 
         void setAlt(bool value) { is_alt = value; }
+
+        CalibrationData* calibrationData;
 
     signals:
 

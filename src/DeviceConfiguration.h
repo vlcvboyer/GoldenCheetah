@@ -22,6 +22,7 @@
 #ifndef _GC_DeviceConfiguration_h
 #define  _GC_DeviceConfiguration_h
 #include "GoldenCheetah.h"
+#include "CalibrationData.h"
 
 class RealtimeController;
 

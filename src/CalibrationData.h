@@ -20,50 +20,103 @@
 #define SRC_CALIBRATIONDATA_H_
 
 #include <stdint.h> // uint8_t etc
+#include <QString>
+#include <QTime>
 
-#define CALIBRATION_TYPE_NOT_SUPPORTED  0x00
-#define CALIBRATION_TYPE_COMPUTRAINER   0x01
-#define CALIBRATION_TYPE_ZERO_OFFSET    0x02
-#define CALIBRATION_TYPE_SPINDOWN       0x04
+#define CALIBRATION_TYPE_NONE           ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_UNKNOWN        ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_NOT_SUPPORTED  ((uint8_t) 0x00)
+#define CALIBRATION_TYPE_COMPUTRAINER   ((uint8_t) 0x01)
+#define CALIBRATION_TYPE_ZERO_OFFSET    ((uint8_t) 0x02)
+#define CALIBRATION_TYPE_SPINDOWN       ((uint8_t) 0x04)
+#define CALIBRATION_TYPE_CONFIGURATION  ((uint8_t) 0x08)
+#define CALIBRATION_TYPE_ALL            ((uint8_t) 0xFF)
 
 #define CALIBRATION_STATE_IDLE          0x00
-#define CALIBRATION_STATE_REQUESTED     0x01
-#define CALIBRATION_STATE_STARTING      0x02
+#define CALIBRATION_STATE_REQUIRED      0x01
+#define CALIBRATION_STATE_REQUESTED     0x02
+#define CALIBRATION_STATE_STARTING      0x03
 #define CALIBRATION_STATE_STARTED       0x04
-#define CALIBRATION_STATE_POWER         0x08
-#define CALIBRATION_STATE_COAST         0x10
-#define CALIBRATION_STATE_SUCCESS       0x20
-#define CALIBRATION_STATE_FAILURE       0x40
+#define CALIBRATION_STATE_SPEEDUP       0x05
+#define CALIBRATION_STATE_COAST         0x06
+#define CALIBRATION_STATE_SUCCESS       0x80
+#define CALIBRATION_STATE_FAILURE       0x81
+#define CALIBRATION_STATE_ABORT         0x82
+
+#define CALIBRATION_DEVICE_NONE         ((uint8_t) 0x00)
+#define CALIBRATION_DEVICE_COMPUTRAINER ((uint8_t) 0x01)
+#define CALIBRATION_DEVICE_ANT_SPORT    ((uint8_t) 0x02)
+#define CALIBRATION_DEVICE_ANT_FEC      ((uint8_t) 0x04)
+#define CALIBRATION_DEVICE_ALL          ((uint8_t) 0xFF)
+
+class RealtimeController;
 
 class CalibrationData
 {
+// This class is used in each RealTime controller in order to manage calibration process
 public:
+    CalibrationData(RealtimeController* realtimeController=NULL);
+    CalibrationData(CalibrationData* parentCalibrationData);
+    virtual ~CalibrationData();
 
-    CalibrationData();
+    static QString typeDescr(uint8_t param_type);
+    static QString deviceDescr(uint8_t param_device);
+    static QString stateDescr(uint8_t param_state);
 
-    uint8_t getType();
-    void setType(uint8_t type);
+    // here are functions to address the device linked to this class instance only
+    // (and sub-classes when sub-nodes are present such as ANT devices connected to ANT controller)
+    virtual void update();
 
-    uint8_t getState();
-    void setState(uint8_t state);
+    virtual void     setDevice(uint8_t device);
+    virtual uint8_t  getDevice() const;
 
-    uint16_t getZeroOffset();
-    void setZeroOffset(uint16_t offset);
+    virtual void     setSupported(uint8_t type);
+    virtual uint8_t  getSupported() const;
+    virtual void     setInProgress(uint8_t type);
+    virtual uint8_t  getInProgress() const;
+    virtual void     setCompleted(uint8_t type);
+    virtual uint8_t  getCompleted() const;
 
-    uint16_t getSpindownTime();
-    void setSpindownTime(uint16_t time);
+    virtual void     setState(uint8_t state);
+    virtual uint8_t  getState();
 
-    double getTargetSpeed();
-    void setTargetSpeed(double speed);
+    virtual void     setTargetSpeed(double target_speed);
+    virtual void     start(uint8_t type = CALIBRATION_DEVICE_ALL, bool allowForce=false);
+    virtual void     force(uint8_t type);
+    virtual void     resetProcess();     // this reset calibration process (for this calibration class)
 
-private:
+    virtual void     setMessageIndex(uint8_t index);
+    virtual uint8_t  getMessageIndex() const;
+    virtual const QList<QString>&  getMessageList() const;
+    virtual const QString&  getMessage() const;
 
-    uint8_t  type;
-    uint8_t  state;
-    uint16_t zerooffset;
-    uint16_t spindowntime;
-    double   targetspeed;
+    virtual const QString& getName() const;
+    virtual void     setName(const QString& name);
 
+    virtual QTime    getStepTimestamp() const;
+
+    static QList<QString> emptyMessageList;
+    static QString emptyMessage;
+    static CalibrationData* calibrationDataRootPtr; // to be removed as we will intanciate the root CalibrationData in TrainSidebar
+    static uint8_t requestType;
+
+    uint8_t attempts;
+
+protected:
+    RealtimeController* realtimeController;
+    CalibrationData* parentCalibrationData;
+    QList<CalibrationData*> childsCalibrationData;
+    uint8_t supported;
+    uint8_t inProgress;
+    uint8_t completed;
+    uint8_t state;
+    uint8_t type;
+    uint8_t device;
+    QList<QString> messageList;
+    uint8_t messageIndex;
+    double targetSpeed;
+    QTime  stepTimestamp;
+    QString name;
 };
 
 #endif /* SRC_CALIBRATIONDATA_H_ */

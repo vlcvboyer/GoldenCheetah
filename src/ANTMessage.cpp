@@ -523,7 +523,7 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
             case ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT:
                 switch (data_page)
                 {
-                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     // response back from trainer at end of calibration
                     fecCalibrationReq = message[5];
                     fecTemperature    = message[7];
@@ -531,6 +531,9 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
                     fecZeroOffset    |= (message[9]) << 8;
                     fecSpindownTime   = message[10];
                     fecSpindownTime  |= (message[11]) << 8;
+                    fecPowerCalibSuccess = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
+                    fecResisCalibSuccess = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
+
                     break;
 
                 case FITNESS_EQUIPMENT_CALIBRATION_PROGRESS_PAGE:
@@ -542,6 +545,8 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
                     fecTargetSpeed          |= (message[9]) << 8;
                     fecTargetSpindownTime    = message[10];
                     fecTargetSpindownTime   |= (message[11]) << 8;
+                    fecPowerCalibInProgress = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_ZERO_OFFSET);
+                    fecResisCalibInProgress = (message[5] & FITNESS_EQUIPMENT_CAL_REQ_SPINDOWN);
                     break;
 
                 case FITNESS_EQUIPMENT_GENERAL_PAGE:
@@ -1060,11 +1065,11 @@ ANTMessage ANTMessage::fecRequestCommandStatus(const uint8_t channel, const uint
 
 ANTMessage ANTMessage::fecRequestCalibration(const uint8_t channel, const uint8_t type)
 {
-    qDebug() << "Sending ANT_SPORT_CALIBRATION_MESSAGE";
+    qDebug() << "Sending FITNESS_EQUIPMENT_CALIBRATION_PAGE";
 
     // based on ANT+ Device Profile Fitness Equipment, Rev 4.1 p 38: 6.4.1  Data Page 1 – Calibration Request and Response Page
     return ANTMessage(9, ANT_ACK_DATA, channel,
-                      ANT_SPORT_CALIBRATION_MESSAGE,        // data page request
+                      FITNESS_EQUIPMENT_CALIBRATION_PAGE,        // data page request
                       type,                                 // spindown, zero offset, or none (does not seem to cancel an ongoing calibration?)
                       0x00,                                 // reserved
                       0xFF,                                 // temperature - set to invalid in request
@@ -1081,4 +1086,29 @@ ANTMessage ANTMessage::requestCalibration(const uint8_t channel, const uint8_t t
                       0xFF, 0xFF,                           // reserved
                       0xFF, 0xFF,                           // reserved
                       0xFF, 0xFF);                          // reserved
+}
+ANTMessage ANTMessage::fecUserConfig(const uint8_t channel, const float kgCyclistWeight, const float kgCycleWeight, const float mmDiameter, const float gearRatio)
+{
+    // values encoding
+    uint8_t  diameter = (uint8_t)(mmDiameter/10.0);                           // diameter (unit=cm)
+    uint8_t  diameterOffset = (uint8_t)(mmDiameter - (float)diameter * 10.0); // diameter remainder (unit=mm)
+    uint16_t bicycleWeight = (uint16_t) (kgCycleWeight / 0.05);               // bicycle weight (unit=0.05kg)
+    uint16_t cyclistWeight = (uint16_t) (kgCyclistWeight / 0.01);             // cyclist weight (unit=0.01kg)
+    uint8_t  ratio = (uint8_t) (gearRatio/0.03);
+
+    // qDebug() << "UserConfig (ANTMessage::fecUserConfig)";
+    // qDebug() << "diameter " << QString::number(diameter);
+    // qDebug() << "diameterOffset " << QString::number(diameterOffset);
+    // qDebug() << "bicycleWeight " << QString::number(bicycleWeight);
+    // qDebug() << "cyclistWeight " << QString::number(cyclistWeight);
+    // qDebug() << "ratio " << QString::number(ratio);
+
+    return ANTMessage(9, ANT_ACK_DATA, channel,                              // broadcast
+                      FITNESS_EQUIPMENT_TRAINER_USER_CONFIG_PAGE,
+                      (uint8_t)(cyclistWeight & 0x00FF), (uint8_t)(cyclistWeight >> 8),
+                      0xFF,
+                      diameterOffset | (uint8_t)((bicycleWeight & 0x000F)<<4),
+                      (uint8_t)((bicycleWeight & 0x0FF0)>>4),
+                      diameter,
+                      ratio);
 }

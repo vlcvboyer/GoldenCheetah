@@ -32,6 +32,11 @@ BT40Controller::~BT40Controller()
     myBT40->deleteLater();
 }
 
+QString BT40Controller::name() const
+{
+    return QString("BT40");
+}
+
 void
 BT40Controller::setDevice(QString)
 {
