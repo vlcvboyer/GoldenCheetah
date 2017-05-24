@@ -1639,7 +1639,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayO2HB = rtData.getO2Hb();
             displayHHB = rtData.getHHb();
 
-            // virtual speed
+            // virtual speed // TODO : allow use of virtual speed instead of sensor speed during workout (depending on user choice)
             double crr = 0.004f; // typical for asphalt surfaces
             double g = 9.81;     // g constant 9.81 m/s
             double weight = context->athlete->getWeight(QDate::currentDate());
@@ -1833,7 +1833,8 @@ void TrainSidebar::loadUpdate()
         displayWorkoutLap = curLap;
 
         // we got to the end!
-        if (slope == -100) {
+        if (slope == -100) { // FIXME "loop feature" : maybe we have something to change in this paort of the code in order to add this functionality
+                            // TODO : allow use of DI2 hidden buttons for training control
             Stop(DEVICE_OK);
         } else {
             foreach(int dev, activeDevices) Devices[dev].controller->setGradient(slope);
