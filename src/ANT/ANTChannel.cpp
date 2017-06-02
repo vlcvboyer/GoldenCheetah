@@ -1296,9 +1296,9 @@ void ANTChannel::attemptTransition(int message_id)
         //qDebug()<<number<<"TRANSITION from unassigned";
 
         if (is_master)
-            //qDebug()<<number<<"assign channel type TX";
+            ;//qDebug()<<number<<"assign channel type TX";
         else
-            //qDebug()<<number<<"assign channel type RX";
+            ;//qDebug()<<number<<"assign channel type RX";
 
         // assign and set channel id all in one
         parent->sendMessage(ANTMessage::assignChannel(number, is_master ? CHANNEL_TYPE_TX : CHANNEL_TYPE_RX, st->network)); // receive channel on network 1
