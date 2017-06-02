@@ -523,7 +523,7 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
             case ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT:
                 switch (data_page)
                 {
-                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     // response back from trainer at end of calibration
                     fecCalibrationReq = message[5];
                     fecTemperature    = message[7];

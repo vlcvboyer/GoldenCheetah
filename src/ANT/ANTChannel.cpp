@@ -965,7 +965,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     qDebug() << "Capabilities received from ANT FEC Device:" << fecCapabilities;
                     break;
 
-                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     qDebug() << "Calibration response received from ANT FEC Device";
                     qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
 
