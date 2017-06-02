@@ -898,7 +898,9 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 switch (antMessage.data_page) {
 
                 case FITNESS_EQUIPMENT_TRAINER_SPECIFIC_PAGE:
-
+                {
+                    // when we receive this page we know that the trainer will be able to indicate its status
+                    parent->setTrainerStatusAvailable(true);
                     // Device is a FE-C trainer, so assume we support spindown calibration
                     parent->setCalibrationType(number, CALIBRATION_TYPE_SPINDOWN);
 
@@ -909,7 +911,6 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     //        accumulated power to be used instead as it is not affected by any transmission loss
                     if (antMessage.fecCadence != 0xFF)
                         parent->setSecondaryCadence(antMessage.fecCadence);
-                    parent->setTrainerStatusAvailable(true);
 
                     if (antMessage.fecPowerCalibRequired || antMessage.fecResisCalibRequired) {
                         // FE-C trainer requesting calibration
@@ -924,13 +925,29 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     //if (antMessage.fecUserConfigRequired)
                     //    qDebug() << "Trainer configuration required";
 
-                    parent->setTrainerBrakeFault(antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK_LOWSPEED
-                                             ||  antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK_HIGHSPEED
-                                             ||  antMessage.fecPowerOverLimits==FITNESS_EQUIPMENT_POWER_NOK);
+                    // Manage trainer status (over limits...)
+                    switch (antMessage.fecPowerOverLimits)
+                    {
+                        case FITNESS_EQUIPMENT_POWER_NOK_LOWSPEED:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK_LOWSPEED);
+                             break;
+                        case FITNESS_EQUIPMENT_POWER_NOK_HIGHSPEED:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK_HIGHSPEED);
+                             break;
+                        case FITNESS_EQUIPMENT_POWER_NOK:
+                             // FIXME: signal seems not correct thus ignored at present
+                             // parent->setTrainerBrakeStatus(TRAINER_BRAKE_NOK);
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_OK); // FIXME: remove this OK status when above will be solved
+                             break;
+                        default:
+                             parent->setTrainerBrakeStatus(TRAINER_BRAKE_OK);
+                             break;
+                    }
+
                     parent->setTrainerReady(antMessage.fecState==FITNESS_EQUIPMENT_READY);
                     parent->setTrainerRunning(antMessage.fecState==FITNESS_EQUIPMENT_IN_USE);
                     break;
-
+                }
                 case FITNESS_EQUIPMENT_TRAINER_TORQUE_PAGE:
                     // TODO: Manage "wheelRevolutions" information
                     // TODO: Manage "wheelAccumulatedPeriod" information
