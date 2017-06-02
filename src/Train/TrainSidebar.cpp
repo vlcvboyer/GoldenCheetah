@@ -2354,16 +2354,16 @@ MultiDeviceDialog::MultiDeviceDialog(Context *, TrainSidebar *traintool) : train
     main->addLayout(mainLayout);
 
     bpmSelect = new QComboBox(this);
-    mainLayout->addRow(new QLabel("Heartrate", this), bpmSelect);
+    mainLayout->addRow(new QLabel(tr("Heartrate"), this), bpmSelect);
 
     wattsSelect = new QComboBox(this);
-    mainLayout->addRow(new QLabel("Power", this), wattsSelect);
+    mainLayout->addRow(new QLabel(tr("Power"), this), wattsSelect);
 
     rpmSelect = new QComboBox(this);
-    mainLayout->addRow(new QLabel("Cadence", this), rpmSelect);
+    mainLayout->addRow(new QLabel(tr("Cadence"), this), rpmSelect);
 
     kphSelect = new QComboBox(this);
-    mainLayout->addRow(new QLabel("Speed", this), kphSelect);
+    mainLayout->addRow(new QLabel(tr("Speed"), this), kphSelect);
 
     // update the device selections for the drop downs
     foreach(QTreeWidgetItem *selected, traintool->deviceTree->selectedItems()) {
@@ -2375,10 +2375,10 @@ MultiDeviceDialog::MultiDeviceDialog(Context *, TrainSidebar *traintool) : train
         kphSelect->addItem(selected->text(0), selected->type());
     }
 
-    bpmSelect->addItem("None", -1);
-    wattsSelect->addItem("None", -1);
-    rpmSelect->addItem("None", -1);
-    kphSelect->addItem("None", -1);
+    bpmSelect->addItem(tr("None"), -1);
+    wattsSelect->addItem(tr("None"), -1);
+    rpmSelect->addItem(tr("None"), -1);
+    kphSelect->addItem(tr("None"), -1);
 
     // set to the current values (if set)
     if (traintool->bpmTelemetry != -1) {
@@ -2402,10 +2402,10 @@ MultiDeviceDialog::MultiDeviceDialog(Context *, TrainSidebar *traintool) : train
     buttons->addStretch();
     main->addLayout(buttons);
 
-    cancelButton = new QPushButton("Cancel", this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
     buttons->addWidget(cancelButton);
 
-    applyButton = new QPushButton("Apply", this);
+    applyButton = new QPushButton(tr("Apply"), this);
     buttons->addWidget(applyButton);
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
