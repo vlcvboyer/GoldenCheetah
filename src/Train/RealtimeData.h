@@ -25,6 +25,11 @@
 #include <QString>
 #include <QApplication>
 
+#define TRAINER_BRAKE_OK            0x00
+#define TRAINER_BRAKE_NOK_LOWSPEED  0x01
+#define TRAINER_BRAKE_NOK_HIGHSPEED 0x02
+#define TRAINER_BRAKE_NOK           0x03
+
 class RealtimeData
 {
     Q_DECLARE_TR_FUNCTIONS(RealtimeData)
@@ -120,12 +125,12 @@ public:
     void setTrainerRunning(bool status);
     void setTrainerCalibRequired(bool status);
     void setTrainerConfigRequired(bool status);
-    void setTrainerBrakeFault(bool status);
+    void setTrainerBrakeStatus(uint8_t status);
     bool getTrainerReady() const;
     bool getTrainerRunning() const;
     bool getTrainerCalibRequired() const;
     bool getTrainerConfigRequired() const;
-    bool getTrainerBrakeFault() const;
+    uint8_t getTrainerBrakeStatus() const;
 
     uint8_t spinScan[24];
 
@@ -154,7 +159,7 @@ private:
     bool trainerRunning;
     bool trainerCalibRequired;
     bool trainerConfigRequired;
-    bool trainerBrakeFault;
+    uint8_t trainerBrakeStatus;
 };
 
 #endif

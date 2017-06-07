@@ -332,7 +332,18 @@ void VideoWindow::telemetryUpdate(RealtimeData rtd)
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("Configuration required");
             }
-            else if (rtd.getTrainerBrakeFault())
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_LOWSPEED)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("brake fault\nspeed too low");
+            }
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK_HIGHSPEED)
+            {
+                p_meterWidget->setColor(QColor(255,0,0,180));
+                p_meterWidget->Text = tr("brake fault\nspeed too high");
+            }
+            else if (rtd.getTrainerBrakeStatus()==TRAINER_BRAKE_NOK)
+
             {
                 p_meterWidget->setColor(QColor(255,0,0,180));
                 p_meterWidget->Text = tr("brake fault");

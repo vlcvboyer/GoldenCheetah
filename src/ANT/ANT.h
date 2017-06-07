@@ -665,7 +665,7 @@ public:
     void setTrainerStatusAvailable(bool status) { telemetry.setTrainerStatusAvailable(status); }
     void setTrainerCalibRequired(bool status) { telemetry.setTrainerCalibRequired(status); }
     void setTrainerConfigRequired(bool status) { telemetry.setTrainerConfigRequired(status); }
-    void setTrainerBrakeFault(bool status) { telemetry.setTrainerBrakeFault(status); }
+    void setTrainerBrakeStatus(uint8_t status) { telemetry.setTrainerBrakeStatus(status); }
     void setTrainerReady(bool status) { telemetry.setTrainerReady(status); }
     void setTrainerRunning(bool status) { telemetry.setTrainerRunning(status); }
 
