@@ -130,7 +130,10 @@ void ANTChannel::close()
     }
 
     // lets shutdown
-    qDebug()<<"** CLOSING CHANNEL"<<number<<"**";
+    qDebug() << qPrintable("Closing ANT channel #" + QString("%1").arg(number, 1, 10, QLatin1Char( '0' ))
+            + " device:0x" + QString("%1").arg(device_number, 4, 16, QLatin1Char( '0' )).toUpper()
+            + " type:0x" + QString("%1").arg(channel_type, 2, 16, QLatin1Char( '0' )).toUpper()
+            + ">" + getDescription());
     status = Closing;
 
     parent->sendMessage(ANTMessage::close(number));
@@ -940,6 +943,9 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     {
                         // FEC speed is in 0.001m/s, telemetry speed is km/h
                         parent->setSpeed(antMessage.fecSpeed * 0.0036);
+
+                       // TODO: if there is already a speed sensor on the bike wheel  do we use this one as
+                       // an alternative speed (as it seems to be less accurate) or maybe do not consider it
                     }
 
                     // FEC distance is in m, telemetry is km
@@ -947,6 +953,8 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                                            + (fecPrevRawDistance > antMessage.fecRawDistance ? 256 : 0)) * 0.001);
                     fecPrevRawDistance = antMessage.fecRawDistance;
 
+                    // TODO: if there is already a speed/distance sensor on the bike wheel  do we use this one as
+                    // a second alternative distance (as it seems to be less accurate) or maybe do not consider it
                     // TODO: Manage "fecLastCommandReceived" information
                     // TODO: Manage "fecLastCommandSeq" information
                     // TODO: Manage "fecLastCommandStatus" information
@@ -965,7 +973,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     qDebug() << "Capabilities received from ANT FEC Device:" << fecCapabilities;
                     break;
 
-                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     qDebug() << "Calibration response received from ANT FEC Device";
                     qDebug() << "Calibration response:" << antMessage.fecCalibrationReq;
 
@@ -1160,13 +1168,13 @@ void ANTChannel::channelId(unsigned char *ant_message) {
     is_kickr = (device_id == ANT_SPORT_POWER_TYPE) && ((CHANNEL_ID_TRANSMISSION_TYPE(message)&0xF0) == 0xA0);
 
     if (is_kickr) {
-        qDebug()<<number<<"KICKR DETECTED VIA CHANNEL ID EVENT";
+        qDebug()<<"KICKR device found via CHANNEL ID EVENT on channel " << number;
     }
 
     is_fec = (device_id == ANT_SPORT_FITNESS_EQUIPMENT_TYPE);
 
     if (is_fec) {
-        qDebug()<<number<<"ANT FE-C DETECTED VIA CHANNEL ID EVENT";
+        qDebug()<<"ANT FE-C device found via CHANNEL ID EVENT on channel " << number;
     }
 
     // tell controller we got a new channel id
@@ -1356,7 +1364,7 @@ uint8_t ANTChannel::capabilities()
         return fecCapabilities;
 
     // if we do not know device capabilities, request it
-    qDebug() << qPrintable("Ask for capabilities");
+    qDebug() << qPrintable("ANT FE-C: ask for capabilities");
     parent->requestFecCapabilities();
     return 0;
 }

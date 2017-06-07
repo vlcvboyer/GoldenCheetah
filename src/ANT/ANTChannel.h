@@ -95,7 +95,7 @@ class ANTChannel : public QObject {
         int dualNullCount, nullCount, stdNullCount;
         double last_message_timestamp;
         uint8_t fecPrevRawDistance;
-        uint8_t  fecCapabilities;
+        uint8_t fecCapabilities;
 
         double blanking_timestamp;
         int blanked;
@@ -198,9 +198,9 @@ class ANTChannel : public QObject {
         void attemptTransition(int message_code);
 
         // telemetry for this channel
-        double channelValue() { return value; }
-        double channelValue2() { return value2; }
-        double value,value2; // used during config, rather than rtData
+        double  channelValue() { return value; }
+        double  channelValue2() { return value2; }
+        double  value,value2; // used during config, rather than rtData
         uint8_t capabilities();
 
         // search

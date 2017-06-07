@@ -523,7 +523,7 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
             case ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT:
                 switch (data_page)
                 {
-                case FITNESS_EQUIPMENT_CALIBRATION_REQUEST_PAGE:
+                case FITNESS_EQUIPMENT_CALIBRATION_PAGE:
                     // response back from trainer at end of calibration
                     fecCalibrationReq = message[5];
                     fecTemperature    = message[7];
@@ -1135,11 +1135,11 @@ ANTMessage ANTMessage::fecRequestCommandStatus(const uint8_t channel, const uint
 
 ANTMessage ANTMessage::fecRequestCalibration(const uint8_t channel, const uint8_t type)
 {
-    qDebug() << "Sending ANT_SPORT_CALIBRATION_MESSAGE (FE-C) on channel" << channel;
+    qDebug() << "Sending FITNESS_EQUIPMENT_CALIBRATION_PAGE request (FE-C) on channel" << channel;
 
     // based on ANT+ Device Profile Fitness Equipment, Rev 4.1 p 38: 6.4.1  Data Page 1 – Calibration Request and Response Page
     return ANTMessage(9, ANT_ACK_DATA, channel,
-                      ANT_SPORT_CALIBRATION_MESSAGE,        // data page request
+                      FITNESS_EQUIPMENT_CALIBRATION_PAGE,   // data page request
                       type,                                 // spindown, zero offset, or none (does not seem to cancel an ongoing calibration?)
                       0x00,                                 // reserved
                       0xFF,                                 // temperature - set to invalid in request
