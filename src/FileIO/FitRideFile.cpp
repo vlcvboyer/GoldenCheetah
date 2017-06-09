@@ -644,43 +644,43 @@ struct FitFileReaderState
                         case 6: // Basketball:
                             rideFile->setTag("Sport","Basketball");
                             break;
-                        case 7: //
+                        case 7:
                             rideFile->setTag("Sport","Soccer");
                             break;
-                        case 8: // running:
+                        case 8:
                             rideFile->setTag("Sport","Tennis");
                             break;
-                        case 9: // running:
+                        case 9:
                             rideFile->setTag("Sport","American fotball");
                             break;
-                        case 10: // running:
+                        case 10:
                             rideFile->setTag("Sport","Training");
                             break;
-                        case 11: // running:
+                        case 11:
                             rideFile->setTag("Sport","Walking");
                             break;
-                        case 12: // running:
+                        case 12:
                             rideFile->setTag("Sport","Cross country skiing");
                             break;
-                        case 13: // running:
+                        case 13:
                             rideFile->setTag("Sport","Alpine skiing");
                             break;
-                        case 14: // running:
+                        case 14:
                             rideFile->setTag("Sport","Snowboarding");
                             break;
-                        case 15: // running:
+                        case 15:
                             rideFile->setTag("Sport","Rowing");
                             break;
-                        case 16: // running:
+                        case 16:
                             rideFile->setTag("Sport","Mountaineering");
                             break;
-                        case 17: // running:
+                        case 17:
                             rideFile->setTag("Sport","Hiking");
                             break;
-                        case 18: // running:
+                        case 18:
                             rideFile->setTag("Sport","Multisport");
                             break;
-                        case 19: // running:
+                        case 19:
                             rideFile->setTag("Sport","Paddling");
                             break;
                         default: // if we can't work it out, assume bike
@@ -692,134 +692,134 @@ struct FitFileReaderState
                 case 6: // sub sport (ignored at present)
                     switch (value) {
                         case 0:    // generic
-			  rideFile->setTag("SubSport","");
-			  break;
+                            rideFile->setTag("SubSport","");
+                            break;
                         case 1:    // treadmill
-			  rideFile->setTag("SubSport","treadmill");
-			  break;
+                            rideFile->setTag("SubSport","treadmill");
+                            break;
                         case 2:    // street
-			  rideFile->setTag("SubSport","street");
-			  break;
+                            rideFile->setTag("SubSport","street");
+                            break;
                         case 3:    // trail
-			  rideFile->setTag("SubSport","trail");
-			  break;
+                            rideFile->setTag("SubSport","trail");
+                            break;
                         case 4:    // track
-			  rideFile->setTag("SubSport","track");
-			  break;
+                            rideFile->setTag("SubSport","track");
+                            break;
                         case 5:    // spin
-			  rideFile->setTag("SubSport","spinning");
-			  break;
+                            rideFile->setTag("SubSport","spinning");
+                            break;
                         case 6:    // home trainer
-			  rideFile->setTag("SubSport","home trainer");
-			  break;
+                            rideFile->setTag("SubSport","home trainer");
+                            break;
                         case 7:    // route
-			  rideFile->setTag("SubSport","route");
-			  break;
+                            rideFile->setTag("SubSport","route");
+                            break;
                         case 8:    // mountain
-			  rideFile->setTag("SubSport","mountain");
-			  break;
+                            rideFile->setTag("SubSport","mountain");
+                            break;
                         case 9:    // downhill
-			  rideFile->setTag("SubSport","downhill");
-			  break;
+                            rideFile->setTag("SubSport","downhill");
+                            break;
                         case 10:    // recumbent
-			  rideFile->setTag("SubSport","recumbent");
-			  break;
+                            rideFile->setTag("SubSport","recumbent");
+                            break;
                         case 11:    // cyclocross
-			  rideFile->setTag("SubSport","cyclocross");
-			  break;
+                            rideFile->setTag("SubSport","cyclocross");
+                            break;
                         case 12:    // hand_cycling
-			  rideFile->setTag("SubSport","hand cycling");
-			  break;
+                            rideFile->setTag("SubSport","hand cycling");
+                            break;
                         case 13:    // piste
-			  rideFile->setTag("SubSport","piste");
-			  break;
+                            rideFile->setTag("SubSport","piste");
+                            break;
                         case 14:    // indoor_rowing
-			  rideFile->setTag("SubSport","indoor rowing");
-			  break;
+                            rideFile->setTag("SubSport","indoor rowing");
+                            break;
                         case 15:    // elliptical
-			  rideFile->setTag("SubSport","elliptical");
-			  break;
-		        case 16: // stair climbing
-			  rideFile->setTag("SubSport","stair climbing");
-			  break;
-		        case 17: // lap swimming
-			  rideFile->setTag("SubSport","lap swimming");
-			  break;
-		        case 18: // open water
-			  rideFile->setTag("SubSport","open water");
-			  break;
-		        case 19: // flexibility training
-			  rideFile->setTag("SubSport","flexibility training");
-			  break;
-   		        case 20: // strength_training
-			  rideFile->setTag("SubSport","strength_training");
-			  break;
-		        case 21: // warm_up
-			  rideFile->setTag("SubSport","warm_up");
-			  break;
-		        case 22: // match
-			  rideFile->setTag("SubSport","match");
-			  break;
-		        case 23: // exercise
-			  rideFile->setTag("SubSport","exercise");
-			  break;
-		        case 24: // challenge
-			  rideFile->setTag("SubSport","challenge");
-			  break;
-		        case 25: // indoor_skiing
-			  rideFile->setTag("SubSport","indoor_skiing");
-			  break;
-		        case 26: // cardio_training
-			  rideFile->setTag("SubSport","cardio_training");
-			  break;
-		        case 27: // indoor_walking
-			  rideFile->setTag("SubSport","indoor_walking");
-			  break;
-		        case 28: // e_bike_fitness
-			  rideFile->setTag("SubSport","e_bike_fitness");
-			  break;
-		        case 29: // bmx
-			  rideFile->setTag("SubSport","bmx");
-			  break;
-		        case 30: // casual_walking
-			  rideFile->setTag("SubSport","casual_walking");
-			  break;
-		        case 31: // speed_walking
-			  rideFile->setTag("SubSport","speed_walking");
-			  break;
-		        case 32: // bike_to_run_transition
-			  rideFile->setTag("SubSport","bike_to_run_transition");
-			  break;
-		        case 33: // run_to_bike_transition
-			  rideFile->setTag("SubSport","run_to_bike_transition");
-			  break;
-		        case 34: // swim_to_bike_transition
-			  rideFile->setTag("SubSport","swim_to_bike_transition");
-			  break;
-		        case 35: // atv
-			  rideFile->setTag("SubSport","atv");
-			  break;
-		        case 36: // motocross
-			  rideFile->setTag("SubSport","motocross");
-			  break;
-		        case 37: // backcountry
-			  rideFile->setTag("SubSport","backcountry");
-			  break;
-		        case 38: // resort
-			  rideFile->setTag("SubSport","resort");
-			  break;
-		        case 39: // rc_drone
-			  rideFile->setTag("SubSport","rc_drone");
-			  break;
-		        case 40: // wingsuit
-			  rideFile->setTag("SubSport","wingsuit");
-			  break;
-		        case 41: // whitewater
-			  rideFile->setTag("SubSport","whitewater");
-			  break;
-  		        case 254: // all
-		        default:
-			  break;
+                            rideFile->setTag("SubSport","elliptical");
+                            break;
+                        case 16: // stair climbing
+                            rideFile->setTag("SubSport","stair climbing");
+                            break;
+                        case 17: // lap swimming
+                            rideFile->setTag("SubSport","lap swimming");
+                            break;
+                        case 18: // open water
+                            rideFile->setTag("SubSport","open water");
+                            break;
+                        case 19: // flexibility training
+                            rideFile->setTag("SubSport","flexibility training");
+                            break;
+                        case 20: // strength_training
+                            rideFile->setTag("SubSport","strength_training");
+                            break;
+                        case 21: // warm_up
+                            rideFile->setTag("SubSport","warm_up");
+                            break;
+                        case 22: // match
+                            rideFile->setTag("SubSport","match");
+                            break;
+                        case 23: // exercise
+                            rideFile->setTag("SubSport","exercise");
+                            break;
+                        case 24: // challenge
+                            rideFile->setTag("SubSport","challenge");
+                            break;
+                        case 25: // indoor_skiing
+                            rideFile->setTag("SubSport","indoor_skiing");
+                            break;
+                        case 26: // cardio_training
+                            rideFile->setTag("SubSport","cardio_training");
+                            break;
+                        case 27: // indoor_walking
+                            rideFile->setTag("SubSport","indoor_walking");
+                            break;
+                        case 28: // e_bike_fitness
+                            rideFile->setTag("SubSport","e_bike_fitness");
+                            break;
+                        case 29: // bmx
+                            rideFile->setTag("SubSport","bmx");
+                            break;
+                        case 30: // casual_walking
+                            rideFile->setTag("SubSport","casual_walking");
+                            break;
+                        case 31: // speed_walking
+                            rideFile->setTag("SubSport","speed_walking");
+                            break;
+                        case 32: // bike_to_run_transition
+                            rideFile->setTag("SubSport","bike_to_run_transition");
+                            break;
+                        case 33: // run_to_bike_transition
+                            rideFile->setTag("SubSport","run_to_bike_transition");
+                            break;
+                        case 34: // swim_to_bike_transition
+                            rideFile->setTag("SubSport","swim_to_bike_transition");
+                            break;
+                        case 35: // atv
+                            rideFile->setTag("SubSport","atv");
+                            break;
+                        case 36: // motocross
+                            rideFile->setTag("SubSport","motocross");
+                            break;
+                        case 37: // backcountry
+                            rideFile->setTag("SubSport","backcountry");
+                            break;
+                        case 38: // resort
+                            rideFile->setTag("SubSport","resort");
+                            break;
+                        case 39: // rc_drone
+                            rideFile->setTag("SubSport","rc_drone");
+                            break;
+                        case 40: // wingsuit
+                            rideFile->setTag("SubSport","wingsuit");
+                            break;
+                        case 41: // whitewater
+                            rideFile->setTag("SubSport","whitewater");
+                            break;
+                        case 254: // all
+                        default:
+                            break;
                     }
                     break;
                 case 44: // pool_length
@@ -2583,13 +2583,13 @@ struct FitFileReaderState
                     decodeFileId(def, time_offset, values); break;
                 case SESSION_MSG_NUM: // #18
                     decodeSession(def, time_offset, values); break; /* session */
-                case LAP_MSG_NUM: // #19
+                case LAP_MSG_NUM:     // #19
                     decodeLap(def, time_offset, values);
                     break;
-                case RECORD_MSG_NUM: // #20
+                case RECORD_MSG_NUM:  // #20
                     decodeRecord(def, time_offset, values);
                     break;
-                case EVENT_MSG_NUM: // #21
+                case EVENT_MSG_NUM:   // #21
                     decodeEvent(def, time_offset, values); break;
                 case 23:
                     //decodeDeviceInfo(def, time_offset, values); /* device info */
