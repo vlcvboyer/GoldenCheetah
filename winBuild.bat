@@ -88,6 +88,11 @@ jom -j4
 
 copy /Y src\release\GoldenCheetah.exe .\
 
+d:
+cd \git\GoldenCheetah
+
+goto bypassInstaller
+
 cd src\release
 
 :: copy dependencies
@@ -120,6 +125,8 @@ copy /Y ..\Resources\win32\GC3.6-Dev-Master-W64-QT5.nsi .\
 :: Build the installer
 makensis GC3.6-Dev-Master-W64-QT5.nsi
 copy /Y GoldenCheetah_v3.6-DEV_64bit_Windows.exe ..\..\GoldenCheetah_v3.6-DEV_x64.exe
+
+:bypassInstaller
 
 d:
 cd \git\GoldenCheetah
