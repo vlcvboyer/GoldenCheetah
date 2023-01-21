@@ -101,8 +101,8 @@ install:
       7z x Python.zip -oC:\Python\
       echo python37.zip . '' 'import site' | Out-File C:\Python\python37._pth -Encoding ascii
       mkdir C:\Python\lib\site-packages
-      c:\python37-x64\python -m pip install --upgrade pip
-      c:\python37-x64\python -m pip install -r src\Python\requirements.txt -t C:\Python\lib\site-packages
+      c:\python37-x64\python -m pip install --upgrade pip --no-warn-script-location
+      c:\python37-x64\python -m pip install -r src\Python\requirements.txt -t C:\Python\lib\site-packages --use-pep517
     }
 
 # Get SIP and and install on Python
