@@ -164,67 +164,67 @@ build_script:
 - qmake.exe build.pro -r -spec win32-msvc
 - cd qwt\
 - jom -j1
-- cd ..
-- jom -j4
+# - cd ..
+# - jom -j4
 
 after_build:
 - cd src\release
 
-# copy dependencies
-- windeployqt --release GoldenCheetah.exe
-- copy c:\libs\10_Precompiled_DLL\usbexpress_3.5.1\USBXpress\USBXpress_API\Host\x64\SiUSBXp.dll
-- copy c:\libs\10_Precompiled_DLL\libsamplerate64\lib\libsamplerate-0.dll
-- copy c:\libs\10_Precompiled_DLL\VLC\win64\lib\libvlc*.dll
-- xcopy /s /i /e /q c:\libs\10_Precompiled_DLL\VLC\win64\plugins plugins
-- copy c:\OpenSSL-v111-Win64\bin\lib*.dll
-- copy c:\OpenSSL-v111-Win64\license.txt "OpenSSL License.txt"
-- xcopy /s /i /e /q C:\Python .
-- copy C:\Python\LICENSE.txt "PYTHON LICENSE.txt"
-- copy c:\tools\vcpkg\installed\x64-windows\bin\gsl*.dll
+# # copy dependencies
+# - windeployqt --release GoldenCheetah.exe
+# - copy c:\libs\10_Precompiled_DLL\usbexpress_3.5.1\USBXpress\USBXpress_API\Host\x64\SiUSBXp.dll
+# - copy c:\libs\10_Precompiled_DLL\libsamplerate64\lib\libsamplerate-0.dll
+# - copy c:\libs\10_Precompiled_DLL\VLC\win64\lib\libvlc*.dll
+# - xcopy /s /i /e /q c:\libs\10_Precompiled_DLL\VLC\win64\plugins plugins
+# - copy c:\OpenSSL-v111-Win64\bin\lib*.dll
+# - copy c:\OpenSSL-v111-Win64\license.txt "OpenSSL License.txt"
+# - xcopy /s /i /e /q C:\Python .
+# - copy C:\Python\LICENSE.txt "PYTHON LICENSE.txt"
+# - copy c:\tools\vcpkg\installed\x64-windows\bin\gsl*.dll
 
-# ReadMe, license and icon files
-- copy ..\Resources\win32\ReadMe.txt
-- echo GoldenCheetah is licensed under the GNU General Public License v2 > license.txt
-- echo. >> license.txt
-- type ..\..\COPYING >> license.txt
-- copy ..\Resources\win32\gc.ico
+# # ReadMe, license and icon files
+# - copy ..\Resources\win32\ReadMe.txt
+# - echo GoldenCheetah is licensed under the GNU General Public License v2 > license.txt
+# - echo. >> license.txt
+# - type ..\..\COPYING >> license.txt
+# - copy ..\Resources\win32\gc.ico
 
-# Installer script
-- copy ..\Resources\win32\GC3.6-Dev-Master-W64-QT5.nsi
+# # Installer script
+# - copy ..\Resources\win32\GC3.6-Dev-Master-W64-QT5.nsi
 
-# Build the installer
-- makensis GC3.6-Dev-Master-W64-QT5.nsi
-- move GoldenCheetah_v3.6-DEV_64bit_Windows.exe ..\..\GoldenCheetah_v3.6-DEV_x64.exe
-- cd ..\..
-- ps: Set-AppveyorBuildVariable -Name 'PUBLISH_BINARIES' -Value false
-- ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -Match "\[publish binaries\]") { Set-AppveyorBuildVariable -Name 'PUBLISH_BINARIES' -Value true }
+# # Build the installer
+# - makensis GC3.6-Dev-Master-W64-QT5.nsi
+# - move GoldenCheetah_v3.6-DEV_64bit_Windows.exe ..\..\GoldenCheetah_v3.6-DEV_x64.exe
+# - cd ..\..
+# - ps: Set-AppveyorBuildVariable -Name 'PUBLISH_BINARIES' -Value false
+# - ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED -Match "\[publish binaries\]") { Set-AppveyorBuildVariable -Name 'PUBLISH_BINARIES' -Value true }
 
 test_script:
-# minimum test
-- src\release\GoldenCheetah --version 2>GCversionWindows.txt
-- git log -1 >> GCversionWindows.txt
-- ps: CertUtil -hashfile GoldenCheetah_v3.6-DEV_x64.exe sha256 | Select-Object -First 2 | Add-Content GCversionWindows.txt
-- type GCversionWindows.txt
+# # minimum test
+# - src\release\GoldenCheetah --version 2>GCversionWindows.txt
+# - git log -1 >> GCversionWindows.txt
+# - ps: CertUtil -hashfile GoldenCheetah_v3.6-DEV_x64.exe sha256 | Select-Object -First 2 | Add-Content GCversionWindows.txt
+# - type GCversionWindows.txt
 
 artifacts:
-- path: GoldenCheetah_v3.6-DEV_x64.exe
-  name: GCinstaller
-- path: GCversionWindows.txt
-  name: GCversionWindows
+# - path: GoldenCheetah_v3.6-DEV_x64.exe
+#   name: GCinstaller
+# - path: GCversionWindows.txt
+#   name: GCversionWindows
 
 deploy:
-# deploy continuous builds to s3
-  - provider: S3
-    access_key_id:
-      secure: RoEkfKfOnF7JHOiLZX5qfZM08X+bu4oaDzzSKgdooNM=
-    secret_access_key:
-      secure: GPAArawatirYwgpHJBthdrbvyFU5bBzPOdK7VYYPiG2YHYi/DNJZ5Q5qGK1A440p
-    bucket: goldencheetah-binaries
-    region: us-east-1
-    remove_files: true
-    set_public: true
-    folder: Windows
-    artifact: GCinstaller, GCversionWindows
-    on:
-      PUBLISH_BINARIES: true
-      APPVEYOR_REPO_NAME: "GoldenCheetah/GoldenCheetah"
+# # deploy continuous builds to s3
+#   - provider: S3
+#     access_key_id:
+#       secure: RoEkfKfOnF7JHOiLZX5qfZM08X+bu4oaDzzSKgdooNM=
+#     secret_access_key:
+#       secure: GPAArawatirYwgpHJBthdrbvyFU5bBzPOdK7VYYPiG2YHYi/DNJZ5Q5qGK1A440p
+#     bucket: goldencheetah-binaries
+#     region: us-east-1
+#     remove_files: true
+#     set_public: true
+#     folder: Windows
+#     artifact: GCinstaller, GCversionWindows
+#     on:
+#       PUBLISH_BINARIES: true
+#       APPVEYOR_REPO_NAME: "GoldenCheetah/GoldenCheetah"
