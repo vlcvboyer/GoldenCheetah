@@ -54,7 +54,7 @@ const ant_sensor_type_t ANT::ant_sensor_types[] = {
   { true, ANTChannel::CHANNEL_TYPE_UNUSED, 0, 0, 0, 0, "Unused", '?', "" },
   { true, ANTChannel::CHANNEL_TYPE_HR, ANT_SPORT_HR_PERIOD, ANT_SPORT_HR_TYPE,
                 ANT_SPORT_FREQUENCY, ANT_SPORT_NETWORK_NUMBER, "Heartrate", 'h', ":images/IconHR.png" },
-  { true, ANTChannel::CHANNEL_TYPE_POWER, ANT_SPORT_POWER_PERIOD, ANT_SPORT_POWER_TYPE,
+  { true, ANTChannel::CHANNEL_TYPE_POWER, ANT_SPORT_POWER_8HZ_PERIOD, ANT_SPORT_POWER_TYPE,
                 ANT_SPORT_FREQUENCY, ANT_SPORT_NETWORK_NUMBER, "Power", 'p', ":images/IconPower.png" },
   { true, ANTChannel::CHANNEL_TYPE_SPEED, ANT_SPORT_SPEED_PERIOD, ANT_SPORT_SPEED_TYPE,
                 ANT_SPORT_FREQUENCY, ANT_SPORT_NETWORK_NUMBER, "Speed", 's', ":images/IconSpeed.png" },
@@ -110,6 +110,7 @@ ANT::ANT(QObject *parent, DeviceConfiguration *devConf, QString athlete) : QThre
     vortexID = vortexChannel = -1;
 
     fecChannel = -1;
+    pwrChannel = -1;
 
     // current and desired modes/load/gradients
     // set so first time through current != desired
@@ -364,6 +365,33 @@ void ANT::requestFecCapabilities()
 void ANT::requestFecCalibration(uint8_t type)
 {
     sendMessage(ANTMessage::fecRequestCalibration(fecChannel, type));
+}
+
+void ANT::requestPwrCapabilities1()
+{
+    if (pwrChannel == -1)
+        return;
+
+    sendMessage(ANTMessage::requestPwrCapabilities1(pwrChannel));
+}
+
+void ANT::requestPwrCapabilities2()
+{
+    if (pwrChannel == -1)
+        return;
+
+    qDebug() << "Requesting capabilities #2 of power sensor";
+
+    sendMessage(ANTMessage::requestPwrCapabilities2(pwrChannel));
+}
+
+void ANT::enablePwrCapabilities2(uint8_t capabilities)
+{
+    if (pwrChannel == -1)
+        return;
+    qDebug() << "Request to enable some capabilities #2 of power sensor 0x" << QString("%1").arg(capabilities, 2, 16, QChar('0')).toUpper();
+
+    sendMessage(ANTMessage::enablePwrCapabilities2(pwrChannel, capabilities));
 }
 
 void ANT::requestPwrCalibration(uint8_t channel, uint8_t type)
@@ -827,6 +855,13 @@ ANT::channelInfo(int channel, int device_number, int device_id)
     if (!configuring && antChannel[channel]->is_fec) {
         antChannel[channel]->capabilities();
         qDebug()<<"ANT FE-C device found."<<device_number<<"on channel"<<channel;
+    }
+
+    // ANT PWR DEVICE DETECTED - ACT ACCORDINGLY !
+    // if we just got an PWR sensor, request the capabilities
+    if (!configuring && antChannel[channel]->is_power) {
+        antChannel[channel]->capabilities();
+        qDebug()<<"ANT PWR device found."<<device_number<<"on channel"<<channel;
     }
 
     //qDebug()<<"found device number"<<device_number<<"type"<<device_id<<"on channel"<<channel
@@ -1350,6 +1385,11 @@ void ANT::setVortexData(int channel, int id)
 void ANT::setFecChannel(int channel)
 {
     fecChannel = channel;
+}
+
+void ANT::setPwrChannel(int channel)
+{
+    pwrChannel = channel;
 }
 
 void ANT::setControlChannel(int channel)

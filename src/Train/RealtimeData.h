@@ -45,6 +45,9 @@ public:
                       VirtualSpeed, AltWatts, LRBalance, LapTimeRemaining,
                       LeftTorqueEffectiveness, RightTorqueEffectiveness,
                       LeftPedalSmoothness, RightPedalSmoothness, Slope, 
+                      RightPowerPhaseBegin, RightPowerPhaseEnd,
+                      RightPowerPhasePeakBegin, RightPowerPhasePeakEnd,
+                      Position, RightPCO, LeftPCO,
                       LapDistance, LapDistanceRemaining, ErgTimeRemaining,
                       Latitude, Longitude, Altitude, RouteDistance,
                       DistanceRemaining };
@@ -54,6 +57,11 @@ public:
     double value(DataSeries) const;
     static QString seriesName(DataSeries);
     static const QList<DataSeries> &listDataSeries();
+
+    // we use same IDs than ANT power meters messages. aero is an additional one for virtual speed estimation
+    // (we can suppose aero position when no power is generated since 10s ?)
+    enum cyclistposition { seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 4 };
+    typedef enum cyclistposition cyclistPosition;
 
     RealtimeData();
     void reset(); // set all values to zero
@@ -89,6 +97,13 @@ public:
     void setRTE(double);
     void setLPS(double);
     void setRPS(double);
+    void setRppb(double);
+    void setRppe(double);
+    void setRpppb(double);
+    void setRpppe(double);
+    void setRightPCO(double);
+    void setLeftPCO(double);
+    void setPosition(uint8_t);
     void setTorque(double);
     void setLatitude(double);
     void setLongitude(double);
@@ -143,6 +158,13 @@ public:
     double getRTE() const;
     double getLPS() const;
     double getRPS() const;
+    double getRppb() const;
+    double getRppe() const;
+    double getRpppb() const;
+    double getRpppe() const;
+    double getRightPCO() const;
+    double getLeftPCO() const;
+    uint8_t getPosition() const;
     double getTorque() const;
     double getLatitude() const;
     double getLongitude() const;
@@ -171,9 +193,13 @@ private:
     double cadence;      // in rpm
     double smo2, thb;
     double lte, rte, lps, rps; // torque efficiency and pedal smoothness
+    double rppb, rppe, rpppb, rpppe;
+    double rightPowerPhaseBegin, rightPowerPhaseEnd, rightPowerPhasePeakBegin, rightPowerPhasePeakEnd;
+    double rightPCO, leftPCO;
     double torque; // raw torque data for calibration display
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
+    uint8_t position;
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 

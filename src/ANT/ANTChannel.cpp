@@ -40,6 +40,7 @@ ANTChannel::init()
     is_kickr=false;
     is_moxy=false;
     is_fec=false;
+    is_power=false;
     is_cinqo=0;
     is_old_cinqo=0;
     is_alt=0;
@@ -63,6 +64,10 @@ ANTChannel::init()
     status = Closed;
     fecPrevRawDistance=0;
     fecCapabilities=0;
+    pwrCapabilities1=0;
+    pwrEnCapabilities1=0;
+    pwrCapabilities2=0;
+    pwrEnCapabilities2=0;
     lastMessageTimestamp = lastMessageTimestamp2 = parent->getElapsedTime();
     blacklisted=0;
     sc_speed_active = sc_cadence_active = 0;
@@ -633,30 +638,108 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 // or the ANT_CRANKTORQUE_POWER.
                 case ANT_STANDARD_POWER: // 0x10 - standard power
                 {
-                    uint8_t events = antMessage.eventCount - lastStdPwrMessage.eventCount;
-                    if (lastStdPwrMessage.type && events) {
-                        stdNullCount = 0;
-                        is_alt ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
-                        value2 = value = antMessage.instantPower;
-                        parent->setSecondaryCadence(antMessage.instantCadence); // cadence
-                        // LRBalance is left side contribution, pedalPower is right side
-                        antMessage.pedalPowerContribution ? parent->setLRBalance(100-antMessage.pedalPower) : parent->setLRBalance(RideFile::NA);
-                    } else {
-                       stdNullCount++;
-                       if (stdNullCount >= 6) { //6 for standard power according to specs
-                           parent->setSecondaryCadence(0);
-                           is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
-                           parent->setLRBalance(RideFile::NA);
-                           value2 = value = 0;
-                           parent->setTE(0,0);
-                           parent->setPS(0,0);
-                       }
+                    parent->setPwrChannel(number);
+
+                    switch (antMessage.data_page) {
+                        case POWER_POWERONLY_DATA_PAGE:
+                            {
+                                uint8_t events = antMessage.eventCount - lastStdPwrMessage.eventCount;
+                                if (lastStdPwrMessage.type && events) {
+                                    stdNullCount = 0;
+                                    is_alt ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
+                                    value2 = value = antMessage.instantPower;
+                                    parent->setSecondaryCadence(antMessage.instantCadence); // cadence
+                                    // LRBalance is left side contribution, pedalPower is right side
+                                    antMessage.pedalPowerContribution ? parent->setLRBalance(100-antMessage.pedalPower) : parent->setLRBalance(RideFile::NA);
+                                } else {
+                                stdNullCount++;
+                                if (stdNullCount >= 6) { //6 for standard power according to specs
+                                    parent->setSecondaryCadence(0);
+                                    is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                                    parent->setLRBalance(RideFile::NA);
+                                    value2 = value = 0;
+                                    parent->setTE(0,0);
+                                    parent->setPS(0,0);
+                                }
+                                }
+                                lastStdPwrMessage = antMessage;
+                                // Mark power event for possible match-up against a future
+                                // ANT_TE_AND_PS_POWER event.
+                                lastPwrForTePsMessage = lastStdPwrMessage;
+                                // Mark power event for possible match-up against a future
+                                // other data page
+                                lastPwrForCDMessage =  lastStdPwrMessage;
+                                savemessage = false;
+                            }
+                            break;
+
+                        case POWER_ADVANCED_CAPABILITIES1_PAGE:
+                            pwrCapabilities1 = antMessage.pwrCapabilities1;
+                            pwrEnCapabilities1 = antMessage.pwrEnCapabilities1;
+                            qDebug() << "Capabilities 1 received from ANT PWR Device:" << pwrCapabilities1;
+                            break;
+
+                        case POWER_ADVANCED_CAPABILITIES2_PAGE:
+                            pwrCapabilities2 = antMessage.pwrCapabilities2;
+                            pwrEnCapabilities2 = antMessage.pwrEnCapabilities2;
+                            qDebug() << "Capabilities 2 received from ANT PWR Device:" << pwrCapabilities2;
+                            break;
+
+                        case POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                uint8_t events = antMessage.eventCount - lastPwrForCDMessage.eventCount;
+
+                                if (events) {
+                                    qDebug() << "Receiving valid data in POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                    // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.84 : 17.1 Right Force Angle (0xE0)
+                                    parent->setRppb(antMessage.instantStartAngle);      //Right Power Phase Begin
+                                    parent->setRppe(antMessage.instantEndAngle);        //Right Power Phase End
+                                    parent->setRpppb(antMessage.instantStartPeakAngle); //Right Power Phase Peak Begin
+                                    parent->setRpppe(antMessage.instantEndPeakAngle);   //Right Power Phase Peak End
+                                } else {
+                                    qDebug() << "ERR: Receiving invalid data in POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                }
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE";
+
+                                // TODO !!!
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_PEDALPOSITION_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                uint8_t events = antMessage.eventCount - lastPwrForCDMessage.eventCount;
+
+                                if (events) {
+                                    qDebug() << "Receiving valid data in POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                    // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.90 : 17-3 Pedal Position Data Message Format (0xE0)
+
+                                    parent->setPosition(antMessage.riderPosition);
+                                    parent->setRightPCO(antMessage.rightPCO);
+                                    parent->setLeftPCO(antMessage.leftPCO);
+                                } else {
+                                    qDebug() << "ERR: Receiving invalid data in POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                }
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_TORQUE_BARYC_PAGE:
+
+                            // TODO !!!
+
+                            break;
+
+                        default:
+                            qDebug() << "Err: Received unknown page from power sensor 0x" << QString("%1").arg(antMessage.data_page, 2, 16, QChar('0')).toUpper();
+
                     }
-                    lastStdPwrMessage = antMessage;
-                    // Mark power event for possible match-up against a future
-                    // ANT_TE_AND_PS_POWER event.
-                    lastPwrForTePsMessage = lastStdPwrMessage;
-                    savemessage = false;
+
                 }
                 break;
 
@@ -1201,9 +1284,13 @@ void ANTChannel::channelId(unsigned char *ant_message) {
     }
 
     is_fec = (device_id == ANT_SPORT_FITNESS_EQUIPMENT_TYPE);
-
     if (is_fec) {
         qDebug()<<number<<"ANT FE-C DETECTED VIA CHANNEL ID EVENT";
+    }
+
+    is_power = (device_id == ANT_SPORT_POWER_TYPE);
+    if (is_power) {
+        qDebug()<<number<<"ANT POWER SENSOR DETECTED VIA CHANNEL ID EVENT";
     }
 
     // tell controller we got a new channel id
@@ -1387,15 +1474,69 @@ void ANTChannel::attemptTransition(int message_id)
 
 uint8_t ANTChannel::capabilities()
 {
-    if (!is_fec)
+    if (!is_fec || !is_power)
         return 0;
 
-    if (fecCapabilities)
+    if (is_fec && fecCapabilities)
         return fecCapabilities;
+
+    if (is_power && pwrCapabilities2) {
+        // We have received its capabilities from sensor so just ensure that
+        // any usefull functionality is enabled when available
+        // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.77
+        bool setupCapabilities2=false;
+        uint8_t presetCapabilities2=0xFF;
+        if (    (~pwrCapabilities2   & POWER_NO_8Hz_MODE_CAPABILITY)
+            && !(~pwrEnCapabilities2 & POWER_NO_8Hz_MODE_CAPABILITY))
+        {
+            setupCapabilities2=true;
+            presetCapabilities2 &= ~POWER_NO_8Hz_MODE_CAPABILITY;
+        }
+
+        if (    (~pwrCapabilities2   & POWER_NO_POWERPHASE_CAPABILITY)
+            && !(~pwrEnCapabilities2 & POWER_NO_POWERPHASE_CAPABILITY))
+        {
+            setupCapabilities2=true;
+            presetCapabilities2 &= ~POWER_NO_POWERPHASE_CAPABILITY;
+        }
+
+        if (    (~pwrCapabilities2   & POWER_NO_PCO_CAPABILITY)
+            && !(~pwrEnCapabilities2 & POWER_NO_PCO_CAPABILITY))
+        {
+            setupCapabilities2=true;
+            presetCapabilities2 &= ~POWER_NO_PCO_CAPABILITY;
+        }
+
+        if (    (~pwrCapabilities2   & POWER_NO_POSITION_CAPABILITY)
+            && !(~pwrEnCapabilities2 & POWER_NO_POSITION_CAPABILITY))
+        {
+            setupCapabilities2=true;
+            presetCapabilities2 &= ~POWER_NO_POSITION_CAPABILITY;
+        }
+
+        if (    (~pwrCapabilities2   & POWER_NO_TORQUE_BARYCENTER_CAPABILITY)
+            && !(~pwrEnCapabilities2 & POWER_NO_TORQUE_BARYCENTER_CAPABILITY))
+        {
+            setupCapabilities2=true;
+            presetCapabilities2 &= ~POWER_NO_TORQUE_BARYCENTER_CAPABILITY;
+        }
+
+        if (setupCapabilities2)
+        {
+            parent->enablePwrCapabilities2(presetCapabilities2);
+            qDebug() << "Ask power sensor to enable functionalities 0x" << QString("%1").arg(presetCapabilities2, 2, 16, QChar('0')).toUpper();
+        }
+
+        return pwrCapabilities2;
+    }
 
     // if we do not know device capabilities, request it
     qDebug() << qPrintable("Ask for capabilities");
-    parent->requestFecCapabilities();
+    if (is_fec)
+        parent->requestFecCapabilities();
+    if (is_power && !pwrCapabilities2)
+        parent->requestPwrCapabilities2();
+
     return 0;
 }
 
