@@ -7,6 +7,7 @@ Makefile
 *~
 *.orig
 *.rej
+.vscode
 # old skool
 .svn
 *.pri
@@ -58,3 +59,10 @@ build.pro.user
 build.pro.user.*
 doc/contrib/WASP Packet Protocol.pdf
 
+gc-ci-libs.zip
+jom_1_1_3.zip
+sip-4.19.8.zip
+tmp
+sip-4.19.8
+gc-ci-libs
+.sdk
