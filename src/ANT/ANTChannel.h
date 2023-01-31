@@ -92,10 +92,16 @@ class ANTChannel : public QObject {
         // Stores latest ANT_STANDARD_POWER or ANT_CRANKTORQUE_POWER
         // for use by ANT_TE_AND_PS_POWER.
         ANTMessage lastPwrForTePsMessage;
+        ANTMessage lastPwrForCDMessage;
         int dualNullCount, nullCount, stdNullCount;
         double last_message_timestamp;
         uint8_t fecPrevRawDistance;
         uint8_t  fecCapabilities;
+
+        uint8_t  pwrCapabilities1;
+        uint8_t  pwrEnCapabilities1;
+        uint8_t  pwrCapabilities2;
+        uint8_t  pwrEnCapabilities2;
 
         double blanking_timestamp;
         int blanked;
@@ -165,6 +171,7 @@ class ANTChannel : public QObject {
         bool is_old_cinqo; // bool, set for cinqo needing separate control channel
         bool is_srm;
         bool is_fec;
+        bool is_power;
         bool is_alt; // is alternative channel for power
         bool is_master; // is a master channel (for remote control)
 

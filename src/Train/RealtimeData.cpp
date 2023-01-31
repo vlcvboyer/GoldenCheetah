@@ -30,7 +30,9 @@ RealtimeData::RealtimeData()
     lap = msecs = lapMsecs = lapMsecsRemaining = ergMsecsRemaining = 0;
     thb = smo2 = o2hb = hhb = 0.0;
     lrbalance = RideFile::NA;
+    position = RealtimeData::seated;
     rte = lte = lps = rps = 0.0;
+    rppb = rppe = rpppb = rpppe = 0.0;
     latitude = longitude = altitude = 0.0;
     rf = rmv = vo2 = vco2 = tv = feo2 = 0.0;
     routeDistance = distanceRemaining = 0.0;
@@ -271,6 +273,36 @@ double RealtimeData::getRPS() const
     return rps;
 }
 
+double RealtimeData::getRppb() const
+{
+    return rppb;
+}
+
+double RealtimeData::getRppe() const
+{
+    return rppe;
+}
+
+double RealtimeData::getRpppb() const
+{
+    return rpppb;
+}
+
+double RealtimeData::getRpppe() const
+{
+    return rpppe;
+}
+
+double RealtimeData::getRightPCO() const
+{
+    return rightPCO;
+}
+
+double RealtimeData::getLeftPCO() const
+{
+    return leftPCO;
+}
+
 double RealtimeData::getTorque() const
 {
     return torque;
@@ -415,6 +447,24 @@ double RealtimeData::value(DataSeries series) const
         break;
 
     case RightPedalSmoothness: return rps;
+        break;
+
+   case RightPowerPhaseBegin: return rppb;
+        break;
+
+    case RightPowerPhaseEnd: return rppe;
+        break;
+
+    case RightPowerPhasePeakBegin: return rpppb;
+        break;
+
+    case RightPowerPhasePeakEnd: return rpppe;
+        break;
+
+    case RightPCO: return rightPCO;
+        break;
+
+    case LeftPCO: return leftPCO;
         break;
 
     case Slope: return slope;
@@ -660,6 +710,18 @@ QString RealtimeData::seriesName(DataSeries series)
     case RightPedalSmoothness: return tr("Right Pedal Smoothness");
         break;
 
+    case RightPowerPhaseBegin: return tr("Right Power Phase Start");
+        break;
+
+    case RightPowerPhaseEnd: return tr("Right Power Phase End");
+        break;
+
+    case RightPowerPhasePeakBegin: return tr("Right Power Phase Peak Start");
+        break;
+
+    case RightPowerPhasePeakEnd: return tr("Right Power Phase Peak End");
+        break;
+
     case Slope: return tr("Slope");
         break;
 
@@ -735,10 +797,19 @@ long RealtimeData::getLap() const
 double RealtimeData::getLatitude() const { return latitude; }
 double RealtimeData::getLongitude() const { return longitude; }
 double RealtimeData::getAltitude() const { return altitude; }
+uint8_t RealtimeData::getPosition() const { return position; }
 
 void RealtimeData::setLatitude(double d) { latitude = d; }
 void RealtimeData::setLongitude(double d) { longitude = d; }
 void RealtimeData::setAltitude(double d) { altitude = d; }
+
+void RealtimeData::setRppb(double rppb) { this->rppb = rppb; }
+void RealtimeData::setRppe(double rppe) { this->rppe = rppe; }
+void RealtimeData::setRpppb(double rpppb) { this->rpppb = rpppb; }
+void RealtimeData::setRpppe(double rpppe) { this->rpppe = rpppe; }
+void RealtimeData::setRightPCO(double rightPCO) { this->rightPCO = rightPCO; }
+void RealtimeData::setLeftPCO(double leftPCO) { this->leftPCO = leftPCO; }
+void RealtimeData::setPosition(uint8_t position) { this->position = position; }
 
 void RealtimeData::setRf(double rf) { this->rf = rf; }
 void RealtimeData::setRMV(double rmv) { this->rmv = rmv; }
