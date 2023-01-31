@@ -365,6 +365,9 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     load_msecs = total_msecs = lap_msecs = 0;
     displayWorkoutDistance = displayDistance = displayPower = displayHeartRate =
     displaySpeed = displayCadence = slope = load = 0;
+    displayAltPower = 0;
+    displayPosition = RealtimeData::seated;
+
     displaySMO2 = displayTHB = displayO2HB = displayHHB = 0;
     displayLRBalance = RideFile::NA;
     displayLTE = displayRTE = displayLPS = displayRPS = 0;
@@ -1567,6 +1570,8 @@ void TrainSidebar::updateData(RealtimeData &rtData)
     displayLatitude = rtData.getLatitude();
     displayLongitude = rtData.getLongitude();
     displayAltitude = rtData.getAltitude();
+    displayAltPower = rtData.getAltWatts();
+    displayPosition = rtData.getPosition();
     // Gradient not supported
     return;
 }
@@ -1789,6 +1794,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     rtData.setRTE(local.getRTE());
                     rtData.setLPS(local.getLPS());
                     rtData.setRPS(local.getRPS());
+                    rtData.setRppb(local.getRppb());
+                    rtData.setRppe(local.getRppe());
+                    rtData.setRpppb(local.getRpppb());
+                    rtData.setRpppe(local.getRpppe());
                 }
                 if (local.getTrainerStatusAvailable())
                 {
@@ -1989,6 +1998,8 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayLatitude = rtData.getLatitude();
             displayLongitude = rtData.getLongitude();
             displayAltitude = rtData.getAltitude();
+            displayAltPower = rtData.getAltWatts();
+            displayPosition = rtData.getPosition();
 
             double weightKG = context->athlete->getWeight(QDate::currentDate()) + 10; // 10kg bike
             double vs = computeInstantSpeed(weightKG, rtData.getSlope(), rtData.getAltitude(), rtData.getWatts());
