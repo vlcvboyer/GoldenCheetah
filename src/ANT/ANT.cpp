@@ -392,6 +392,9 @@ void ANT::enablePwrCapabilities2(uint8_t capabilities)
     qDebug() << "Request to enable some capabilities #2 of power sensor 0x" << QString("%1").arg(capabilities, 2, 16, QChar('0')).toUpper();
 
     sendMessage(ANTMessage::enablePwrCapabilities2(pwrChannel, capabilities));
+    // FIXME: code below is required ?
+    // do we have to wait and ensure that device received the expected options to be enabled ?
+    // sendMessage(ANTMessage::setChannelPeriod(pwrChannel, ANT_SPORT_POWER_8HZ_PERIOD));
 }
 
 void ANT::requestPwrCalibration(uint8_t channel, uint8_t type)
@@ -926,7 +929,7 @@ ANT::slotStartBroadcastTimer(int channel) // timer
     connect(antChannel[channel]->channelTimer, SIGNAL(timeout()), this, SLOT(slotControlTimerEvent()), Qt::DirectConnection);
 
     // start the broadcast timer..
-    antChannel[channel]->channelTimer->setInterval(250); //ms
+    antChannel[channel]->channelTimer->setInterval(250); //ms &&&&& FIXME : will work with 8Hz power sensors ?
     antChannel[channel]->channelTimer->start();
 
     //qDebug()<<channel<<"timer id:" << antChannel[channel]->channelTimer->timerId();
