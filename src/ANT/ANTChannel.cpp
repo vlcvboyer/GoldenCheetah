@@ -692,6 +692,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                                 if (events) {
                                     qDebug() << "Receiving valid data in POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                    // FIXME : &&&&& to be confirmed as we expect the same event count ?
                                     // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.84 : 17.1 Right Force Angle (0xE0)
                                     parent->setRppb(antMessage.instantStartAngle);      //Right Power Phase Begin
                                     parent->setRppe(antMessage.instantEndAngle);        //Right Power Phase End
