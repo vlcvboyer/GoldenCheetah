@@ -390,8 +390,9 @@ class RideFile : public QObject // QObject to emit signals
         // rather use the RideFileCommand *command
         // to manipulate the ride data
         void setPointValue(int index, SeriesType series, double value);
-        void setPointValue(int index, SeriesType series, int value);
+        // void setPointValue(int index, SeriesType series, int value);
         void setPointValue(double secs, SeriesType series, double value);
+        // void setPointValue(double secs, SeriesType series, int value);
         void deletePoint(int index);
         void deletePoints(int index, int count);
         void insertPoint(int index, RideFilePoint *point);
