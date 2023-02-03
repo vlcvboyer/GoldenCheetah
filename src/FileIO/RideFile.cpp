@@ -1853,6 +1853,20 @@ RideFile::setPointValue(double secs, SeriesType series, double value) {
     }
 }
 
+// void
+// RideFile::setPointValue(double secs, SeriesType series, int value) {
+//     int idx = timeIndex(secs);
+//     if ((idx != -1) && (dataPoints_.at(idx)->secs == secs)) {
+//         int previousVal = getPointValue(idx, series);
+//         setPointValue(idx, series, value);
+//         setDataPresent(series, true);
+
+//         updateAvg(series, value-previousVal);
+//         updateMin(dataPoints_.at(idx));
+//         updateMax(dataPoints_.at(idx));
+//     }
+// }
+
 void
 RideFile::setPointValue(int index, SeriesType series, double value)
 {
@@ -1895,20 +1909,21 @@ RideFile::setPointValue(int index, SeriesType series, double value)
         case rcontact : dataPoints_[index]->rcontact = value; break;
         case interval : dataPoints_[index]->interval = value; break;
         case tcore : dataPoints_[index]->tcore = value; break;
+        case position : dataPoints_[index]->position = static_cast<int>(value); break;
         default:
         case none : break;
     }
 }
 
-void
-RideFile::setPointValue(int index, SeriesType series, int value)
-{
-    switch (series) {
-        case position : dataPoints_[index]->position = value; break;
-        default:
-        case none : break;
-    }
-}
+// void
+// RideFile::setPointValue(int index, SeriesType series, int value)
+// {
+//     switch (series) {
+//         case position : dataPoints_[index]->position = value; break;
+//         default:
+//         case none : break;
+//     }
+// }
 
 double
 RideFilePoint::value(RideFile::SeriesType series) const
