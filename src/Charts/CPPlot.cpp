@@ -606,8 +606,8 @@ CPPlot::plotModel()
                 QVector<double> power(static_cast<int>(pdModel->size()));
                 QVector<double> wprime(static_cast<int>(pdModel->size()));
                 for (size_t t = 0; t < pdModel->size(); t++) {
-                    power[t] = static_cast<int>(pdModel->y(t+1));
-                    wprime[t] = (static_cast<int>(pdModel->y(t+1)) - veloCP) * (pdModel->x(t+1)); // Joules
+                    power[t] = pdModel->y(static_cast<int>(t)+1);
+                    wprime[t] = (pdModel->y(static_cast<int>(t)+1) - veloCP) * pdModel->x(static_cast<int>(t)+1); // Joules
                 }
                 modelCurve->setSamples(power.data(), wprime.data(), static_cast<int>(pdModel->size())-1);
             }
