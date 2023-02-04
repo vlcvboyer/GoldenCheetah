@@ -263,7 +263,7 @@ class TrainSidebar : public GcWindow
         bool lapAudioThisLap;
         double textPositionEmitted;
         bool useSimulatedSpeed;
-        int displayPosition; // cyclist position (0: seated ; 1: standing ; 2: aero)
+        RealtimeData::riderPosition displayPosition; // rider position (seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 10, off = 11)
 
         void maintainLapDistanceState();
 
