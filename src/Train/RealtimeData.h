@@ -58,10 +58,13 @@ public:
     static QString seriesName(DataSeries);
     static const QList<DataSeries> &listDataSeries();
 
-    // we use same IDs than ANT power meters messages. aero is an additional one for virtual speed estimation
-    // (we can suppose aero position when no power is generated since 10s ?)
-    enum cyclistposition { seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 4 };
-    typedef enum cyclistposition cyclistPosition;
+    // style is coded to be compatible with FIT files
+    // we use same IDs than ANT power meters messages.
+    // Aero is an additional one for virtual speed estimation
+    // (we can suppose aero position when no power is generated during 10s ?)
+    // and off means not riding (when speed is 0 during 10s ?)
+    enum riderposition { seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 10, off = 11 };
+    typedef enum riderposition riderPosition;
 
     RealtimeData();
     void reset(); // set all values to zero
@@ -103,7 +106,7 @@ public:
     void setRpppe(double);
     void setRightPCO(double);
     void setLeftPCO(double);
-    void setPosition(uint8_t);
+    void setPosition(RealtimeData::riderPosition);
     void setTorque(double);
     void setLatitude(double);
     void setLongitude(double);
@@ -164,7 +167,7 @@ public:
     double getRpppe() const;
     double getRightPCO() const;
     double getLeftPCO() const;
-    uint8_t getPosition() const;
+    RealtimeData::riderPosition getPosition() const;
     double getTorque() const;
     double getLatitude() const;
     double getLongitude() const;
@@ -199,7 +202,7 @@ private:
     double torque; // raw torque data for calibration display
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
-    uint8_t position;
+    RealtimeData::riderPosition position;
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 

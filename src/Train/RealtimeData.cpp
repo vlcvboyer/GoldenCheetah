@@ -797,7 +797,7 @@ long RealtimeData::getLap() const
 double RealtimeData::getLatitude() const { return latitude; }
 double RealtimeData::getLongitude() const { return longitude; }
 double RealtimeData::getAltitude() const { return altitude; }
-uint8_t RealtimeData::getPosition() const { return position; }
+RealtimeData::riderPosition  RealtimeData::getPosition() const { return position; }
 
 void RealtimeData::setLatitude(double d) { latitude = d; }
 void RealtimeData::setLongitude(double d) { longitude = d; }
@@ -809,7 +809,7 @@ void RealtimeData::setRpppb(double rpppb) { this->rpppb = rpppb; }
 void RealtimeData::setRpppe(double rpppe) { this->rpppe = rpppe; }
 void RealtimeData::setRightPCO(double rightPCO) { this->rightPCO = rightPCO; }
 void RealtimeData::setLeftPCO(double leftPCO) { this->leftPCO = leftPCO; }
-void RealtimeData::setPosition(uint8_t position) { this->position = position; }
+void RealtimeData::setPosition(RealtimeData::riderPosition position) { this->position = position; }
 
 void RealtimeData::setRf(double rf) { this->rf = rf; }
 void RealtimeData::setRMV(double rmv) { this->rmv = rmv; }
