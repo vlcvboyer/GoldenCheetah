@@ -131,3 +131,4 @@ copy /Y GoldenCheetah_v3.6-DEV_64bit_Windows.exe ..\..\GoldenCheetah_v3.6-DEV_x6
 d:
 cd \git\GoldenCheetah
 
+pause
