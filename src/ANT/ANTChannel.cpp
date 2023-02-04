@@ -721,7 +721,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                                     qDebug() << "Receiving valid data in POWER_CYCL_DYN_PEDALPOSITION_PAGE";
                                     // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.90 : 17-3 Pedal Position Data Message Format (0xE0)
 
-                                    parent->setPosition(antMessage.riderPosition);
+                                    parent->setPosition(static_cast<RealtimeData::riderPosition>(antMessage.riderPosition));
                                     parent->setRightPCO(antMessage.rightPCO);
                                     parent->setLeftPCO(antMessage.leftPCO);
                                 } else {
