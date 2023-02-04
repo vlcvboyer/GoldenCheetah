@@ -677,7 +677,7 @@ public:
     void setRpppe(uint8_t value) { telemetry.setRpppe(value); }
     void setRightPCO(uint8_t value) { telemetry.setRightPCO(value); }
     void setLeftPCO(uint8_t value) { telemetry.setLeftPCO(value); }
-    void setPosition(uint8_t value) { telemetry.setPosition(value); }
+    void setPosition(RealtimeData::riderPosition value) { telemetry.setPosition(value); }
     void setTorque(double torque) {
         telemetry.setTorque(torque);
     }
