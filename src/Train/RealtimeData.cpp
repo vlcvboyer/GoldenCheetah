@@ -30,6 +30,7 @@ RealtimeData::RealtimeData()
     lap = msecs = lapMsecs = lapMsecsRemaining = ergMsecsRemaining = 0;
     thb = smo2 = o2hb = hhb = 0.0;
     lrbalance = RideFile::NA;
+    position = RealtimeData::seated;
     rte = lte = lps = rps = 0.0;
     latitude = longitude = altitude = 0.0;
     rf = rmv = vo2 = vco2 = tv = feo2 = 0.0;
@@ -735,10 +736,13 @@ long RealtimeData::getLap() const
 double RealtimeData::getLatitude() const { return latitude; }
 double RealtimeData::getLongitude() const { return longitude; }
 double RealtimeData::getAltitude() const { return altitude; }
+RealtimeData::riderPosition  RealtimeData::getPosition() const { return position; }
 
 void RealtimeData::setLatitude(double d) { latitude = d; }
 void RealtimeData::setLongitude(double d) { longitude = d; }
 void RealtimeData::setAltitude(double d) { altitude = d; }
+
+void RealtimeData::setPosition(RealtimeData::riderPosition position) { this->position = position; }
 
 void RealtimeData::setRf(double rf) { this->rf = rf; }
 void RealtimeData::setRMV(double rmv) { this->rmv = rmv; }

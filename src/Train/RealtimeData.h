@@ -45,6 +45,7 @@ public:
                       VirtualSpeed, AltWatts, LRBalance, LapTimeRemaining,
                       LeftTorqueEffectiveness, RightTorqueEffectiveness,
                       LeftPedalSmoothness, RightPedalSmoothness, Slope, 
+                      Position,
                       LapDistance, LapDistanceRemaining, ErgTimeRemaining,
                       Latitude, Longitude, Altitude, RouteDistance,
                       DistanceRemaining };
@@ -97,6 +98,7 @@ public:
     void setRTE(double);
     void setLPS(double);
     void setRPS(double);
+    void setPosition(RealtimeData::riderPosition);
     void setTorque(double);
     void setLatitude(double);
     void setLongitude(double);
@@ -151,6 +153,7 @@ public:
     double getRTE() const;
     double getLPS() const;
     double getRPS() const;
+    RealtimeData::riderPosition getPosition() const;
     double getTorque() const;
     double getLatitude() const;
     double getLongitude() const;
@@ -182,6 +185,7 @@ private:
     double torque; // raw torque data for calibration display
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
+    RealtimeData::riderPosition position;
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 
