@@ -232,9 +232,13 @@ struct setChannelAtom {
 #define INVALID_MESSAGE                40
 #define INVALID_NETWORK_NUMBER         41
 
-// ANT+sport
+// ANT+sport periods
+// note: 8086 counts (~4.05Hz, 4 messages/second)
+//      16172 counts (~2.03Hz, 2 messages/second)
+//      32344 counts (~1.01Hz, 1 message/second)
 #define ANT_SPORT_HR_PERIOD 8070
-#define ANT_SPORT_POWER_PERIOD 8182
+#define ANT_SPORT_POWER_PERIOD 8182     // on boot-up power device is emitting @4Hz
+#define ANT_SPORT_POWER_8HZ_PERIOD 4091 // when accessing additional data it will be 8Hz
 #define ANT_SPORT_FOOTPOD_PERIOD 8134
 #define ANT_SPORT_SPEED_PERIOD 8118
 #define ANT_SPORT_CADENCE_PERIOD 8102
@@ -284,6 +288,27 @@ struct setChannelAtom {
 
 #define ANT_SPORT_AUTOZERO_OFF                        0x00
 #define ANT_SPORT_AUTOZERO_ON                         0x01
+
+// std power
+#define POWER_REQUEST_DATA_PAGE                       0x46
+#define POWER_POWERONLY_DATA_PAGE                     0x10
+#define POWER_DATA_PAGE                               0x02
+#define POWER_ADVANCED_CAPABILITIES1_PAGE             0xFD
+#define POWER_ADVANCED_CAPABILITIES2_PAGE             0xFE
+
+// Cycling dynamics data pages
+#define POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE             0xE0
+#define POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE             0xE1
+#define POWER_CYCL_DYN_PEDALPOSITION_PAGE             0xE2
+#define POWER_CYCL_DYN_TORQUE_BARYC_PAGE              0x14
+
+// note: capabilities are available or enabled when set to "0"
+#define POWER_NO_4Hz_MODE_CAPABILITY                  0x01
+#define POWER_NO_8Hz_MODE_CAPABILITY                  0x02
+#define POWER_NO_POWERPHASE_CAPABILITY                0x08
+#define POWER_NO_PCO_CAPABILITY                       0x10
+#define POWER_NO_POSITION_CAPABILITY                  0x20
+#define POWER_NO_TORQUE_BARYCENTER_CAPABILITY         0x40
 
 // kickr
 #define KICKR_COMMAND_INTERVAL         60 // every 60 ms
@@ -646,6 +671,13 @@ public:
         telemetry.setRPS(rps);
     }
 
+    void setRppb(uint8_t value) { telemetry.setRppb(value); }
+    void setRppe(uint8_t value) { telemetry.setRppe(value); }
+    void setRpppb(uint8_t value) { telemetry.setRpppb(value); }
+    void setRpppe(uint8_t value) { telemetry.setRpppe(value); }
+    void setRightPCO(uint8_t value) { telemetry.setRightPCO(value); }
+    void setLeftPCO(uint8_t value) { telemetry.setLeftPCO(value); }
+    void setPosition(uint8_t value) { telemetry.setPosition(value); }
     void setTorque(double torque) {
         telemetry.setTorque(torque);
     }
@@ -656,7 +688,11 @@ public:
     void requestFecCapabilities();
     void requestFecCalibration(uint8_t type);
 
+    void setPwrChannel(int channel);
     void requestPwrCalibration(uint8_t channel, uint8_t type);
+    void requestPwrCapabilities1();
+    void requestPwrCapabilities2();
+    void enablePwrCapabilities2(uint8_t capabilities);
 
     void setVortexData(int channel, int id);
     void refreshVortexLoad();
@@ -735,6 +771,7 @@ private:
 
     // fitness equipment data
     int fecChannel;
+    int pwrChannel;
 
     // tacx vortex (we'll probably want to abstract this out cf. kickr)
     int vortexID;

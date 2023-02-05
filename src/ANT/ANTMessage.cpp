@@ -354,6 +354,11 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
             //   0x12 - Crank Torque (Quarq)
             //   0x13 - Torque Efficiency and Pedal Smoothness - optional extension to 0x10 Standard Power or 0x11/0x12 Wheel/Crank Torque
             //   0x20 - Crank Torque Frequency (SRM)
+            //   0xE0 - Pedal right force angle
+            //   0xE1 - Pedal left force angle
+            //   0xE2 - Pedal position data
+            //   0xFD - Capabilities #1
+            //   0xFE - Capabilities #2
             //   0x50 - Manufacturer UD
             //   0x52 - Battery Voltage
 
@@ -421,12 +426,28 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
 
                 case ANT_STANDARD_POWER: // 0x10 - standard power
 
+                    // data valid on any sub-page
                     eventCount = message[5];
+
+                    // sub-page 0x10: standard Power-Only message
                     pedalPowerContribution = (( message[6] != 0xFF ) && ( message[6]&0x80) ) ; // left/right is defined if NOT 0xFF (= no Pedal Power) AND BIT 7 is set
                     pedalPower = (message[6]&0x7F); // right pedalPower % - stored in bit 0-6
                     instantCadence = message[7];
                     sumPower = message[8] + (message[9]<<8);
                     instantPower = message[10] + (message[11]<<8);
+
+                    // sub-page 0xE0/0xE1 – Right/Left Pedal Force Angle Page
+                    instantStartAngle     = message[6];
+                    instantEndAngle       = message[7];
+                    instantStartPeakAngle = message[8];
+                    instantEndPeakAngle   = message[9];
+                    torque                = message[10] + (message[11]<<8);
+
+                    // sub-page 0xE2 – Pedal Position Data
+                    riderPosition         = message[6] >> 6;
+                    rightPCO              = message[8];
+                    leftPCO               = message[9];
+
                     break;
 
                 case ANT_WHEELTORQUE_POWER: // 0x11 - wheel torque (Powertap)
@@ -512,6 +533,17 @@ ANTMessage::ANTMessage(ANT *parent, const unsigned char *message) {
 
                     }
                     break;
+
+                case POWER_ADVANCED_CAPABILITIES1_PAGE:
+                     pwrCapabilities1         = message[7];
+                     pwrEnCapabilities1       = message[9];
+                     break;
+
+                case POWER_ADVANCED_CAPABILITIES2_PAGE:
+                     pwrCapabilities2         = message[7];
+                     pwrEnCapabilities2       = message[9];
+                     break;
+
                 } // data_page
                 break;
 
@@ -845,6 +877,9 @@ void ANTMessage::init()
     autoZeroStatus = autoZeroEnable = 0;
     pedalPowerContribution = false;
     pedalPower = 0;
+    instantStartAngle = instantEndAngle = instantStartPeakAngle = instantEndPeakAngle = 0;
+    riderPosition = 0;
+    rightPCO = leftPCO = 0;
     leftTorqueEffectiveness = rightTorqueEffectiveness = 0;
     leftOrCombinedPedalSmoothness = rightPedalSmoothness = 0;
     fecSpeed = fecInstantPower = fecAccumulatedPower = 0;
@@ -1184,6 +1219,50 @@ ANTMessage ANTMessage::requestPwrCalibration(const uint8_t channel, const uint8_
                       0xFF, 0xFF,                           // reserved
                       0xFF, 0xFF);                          // reserved
 }
+
+ANTMessage ANTMessage::requestPwrCapabilities1(const uint8_t channel)
+{
+    // based on ANT+ Common Pages, Rev 2.4 p 14: 6.2  Common Data Page 70: Request Data Page
+    return ANTMessage(9, ANT_ACK_DATA, channel,
+                      POWER_REQUEST_DATA_PAGE,            // data page request
+                      0xFF, 0xFF,                         // reserved
+                      0xFF, 0xFF,                         // descriptors
+                      0x04,                               // requested transmission response
+                      POWER_ADVANCED_CAPABILITIES1_PAGE,  // requested page
+                      0x01);                              // request data page
+}
+
+ANTMessage ANTMessage::requestPwrCapabilities2(const uint8_t channel)
+{
+    qDebug() << "Requesting Capabilities #2 on channel" << channel;
+
+    // based on ANT+ Common Pages, Rev 2.4 p 14: 6.2  Common Data Page 70: Request Data Page
+    return ANTMessage(9, ANT_ACK_DATA, channel,
+                      POWER_REQUEST_DATA_PAGE,            // data page request
+                      0xFF, 0xFF,                         // reserved
+                      0xFF, 0xFF,                         // descriptors
+                      0x04,                               // requested transmission response
+                      POWER_ADVANCED_CAPABILITIES2_PAGE,  // requested page
+                      0x01);                              // request data page
+}
+
+ANTMessage ANTMessage::enablePwrCapabilities2(const uint8_t channel, const uint8_t capabilities)
+{
+    qDebug() << "Sending ANT_POWER_ENABLE_CAPABILITES2_MESSAGE (Power) on channel" << channel;
+
+    // based on ANT+ Device Profile - Bicycle Power Rev 5.1
+    // page 21: 4.5.2 Enabling Cycling Dynamics
+    // page 71: 15.2.3 Subpage 0x04 – Rider Position Configuration
+    return ANTMessage(9, ANT_ACK_DATA, channel,
+                      POWER_DATA_PAGE,                      // data page
+                      POWER_ADVANCED_CAPABILITIES2_PAGE,    // subpage
+                      0xFF, 0xFF,                           // reserved
+                      capabilities,                         // capabilities mask
+                      0xFF,                                 // reserved
+                      capabilities,                         // capabilities details
+                      0xFF);                                // reserved
+}
+
 
 ANTMessage ANTMessage::controlDeviceAvailability(const uint8_t channel)
 {
