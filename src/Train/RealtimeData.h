@@ -45,7 +45,9 @@ public:
                       VirtualSpeed, AltWatts, LRBalance, LapTimeRemaining,
                       LeftTorqueEffectiveness, RightTorqueEffectiveness,
                       LeftPedalSmoothness, RightPedalSmoothness, Slope, 
-                      Position,
+                      RightPowerPhaseBegin, RightPowerPhaseEnd,
+                      RightPowerPhasePeakBegin, RightPowerPhasePeakEnd,
+                      Position, RightPCO, LeftPCO,
                       LapDistance, LapDistanceRemaining, ErgTimeRemaining,
                       Latitude, Longitude, Altitude, RouteDistance,
                       DistanceRemaining };
@@ -98,6 +100,12 @@ public:
     void setRTE(double);
     void setLPS(double);
     void setRPS(double);
+    void setRppb(double);
+    void setRppe(double);
+    void setRpppb(double);
+    void setRpppe(double);
+    void setRightPCO(double);
+    void setLeftPCO(double);
     void setPosition(RealtimeData::riderPosition);
     void setTorque(double);
     void setLatitude(double);
@@ -153,6 +161,12 @@ public:
     double getRTE() const;
     double getLPS() const;
     double getRPS() const;
+    double getRppb() const;
+    double getRppe() const;
+    double getRpppb() const;
+    double getRpppe() const;
+    double getRightPCO() const;
+    double getLeftPCO() const;
     RealtimeData::riderPosition getPosition() const;
     double getTorque() const;
     double getLatitude() const;
@@ -182,6 +196,9 @@ private:
     double cadence;      // in rpm
     double smo2, thb;
     double lte, rte, lps, rps; // torque efficiency and pedal smoothness
+    double rppb, rppe, rpppb, rpppe;
+    double rightPowerPhaseBegin, rightPowerPhaseEnd, rightPowerPhasePeakBegin, rightPowerPhasePeakEnd;
+    double rightPCO, leftPCO;
     double torque; // raw torque data for calibration display
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
