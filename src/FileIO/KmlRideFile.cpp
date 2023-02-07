@@ -24,6 +24,12 @@
 #include <time.h>
 #include <iostream>
 #include <string>
+
+// silent few warnings from contributed library
+// in order to clean-up build log and allow to focus
+// on warnings from our own code
+#pragma warning(push)
+#pragma warning(disable : 4100)
 #include "kml/base/date_time.h"
 #include "kml/base/expat_parser.h"
 #include "kml/base/file.h"
@@ -32,6 +38,7 @@
 #include "kml/convenience/gpx_trk_pt_handler.h"
 #include "kml/dom.h"
 #include "kml/dom/kml_ptr.h"
+#pragma warning(pop)
 
 // majority of code swiped from the libkml example gpx2kml.cc
 using kmlbase::ExpatParser;

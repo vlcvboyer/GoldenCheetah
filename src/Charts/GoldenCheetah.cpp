@@ -23,7 +23,12 @@
 #include "Colors.h"
 #include "Settings.h"
 #include "Utils.h"
+// silent few warnings from contributed library
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4244)
 #include "mvjson.h"
+#pragma warning(pop)
 #include "LTMSettings.h"
 #include "Perspective.h"
 
