@@ -21,7 +21,12 @@
 #include "SportsPlusHealth.h"
 #include "Athlete.h"
 #include "Settings.h"
+// silent few warnings from contributed library
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4244)
 #include "mvjson.h"
+#pragma warning(pop)
 #include <QByteArray>
 #include <QHttpMultiPart>
 #include <QJsonDocument>

@@ -25,7 +25,11 @@
 #include <QFormLayout>
 
 #include "LocationInterpolation.h"
+// silent few warnings from contributed library
+#pragma warning(push)
+#pragma warning(disable : 4189)
 #include "GeometricTools_BSplineCurve.h"
+#pragma warning(pop)
 
 using namespace gte;
 
