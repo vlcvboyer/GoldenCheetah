@@ -22,6 +22,9 @@
 // need to get rid of this and use a string...
 #include <stdio.h>
 
+// silent warnings related to possible loss of data during conversion from 'size_t' to 'int'
+#pragma warning(disable : 4267)
+
 #ifdef YY_FLEX_SUBMINOR_VERSION
 # define YY_FLEX_VERSION               \
   (YY_FLEX_MAJOR_VERSION) * 1000000 \
