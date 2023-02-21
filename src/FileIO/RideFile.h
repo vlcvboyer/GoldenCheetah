@@ -63,7 +63,7 @@ extern const QChar deltaChar;
 struct RideFileDataPresent
 {
     // basic (te = torqueeffectiveness, ps = pedal smoothness)
-    bool secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp;
+    bool secs, cad, hr, km, kph, nm, watts, altwatts, alt, lon, lat, headwind, slope, temp;
     bool lrbalance, lte, rte, lps, rps, lpco, rpco, lppb, rppb, lppe, rppe, lpppb, rpppb, lpppe, rpppe;
     bool smo2, thb, interval;
 
@@ -76,7 +76,7 @@ struct RideFileDataPresent
     // whether non-zero data of each field is present
     RideFileDataPresent():
         secs(false), cad(false), hr(false), km(false),
-        kph(false), nm(false), watts(false), alt(false), lon(false), lat(false),
+        kph(false), nm(false), watts(false), altwatts(false), alt(false), lon(false), lat(false),
         headwind(false), slope(false), temp(false), 
         lrbalance(false), lte(false), rte(false), lps(false), rps(false),
         lpco(false), rpco(false), lppb(false), rppb(false), lppe(false), rppe(false),
@@ -214,7 +214,7 @@ class RideFile : public QObject // QObject to emit signals
         RideFile *resample(double recIntSecs, int interpolate=30);
 
         // Working with DATASERIES
-        enum seriestype { secs=0, cad, cadd, hr, hrd, km, kph, kphd, nm, nmd, watts, wattsd,
+        enum seriestype { secs=0, cad, cadd, hr, hrd, km, kph, kphd, nm, nmd, watts, altwatts, wattsd,
                           alt, lon, lat, headwind, slope, temp, interval, IsoPower, xPower,
                           vam, wattsKg, lrbalance, lte, rte, lps, rps,
                           aPower, wprime, aTISS, anTISS, smo2, thb, 
@@ -468,7 +468,7 @@ class RideFile : public QObject // QObject to emit signals
 struct RideFilePoint
 {
     // recorded data
-    double secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp;
+    double secs, cad, hr, km, kph, nm, watts, altwatts, alt, lon, lat, headwind, slope, temp;
 
     // pedals
     double lrbalance, lte, rte, lps, rps;
@@ -507,7 +507,8 @@ struct RideFilePoint
                       hrd(0.0), cadd(0.0), kphd(0.0), nmd(0.0), wattsd(0.0),
                       rvert(0.0), rcad(0.0), rcontact(0.0), tcore(0.0),
                       interval(0), xp(0), np(0),
-                      apower(0), atiss(0.0), antiss(0.0), gear(0.0), hhb(0.0), o2hb(0.0) {}
+                      apower(0), atiss(0.0), antiss(0.0), gear(0.0), hhb(0.0), o2hb(0.0),
+                      altwatts(0.0) {}
 
     // create point supplying all values
     RideFilePoint(double secs, double cad, double hr, double km, double kph,
@@ -522,7 +523,7 @@ struct RideFilePoint
                   double rvert, double rcad, double rcontact, double(tcore),
                   int interval) :
 
-        secs(secs), cad(cad), hr(hr), km(km), kph(kph), nm(nm), watts(watts), alt(alt), lon(lon), 
+        secs(secs), cad(cad), hr(hr), km(km), kph(kph), nm(nm), watts(watts), altwatts(0.0), alt(alt), lon(lon),
         lat(lat), headwind(headwind), slope(slope), temp(temp),
         lrbalance(lrbalance),
         lte(lte), rte(rte), lps(lps), rps(rps),
