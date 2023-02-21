@@ -655,6 +655,7 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
 
             } else if (lineno > unitsHeader) {
                 double minutes=0,nm=0,kph=0,watts=0,km=0,cad=0,alt=0,hr=0,dfpm=0, seconds=0.0;
+                double altWatts = 0.0;
                 double temp=RideFile::NA;
                 double slope=0.0;
                 bool ok;
@@ -701,7 +702,7 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                     }
 
                 } else if (csvType == gc) {
-                    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, \n";
+                    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, \n";
 
                     for (int i=0; i<gcSeries->valuename.count(); i++) {
                         QString valueName = gcSeries->valuename.at(i);
@@ -757,6 +758,8 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                             //     hhb = valueStr.toDouble();
                             } else if (valueName == "target") {
                                 target = valueStr.toDouble();
+                            } else if (valueName == "altWatts") {
+                                altWatts = valueStr.toDouble();
                             } else {
                                 // print debug message but only once
                                 static bool debugMessageFlag=false;
@@ -1312,6 +1315,11 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                                           smo2, thb,
                                           vo, rcad, gct, 0.0, interval);
 
+                    if (csvType == gc) {
+                        if (gcSeries->valuename.indexOf("altwatts")!=-1)
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altwatts, altWatts);
+                    }
+
                     if (target > 0.0) {
                         if (trainSeries == NULL)  {
                             // add XDATA
@@ -1758,6 +1766,10 @@ CsvFileReader::writeRideFile(Context *, const RideFile *ride, QFile &file, CsvTy
         gcSeries->valuename << "hhb"; gcSeries->unitname  << "";
 
         const RideFileDataPresent *present = ride->areDataPresent();
+        if (present->altwatts) {
+            gcSeries->valuename << "altwatts";
+            gcSeries->unitname  << "watts";
+        }
         if (present->lpco) {
             gcSeries->valuename << "lpco";
             gcSeries->unitname  << "";
@@ -1852,6 +1864,8 @@ CsvFileReader::writeRideFile(Context *, const RideFile *ride, QFile &file, CsvTy
                     csvLineData << QString::number(point->o2hb);
                 } else if (valueName == "hhb") {
                     csvLineData << QString::number(point->hhb);
+                } else if (valueName == "altwatts") {
+                    csvLineData << QString::number(point->altwatts);
                 } else if (valueName == "lpco") {
                     csvLineData << QString::number(point->lpco);
                 } else if (valueName == "rpco") {
