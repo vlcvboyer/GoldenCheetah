@@ -120,6 +120,7 @@ static QString protect(const QString string)
 %token SAMPLES SECS KM WATTS NM CAD KPH HR ALTITUDE LAT LON HEADWIND SLOPE TEMP
 %token LRBALANCE LTE RTE LPS RPS THB SMO2 RVERT RCAD RCON
 %token LPCO RPCO LPPB RPPB LPPE RPPE LPPPB RPPPB LPPPE RPPPE
+%token ALTWATTS
 
 %start document
 %%
@@ -366,6 +367,7 @@ series: SECS ':' number                 { jc->JsonPoint.secs = jc->JsonNumber; }
         | RVERT ':' number              { jc->JsonPoint.rvert = jc->JsonNumber; }
         | RCAD ':' number               { jc->JsonPoint.rcad = jc->JsonNumber; }
         | RCON ':' number               { jc->JsonPoint.rcontact = jc->JsonNumber; }
+        | ALTWATTS ':' number           { jc->JsonPoint.altwatts = jc->JsonNumber; }
         | string ':' number             { }
         | string ':' string
         ;
@@ -656,6 +658,7 @@ JsonFileReader::toByteArray(Context *, const RideFile *ride, bool withAlt, bool 
             if (ride->areDataPresent()->rcad) out += ", \"RCAD\":" + QString("%1").arg(p->rcad);
             if (ride->areDataPresent()->rvert) out += ", \"RVERT\":" + QString("%1").arg(p->rvert);
             if (ride->areDataPresent()->rcontact) out += ", \"RCON\":" + QString("%1").arg(p->rcontact);
+            if (ride->areDataPresent()->altwatts) out += ", \"ALTWATTS\":" + QString("%1").arg(p->altwatts);
 
             // sample points in here!
             out += " }";
