@@ -1909,10 +1909,21 @@ RideFile::setPointValue(int index, SeriesType series, double value)
         case rcontact : dataPoints_[index]->rcontact = value; break;
         case interval : dataPoints_[index]->interval = value; break;
         case tcore : dataPoints_[index]->tcore = value; break;
+        case position : dataPoints_[index]->position = static_cast<int>(value); break;
         default:
         case none : break;
     }
 }
+
+// void
+// RideFile::setPointValue(int index, SeriesType series, int value)
+// {
+//     switch (series) {
+//         case position : dataPoints_[index]->position = value; break;
+//         default:
+//         case none : break;
+//     }
+// }
 
 double
 RideFilePoint::value(RideFile::SeriesType series) const

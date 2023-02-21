@@ -370,6 +370,7 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayLRBalance = RideFile::NA;
     displayLTE = displayRTE = displayLPS = displayRPS = 0;
     displayLatitude = displayLongitude = displayAltitude = 0.0;
+    displayPosition = RealtimeData::seated;
 
     connect(gui_timer, SIGNAL(timeout()), this, SLOT(guiUpdate()));
     connect(disk_timer, SIGNAL(timeout()), this, SLOT(diskUpdate()));
@@ -1348,7 +1349,7 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs,cad,hr,km,kph,nm,watts,alt,lon,lat,headwind,slope,temp,interval,lrbalance,lte,rte,lps,rps,smo2,thb,o2hb,hhb,target,altWatts\n";
+                recordFileStream << "secs,cad,hr,km,kph,nm,watts,alt,lon,lat,headwind,slope,temp,interval,lrbalance,lte,rte,lps,rps,smo2,thb,o2hb,hhb,target,altWatts,position\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -1578,6 +1579,7 @@ void TrainSidebar::updateData(RealtimeData &rtData)
     displayLatitude = rtData.getLatitude();
     displayLongitude = rtData.getLongitude();
     displayAltitude = rtData.getAltitude();
+    displayPosition = rtData.getPosition();
     // Gradient not supported
     return;
 }
@@ -2009,6 +2011,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayLatitude = rtData.getLatitude();
             displayLongitude = rtData.getLongitude();
             displayAltitude = rtData.getAltitude();
+            displayPosition = rtData.getPosition();
 
             double weightKG = context->athlete->getWeight(QDate::currentDate()) + 10; // 10kg bike
             double vs = computeInstantSpeed(weightKG, rtData.getSlope(), rtData.getAltitude(), rtData.getWatts());
@@ -2134,7 +2137,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, position\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2170,6 +2173,7 @@ void TrainSidebar::diskUpdate()
                         << "," << displayHHB
                         << "," << ((status&RT_MODE_ERGO)?load:0) // if not slope mode
                         << "," << displayAltPower // allows altWatts to record power from trainer in addition to watts which are from power sensor
+                        << "," << displayPosition // record cyclist position
                         << "," << "\n";
 }
 

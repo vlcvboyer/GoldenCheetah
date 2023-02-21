@@ -668,6 +668,7 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                 double gct = 0.0, vo = 0.0, rcad = 0.0;
                 //UNUSED double o2hb = 0.0, hhb = 0.0;
                 double target = 0.0;
+                uint8_t position = 0;
 
                 int interval=0;
                 int pause=0;
@@ -702,7 +703,7 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                     }
 
                 } else if (csvType == gc) {
-                    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, \n";
+                    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, position, \n";
 
                     for (int i=0; i<gcSeries->valuename.count(); i++) {
                         QString valueName = gcSeries->valuename.at(i);
@@ -760,6 +761,8 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                                 target = valueStr.toDouble();
                             } else if (valueName == "altWatts") {
                                 altWatts = valueStr.toDouble();
+                            } else if (valueName == "position") {
+                                position = valueStr.toDouble();
                             } else {
                                 // print debug message but only once
                                 static bool debugMessageFlag=false;
@@ -1318,6 +1321,8 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                     if (csvType == gc) {
                         if (gcSeries->valuename.indexOf("altwatts")!=-1)
                             rideFile->setPointValue(minutes * 60.0, RideFile::altwatts, altWatts);
+                        if (gcSeries->valuename.indexOf("position")!=-1)
+                            rideFile->setPointValue(minutes * 60.0, RideFile::position, position);
                     }
 
                     if (target > 0.0) {

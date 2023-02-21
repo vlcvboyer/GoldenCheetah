@@ -68,7 +68,7 @@ struct RideFileDataPresent
     bool smo2, thb, interval;
 
     // derived
-    bool np,xp,apower,wprime,atiss,antiss,gear,hhb,o2hb,tcore;
+    bool np,xp,apower,wprime,atiss,antiss,gear,hhb,o2hb,tcore, position;
 
     // running
     bool rvert, rcad, rcontact;
@@ -84,7 +84,7 @@ struct RideFileDataPresent
         smo2(false), thb(false), interval(false),
         np(false), xp(false), apower(false), wprime(false), atiss(false), antiss(false),gear(false),
         hhb(false),o2hb(false), tcore(false),
-        rvert(false), rcad(false), rcontact(false) {}
+        rvert(false), rcad(false), rcontact(false), position(false) {}
 
 };
 
@@ -214,6 +214,7 @@ class RideFile : public QObject // QObject to emit signals
                           rvert, rcad, rcontact, gear, o2hb, hhb,
                           lpco, rpco, lppb, rppb, lppe, rppe, lpppb, rpppb, lpppe, rpppe,
                           wbal, tcore, clength, aPowerKg, index,
+                          position,
                           none }; // none must ALWAYS be last
         typedef enum seriestype SeriesType;
 
@@ -501,7 +502,7 @@ struct RideFilePoint
                       rvert(0.0), rcad(0.0), rcontact(0.0), tcore(0.0),
                       interval(0), xp(0), np(0),
                       apower(0), atiss(0.0), antiss(0.0), gear(0.0), hhb(0.0), o2hb(0.0),
-                      altwatts(0.0) {}
+                      altwatts(0.0), position(0) {}
 
     // create point supplying all values
     RideFilePoint(double secs, double cad, double hr, double km, double kph,
@@ -526,7 +527,7 @@ struct RideFilePoint
         smo2(smo2), thb(thb),
         hrd(0.0), cadd(0.0), kphd(0.0), nmd(0.0), wattsd(0.0), 
         rvert(rvert), rcad(rcad), rcontact(rcontact), tcore(tcore), interval(interval), 
-        xp(0), np(0), apower(0), atiss(0.0), antiss(0.0), gear(0.0),hhb(0.0),o2hb(0.0) {}
+        xp(0), np(0), apower(0), atiss(0.0), antiss(0.0), gear(0.0),hhb(0.0),o2hb(0.0), position(0) {}
 
     // get the value via the series type rather than access direct to the values
     double value(RideFile::SeriesType series) const;
