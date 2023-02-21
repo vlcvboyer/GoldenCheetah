@@ -211,6 +211,8 @@ class TrainSidebar : public GcWindow
         // HRV R-R data being saved away
         void rrData(uint16_t  rrtime, uint8_t heartrateBeats, uint8_t instantHeartrate);
 
+        void posData(uint16_t  posTime, uint8_t position);
+
         // VO2 measurement data to save
         void vo2Data(double rf, double rmv, double vo2, double vco2, double tv, double feo2);
 
@@ -263,6 +265,7 @@ class TrainSidebar : public GcWindow
         bool lapAudioThisLap;
         double textPositionEmitted;
         bool useSimulatedSpeed;
+        RealtimeData::riderPosition displayPosition; // rider position (seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 10, off = 11)
 
         void maintainLapDistanceState();
 
@@ -275,6 +278,8 @@ class TrainSidebar : public GcWindow
         int lastRecordSecs;     // to avoid duplicates
         QMutex rrMutex;         // to coordinate async recording from ANT+ thread
         QFile *rrFile;          // r-r records, if any received.
+        QMutex posMutex;        // to coordinate async recording from ANT+ thread
+        QFile *posFile;         // cyclist position records, if any received.
         QMutex vo2Mutex;         // to coordinate async recording from ANT+ thread
         QFile *vo2File;         // vo2 records, if any received.
 

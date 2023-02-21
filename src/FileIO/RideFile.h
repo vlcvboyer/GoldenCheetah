@@ -474,6 +474,8 @@ struct RideFilePoint
 
     int interval;
 
+    int position;
+
     // derived data (we calculate it)
     // xPower, normalised power, aPower
     double xp, np, apower, atiss, antiss, gear, hhb, o2hb, clength;

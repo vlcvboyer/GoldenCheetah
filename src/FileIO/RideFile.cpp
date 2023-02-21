@@ -1871,6 +1871,7 @@ RideFilePoint::value(RideFile::SeriesType series) const
         case RideFile::aTISS : return atiss; break;
         case RideFile::anTISS : return antiss; break;
         case RideFile::tcore : return tcore; break;
+        case RideFile::position : return position; break;
 
         default:
         case RideFile::none : break;
@@ -1930,6 +1931,7 @@ RideFilePoint::setValue(RideFile::SeriesType series, double value)
         case RideFile::aTISS : atiss = value; break;
         case RideFile::anTISS : antiss = value; break;
         case RideFile::tcore : tcore = value; break;
+        case RideFile::position : position = value; break;
 
         default:
         case RideFile::none : break;
@@ -2027,6 +2029,7 @@ RideFile::decimalsFor(SeriesType series)
         case wprime : return 0; break;
         case wbal : return 0; break;
         case tcore : return 2; break;
+        case position : return 0; break;
         default:
         case none : break;
     }
