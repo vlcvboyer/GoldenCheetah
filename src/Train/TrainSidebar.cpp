@@ -364,7 +364,8 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     wbalr = wbal = 0;
     load_msecs = total_msecs = lap_msecs = 0;
     displayWorkoutDistance = displayDistance = displayPower = displayHeartRate =
-    displaySpeed = displayCadence = slope = load = 0;
+    displayAltPower = displaySpeed = displayCadence = slope = load = 0;
+
     displaySMO2 = displayTHB = displayO2HB = displayHHB = 0;
     displayLRBalance = RideFile::NA;
     displayLTE = displayRTE = displayLPS = displayRPS = 0;
@@ -1350,7 +1351,7 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
+                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -1563,6 +1564,7 @@ void TrainSidebar::Stop(int deviceStatus)        // when stop button is pressed
 void TrainSidebar::updateData(RealtimeData &rtData)
 {
     displayPower = rtData.getWatts();
+    displayAltPower = rtData.getAltWatts();
     displayCadence = rtData.getCadence();
     displayHeartRate = rtData.getHr();
     displaySpeed = rtData.getSpeed();
@@ -2001,6 +2003,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
 
             // local stuff ...
             displayPower = rtData.getWatts();
+            displayAltPower = rtData.getAltWatts();
             displayCadence = rtData.getCadence();
             displayHeartRate = rtData.getHr();
             displaySpeed = rtData.getSpeed();
@@ -2152,7 +2155,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2190,6 +2193,7 @@ void TrainSidebar::diskUpdate()
                         << "," << displayO2HB
                         << "," << displayHHB
                         << "," << loadStr
+                        << "," << displayAltPower // allows altWatts to record power from trainer in addition to watts which are from power sensor
                         << "," << displayRppb
                         << "," << displayRppe
                         << "," << displayRpppb
