@@ -29,6 +29,11 @@ static float timeout_lost=30.0; // time to do more thorough scan
 
 ANTChannel::ANTChannel(int number, ANT *parent) : parent(parent), number(number)
 {
+    // timer for power sensor setup
+    connect(this, SIGNAL(sensorSetupTimerStart()), this, SLOT(slotStartSensorSetupTimer()));
+    connect(this, SIGNAL(sensorSetupTimerStop()), this, SLOT(slotStopSensorSetupTimer()));
+    sensorSetupTimer = new QTimer(this);
+
     init();
 }
 
@@ -40,6 +45,7 @@ ANTChannel::init()
     is_kickr=false;
     is_moxy=false;
     is_fec=false;
+    is_power=false;
     is_cinqo=0;
     is_old_cinqo=0;
     is_alt=0;
@@ -63,6 +69,11 @@ ANTChannel::init()
     status = Closed;
     fecPrevRawDistance=0;
     fecCapabilities=0;
+    pwrCapabilities=0;
+    pwrReqCapabilities=0;
+    pwrEnCapabilities=0;
+    pwrCapabilitiesMsgDelay=0;
+    pwrCapabilitiesSetupComplete=false;
     lastMessageTimestamp = lastMessageTimestamp2 = parent->getElapsedTime();
     blacklisted=0;
     sc_speed_active = sc_cadence_active = 0;
@@ -131,6 +142,11 @@ void ANTChannel::close()
     if (is_master) {
         //qDebug()<<number<<"Stopping timer..";
         emit broadcastTimerStop(number);
+    }
+
+    // timer used to setup sensor
+    if (is_power) {
+        emit sensorSetupTimerStop();
     }
 
     // lets shutdown
@@ -633,32 +649,135 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                 // or the ANT_CRANKTORQUE_POWER.
                 case ANT_STANDARD_POWER: // 0x10 - standard power
                 {
-                    uint8_t events = antMessage.eventCount - lastStdPwrMessage.eventCount;
-                    if (lastStdPwrMessage.type && events) {
-                        stdNullCount = 0;
-                        is_alt ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
-                        value2 = value = antMessage.instantPower;
-                        parent->setSecondaryCadence(antMessage.instantCadence); // cadence
-                        // LRBalance is left side contribution, pedalPower is right side
-                        antMessage.pedalPowerContribution ? parent->setLRBalance(100-antMessage.pedalPower) : parent->setLRBalance(RideFile::NA);
-                    } else {
-                       stdNullCount++;
-                       if (stdNullCount >= 6) { //6 for standard power according to specs
-                           parent->setSecondaryCadence(0);
-                           is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
-                           parent->setLRBalance(RideFile::NA);
-                           value2 = value = 0;
-                           parent->setTE(0,0);
-                           parent->setPS(0,0);
-                       }
+                    parent->setPwrChannel(number);
+                    if (!pwrCapabilitiesSetupComplete)
+                        emit sensorSetupTimerStart();
+
+                    switch (antMessage.data_page) {
+                        case POWER_POWERONLY_DATA_PAGE:
+                            {
+                                uint8_t events = antMessage.eventCount - lastStdPwrMessage.eventCount;
+                                if (lastStdPwrMessage.type && events) {
+                                    stdNullCount = 0;
+                                    is_alt ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
+                                    value2 = value = antMessage.instantPower;
+                                    parent->setSecondaryCadence(antMessage.instantCadence); // cadence
+                                    // LRBalance is left side contribution, pedalPower is right side
+                                    antMessage.pedalPowerContribution ? parent->setLRBalance(100-antMessage.pedalPower) : parent->setLRBalance(RideFile::NA);
+                                } else {
+                                stdNullCount++;
+                                if (stdNullCount >= 6) { //6 for standard power according to specs
+                                    parent->setSecondaryCadence(0);
+                                    is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                                    parent->setLRBalance(RideFile::NA);
+                                    value2 = value = 0;
+                                    parent->setTE(0,0);
+                                    parent->setPS(0,0);
+                                }
+                                }
+                                lastStdPwrMessage = antMessage;
+                                // Mark power event for possible match-up against a future
+                                // ANT_TE_AND_PS_POWER event.
+                                lastPwrForTePsMessage = lastStdPwrMessage;
+                                // Mark power event for possible match-up against a future
+                                // other data page
+                                lastPwrForCDMessage =  lastStdPwrMessage;
+                                savemessage = false;
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                uint8_t events = antMessage.eventCount - lastPwrForCDMessage.eventCount;
+
+                                if (events) {
+                                    qDebug() << "Receiving valid data in POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                    // FIXME : &&&&& to be confirmed as we expect the same event count ?
+                                    // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.84 : 17.1 Right Force Angle (0xE0)
+                                    parent->setRppb(antMessage.instantStartAngle);      //Right Power Phase Begin
+                                    parent->setRppe(antMessage.instantEndAngle);        //Right Power Phase End
+                                    parent->setRpppb(antMessage.instantStartPeakAngle); //Right Power Phase Peak Begin
+                                    parent->setRpppe(antMessage.instantEndPeakAngle);   //Right Power Phase Peak End
+                                } else {
+                                    qDebug() << "ERR: Receiving invalid data in POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                                }
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE";
+
+                                // TODO !!!
+                            }
+                            break;
+
+// &&&&& NE PASSE JAMAIS LA !!!
+                        case POWER_CYCL_DYN_PEDALPOSITION_PAGE:
+                            {
+                                qDebug() << "Receiving page POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                uint8_t events = antMessage.eventCount - lastPwrForCDMessage.eventCount;
+
+                                if (events) {
+                                    qDebug() << "Receiving valid data in POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                    // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.90 : 17-3 Pedal Position Data Message Format (0xE0)
+
+                                    parent->setPosition(static_cast<RealtimeData::riderPosition>(antMessage.riderPosition));
+                                    parent->setRightPCO(antMessage.rightPCO);
+                                    parent->setLeftPCO(antMessage.leftPCO);
+                                } else {
+                                    qDebug() << "ERR: Receiving invalid data in POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                                }
+                            }
+                            break;
+
+                        case POWER_CYCL_DYN_TORQUE_BARYC_PAGE:
+
+                            // TODO !!!
+
+                            break;
+
+                        default:
+                            qDebug() << "Err: Received unknown page from power sensor 0x" << QString("%1").arg(antMessage.data_page, 2, 16, QChar('0')).toUpper();
+
                     }
-                    lastStdPwrMessage = antMessage;
-                    // Mark power event for possible match-up against a future
-                    // ANT_TE_AND_PS_POWER event.
-                    lastPwrForTePsMessage = lastStdPwrMessage;
-                    savemessage = false;
+
                 }
                 break;
+
+                case POWER_GETSET_PARAM_PAGE:
+                {
+                    uint8_t data_subpage = message[3];
+
+                    // allows future request without any delay
+                    pwrCapabilitiesMsgDelay = 0;
+
+                    switch(data_subpage) {
+                        case POWER_ADV_CAPABILITIES1_SUBPAGE:
+                            pwrCapabilities = (pwrCapabilities & 0xFF00) | (static_cast<uint16_t>(antMessage.pwrCapabilities1));
+                            pwrEnCapabilities = (pwrCapabilities & 0xFF00) | (static_cast<uint16_t>(antMessage.pwrEnCapabilities1));
+                            qDebug()<<number
+                                << QString("Capabilities 1 received from ANT PWR Device: 0x")
+                                +  QString("%1").arg(antMessage.pwrCapabilities1, 2, 16, QChar('0')).toUpper()
+                                +  QString(", enCapabilities1: 0x")
+                                +  QString("%1").arg(antMessage.pwrEnCapabilities1, 2, 16, QChar('0')).toUpper();
+                            break;
+
+                        case POWER_ADV_CAPABILITIES2_SUBPAGE:
+                            pwrCapabilities = (pwrCapabilities & 0x00FF) | (static_cast<uint16_t>(antMessage.pwrCapabilities2)<<8);
+                            pwrEnCapabilities = (pwrCapabilities & 0x00FF) | (static_cast<uint16_t>(antMessage.pwrEnCapabilities2)<<8);
+                            qDebug()<<number
+                                << QString("Capabilities 2 received from ANT PWR Device: 0x")
+                                +  QString("%1").arg(antMessage.pwrCapabilities2, 2, 16, QChar('0')).toUpper()
+                                +  QString(", enCapabilities2: 0x")
+                                +  QString("%1").arg(antMessage.pwrEnCapabilities2, 2, 16, QChar('0')).toUpper();
+                            break;
+                        default:
+                            qDebug()<<number<<"unknown capabilty subpage"<<QString("0x")+QString("%1").arg(data_subpage, 2, 16, QChar('0')).toUpper();
+                    }
+                    break;
+                }
 
                 case ANT_TE_AND_PS_POWER:
                 {
@@ -1195,15 +1314,22 @@ void ANTChannel::channelId(unsigned char *ant_message) {
     // high nibble of transmission type used to indicate
     // it is a kick, A0 gives the game away :)
     is_kickr = (device_id == ANT_SPORT_POWER_TYPE) && ((CHANNEL_ID_TRANSMISSION_TYPE(message)&0xF0) == 0xA0);
-
     if (is_kickr) {
         qDebug()<<number<<"KICKR DETECTED VIA CHANNEL ID EVENT";
     }
 
     is_fec = (device_id == ANT_SPORT_FITNESS_EQUIPMENT_TYPE);
-
     if (is_fec) {
         qDebug()<<number<<"ANT FE-C DETECTED VIA CHANNEL ID EVENT";
+    }
+
+    is_power = (device_id == ANT_SPORT_POWER_TYPE);
+    if (is_power) {
+        qDebug()<<number<<"ANT POWER SENSOR DETECTED VIA CHANNEL ID EVENT";
+    }
+
+    if (!is_power && !is_fec && !is_kickr) {
+        qDebug()<<number<<"ANT SENSOR ID " << device_id << " DETECTED VIA CHANNEL ID EVENT";
     }
 
     // tell controller we got a new channel id
@@ -1385,17 +1511,179 @@ void ANTChannel::attemptTransition(int message_id)
     }
 }
 
+void
+ANTChannel::slotStartSensorSetupTimer() // timer
+{
+    if (!sensorSetupTimer->isActive())
+    {
+        // connect the timer to the remote control event slot
+        connect(sensorSetupTimer, SIGNAL(timeout()), this, SLOT(slotSensorSetupTimerEvent()), Qt::DirectConnection);
+
+        // start the timer..
+        sensorSetupTimer->start(1000); //ms
+
+        qDebug()<<number<<"timer id:" << sensorSetupTimer->timerId();
+    }
+}
+
+void
+ANTChannel::slotStopSensorSetupTimer() // timer
+{
+    if (sensorSetupTimer->isActive())
+    {
+        // disconnect the slot, else we duplicate signals on subsequent sessions
+        disconnect(sensorSetupTimer, SIGNAL(timeout()), this, SLOT(slotSensorSetupTimerEvent()));
+
+        // stop the broadcast timer..
+        sensorSetupTimer->stop();
+    }
+}
+
+void
+ANTChannel::slotSensorSetupTimerEvent()
+{
+    // qDebug()<<"Sensor setup timer event received. Ask for capabilities and update sensor settings accordingly...";
+    capabilities();
+}
+
 uint8_t ANTChannel::capabilities()
 {
-    if (!is_fec)
+    if (!is_fec && !is_power) {
+        // qDebug()<<number<<"ANTChannel::capabilities() for other sensor";
         return 0;
+    }
 
-    if (fecCapabilities)
-        return fecCapabilities;
+    if (is_fec)
+    {
+        if (fecCapabilities)
+        {
+            return fecCapabilities;
+        } else
+        {
+            qDebug() << qPrintable("Ask for FEC capabilities");
+            parent->requestFecCapabilities();
+            return 0;
+        }
+    }
+    else if (is_power)
+    {
+        if ((!(pwrCapabilities&0x00FF) || !(pwrCapabilities&0xFF00)
+        || pwrEnCapabilities!=pwrReqCapabilities))
+        {
+            // capabilities are not yet collected or requested cababilities have not been enabled
 
-    // if we do not know device capabilities, request it
-    qDebug() << qPrintable("Ask for capabilities");
-    parent->requestFecCapabilities();
+            // first ensure that we will still work on this subject on regular basis
+            if (!pwrCapabilitiesSetupComplete)
+                emit sensorSetupTimerStart();
+
+            qDebug()<<number<<"ANTChannel::capabilities() for power sensor (pwrCapabilities was0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()+")";
+
+            if (pwrCapabilitiesMsgDelay!=0)
+            {
+                // request already sent to sensor
+                // wait few seconds delay between successive requests
+                pwrCapabilitiesMsgDelay--;
+            }
+        }
+
+        if (!(pwrCapabilities&0x00FF) && !pwrCapabilitiesMsgDelay)
+        {
+            qDebug()<<number<<"pwrCapabilities1 to be requested from power sensor";
+            parent->requestPwrCapabilities1(number);
+            pwrCapabilitiesMsgDelay = POWER_CAPABILITIES_DELAY;
+        } else if (!(pwrCapabilities&0xFF00) && !pwrCapabilitiesMsgDelay)
+        {
+            qDebug()<<number<<"pwrCapabilities2 to be requested from power sensor";
+            parent->requestPwrCapabilities2(number);
+            pwrCapabilitiesMsgDelay = POWER_CAPABILITIES_DELAY;
+        } else if (pwrCapabilities&0x00FF && pwrCapabilities&0xFF00)
+        {
+            // all capabilities received from sensor
+            // check for each capability which is useful for us
+            // if it is available and enabled
+            // note: capability are using inverted bits
+
+            // set default values
+            pwrReqCapabilities = pwrEnCapabilities;
+
+            // 8Hz mode (mandatory for cycling dynamics)
+            if ((~pwrCapabilities & (POWER_NO_8HZ_MODE_CAPABILITY<<8))
+                && !(~pwrEnCapabilities & (POWER_NO_8HZ_MODE_CAPABILITY<<8)))
+            {
+                qDebug()<<number<<"pwrCapability 8Hz found to be activated";
+                pwrReqCapabilities &= ~(POWER_NO_8HZ_MODE_CAPABILITY<<8);
+            }
+
+            if ((~pwrCapabilities & (POWER_NO_POWERPHASE_CAPABILITY<<8))
+                && !(~pwrEnCapabilities & (POWER_NO_POWERPHASE_CAPABILITY<<8)))
+            {
+                qDebug()<<number<<"pwrCapability powerphase found to be activated";
+                pwrReqCapabilities &= ~(POWER_NO_POWERPHASE_CAPABILITY<<8);
+            }
+
+            if ((~pwrCapabilities & (POWER_NO_PCO_CAPABILITY<<8))
+                && !(~pwrEnCapabilities & (POWER_NO_PCO_CAPABILITY<<8)))
+            {
+                qDebug()<<number<<"pwrCapability PCO found to be activated";
+                pwrReqCapabilities &= ~(POWER_NO_PCO_CAPABILITY<<8);
+            }
+
+            if ((~pwrCapabilities & (POWER_NO_POSITION_CAPABILITY<<8))
+                && !(~pwrEnCapabilities & (POWER_NO_POSITION_CAPABILITY<<8)))
+            {
+                qDebug()<<number<<"pwrCapability position found to be activated";
+                pwrReqCapabilities &= ~(POWER_NO_POSITION_CAPABILITY<<8);
+            }
+
+            if ((~pwrCapabilities & (POWER_NO_TORQUE_BARYCENTER_CAPABILITY<<8))
+                && !(~pwrEnCapabilities & (POWER_NO_TORQUE_BARYCENTER_CAPABILITY<<8)))
+            {
+                qDebug()<<number<<"pwrCapability torque barycenter found to be activated";
+                pwrReqCapabilities &= ~(POWER_NO_TORQUE_BARYCENTER_CAPABILITY<<8);
+            }
+
+            if ((pwrEnCapabilities&0x00FF)!=(pwrReqCapabilities&0x00FF) && !pwrCapabilitiesMsgDelay)
+            {
+                qDebug()<<number<<"pwrCapabilities=0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrEnCapabilities=0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrReqCapabilities=0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper();
+                qDebug()<<number<<"pwrCapabilities1 previously received but still to be setup correctly"
+                    <<"will be set to 0x"+QString("%1").arg(pwrReqCapabilities & 0x00FF, 2, 16, QChar('0')).toUpper();
+                parent->enablePwrCapabilities1(pwrReqCapabilities & 0x00FF, number);
+                pwrCapabilitiesMsgDelay = POWER_CAPABILITIES_DELAY;
+            } else if ((pwrEnCapabilities&0xFF00)!=(pwrReqCapabilities&0xFF00) && !pwrCapabilitiesMsgDelay)
+            {
+                qDebug()<<number<<"pwrCapabilities=0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrEnCapabilities=0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrReqCapabilities=0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper();
+                qDebug()<<number<<"pwrCapabilities2 previously received but still to be setup correctly"
+                    <<"will be set to 0x"+QString("%1").arg(pwrReqCapabilities >> 8, 2, 16, QChar('0')).toUpper();
+                parent->enablePwrCapabilities2(pwrReqCapabilities >> 8, number);
+                pwrCapabilitiesMsgDelay = POWER_CAPABILITIES_DELAY;
+            } else
+            {
+                pwrCapabilitiesSetupComplete=true;
+                emit sensorSetupTimerStop();
+                qDebug()<<number<<"ANTChannel::capabilities() for power sensor setup correctly";
+                qDebug()<<number<<"pwrCapabilities=0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrEnCapabilities=0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrReqCapabilities=0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper();
+            }
+        }
+
+        // in any case return capabilities when received and exhaustive
+        if ((pwrCapabilities&0x00FF) && (pwrCapabilities&0xFF00))
+        {
+            // we received all capabilities from sensor
+            qDebug()<<number<<"pwrCapabilities previously received for power sensor 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
+                    <<"pwrEnCapabilities=0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper();
+            return pwrCapabilities;
+        } else
+        {
+            return 0;
+        }
+    }
+
     return 0;
 }
 

@@ -92,10 +92,18 @@ class ANTChannel : public QObject {
         // Stores latest ANT_STANDARD_POWER or ANT_CRANKTORQUE_POWER
         // for use by ANT_TE_AND_PS_POWER.
         ANTMessage lastPwrForTePsMessage;
+        ANTMessage lastPwrForCDMessage;
         int dualNullCount, nullCount, stdNullCount;
         double last_message_timestamp;
         uint8_t fecPrevRawDistance;
         uint8_t  fecCapabilities;
+
+        // sensor capabilities, requested capabilities and enabled capabilities
+        uint16_t  pwrCapabilities;
+        uint16_t  pwrReqCapabilities;
+        uint16_t  pwrEnCapabilities;
+        uint8_t   pwrCapabilitiesMsgDelay;
+        bool      pwrCapabilitiesSetupComplete;
 
         double blanking_timestamp;
         int blanked;
@@ -165,6 +173,7 @@ class ANTChannel : public QObject {
         bool is_old_cinqo; // bool, set for cinqo needing separate control channel
         bool is_srm;
         bool is_fec;
+        bool is_power;
         bool is_alt; // is alternative channel for power
         bool is_master; // is a master channel (for remote control)
 
@@ -209,6 +218,9 @@ class ANTChannel : public QObject {
 
         QTimer *channelTimer; // timer for master channel broadcast events
 
+        // timer for sensors setup
+        QTimer *sensorSetupTimer;
+
         // Cinqo support
         void sendCinqoError();
         void sendCinqoSuccess();
@@ -217,6 +229,12 @@ class ANTChannel : public QObject {
         void checkSRM();
 
         void setAlt(bool value) { is_alt = value; }
+
+    public slots:
+       // setup sensors
+        void slotStartSensorSetupTimer();
+        void slotStopSensorSetupTimer();
+        void slotSensorSetupTimerEvent();
 
     signals:
         void channelInfo(int number, int device_number, int device_id); // we got a channel info message
@@ -227,6 +245,8 @@ class ANTChannel : public QObject {
         void searchComplete(int number); // search completed successfully
         void broadcastTimerStart(int number);
         void broadcastTimerStop(int number);
+        void sensorSetupTimerStart(); // setup sensors timer
+        void sensorSetupTimerStop();
 
         // signal instantly on data receipt for R-R data
         void rrData(uint16_t  rrtime, uint8_t heartrateBeats, uint8_t instantHeartrate);
