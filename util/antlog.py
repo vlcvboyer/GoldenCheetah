@@ -18,26 +18,26 @@ file = open(sys.argv[1], 'rb')
 for line in range(0, os.path.getsize(sys.argv[1]), 21):
 
   data = file.read(1)
-  RS = data[0];
+  RS = str(data[0])
 
   data = file.read(8)
-  timestamp = struct.unpack('L', data)[0]
+  timestamp = struct.unpack('Q', data)[0]
 
   data = file.read(12)
-  print str(timestamp) + ' - ' \
+  print (str(timestamp) + ' - ' \
       + RS  + ': ' \
-      + '0x' + (data[0]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[1]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[2]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[3]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[4]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[5]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[6]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[7]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[8]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[9]).encode('hex').upper()  + ', ' \
-      + '0x' + (data[10]).encode('hex').upper() + ', ' \
-      + '0x' + (data[11]).encode('hex').upper()
+      + '0x' + '{:02X}'.format(data[0]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[1]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[2]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[3]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[4]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[5]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[6]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[7]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[8]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[9]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[10]).upper() + ', ' \
+      + '0x' + '{:02X}'.format(data[11]).upper())
 
 file.close()
 
