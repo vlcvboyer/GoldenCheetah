@@ -698,7 +698,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                 case POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE:
                     {
-                        qDebug() << "Receiving page POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
+                        // qDebug() << "Receiving page POWER_CYCL_DYN_R_FORCE_ANGLE_PAGE";
                         // Based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.84 : 17.1 Right Force Angle (0xE0)
                         // Right Power Phase Begin, Power Phase End, Power Phase Peak Begin, Power Phase Peak End
                         // (note: conversion from binary radians to degres)
@@ -713,7 +713,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                 case POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE:
                     {
-                        qDebug() << "Receiving page POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE";
+                        // qDebug() << "Receiving page POWER_CYCL_DYN_L_FORCE_ANGLE_PAGE";
                         // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.84 : 17.1 Right Force Angle (0xE0)
                         // Left Power Phase Begin, Power Phase End, Power Phase Peak Begin, Power Phase Peak End
                         // (note: conversion from binary radians to degres)
@@ -728,7 +728,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                 case POWER_CYCL_DYN_PEDALPOSITION_PAGE:
                     {
-                        qDebug() << "Receiving page POWER_CYCL_DYN_PEDALPOSITION_PAGE";
+                        // qDebug() << "Receiving page POWER_CYCL_DYN_PEDALPOSITION_PAGE";
                         // based on ANT+ Device Profile - Bicycle Power Rev 5.1 p.90 : 17-3 Pedal Position Data Message Format (0xE0)
                         parent->setPosition(static_cast<RealtimeData::riderPosition>(antMessage.riderPosition));
                         parent->setRightPCO(antMessage.rightPCO);
@@ -756,21 +756,21 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         case POWER_ADV_CAPABILITIES1_SUBPAGE:
                             pwrCapabilities = (pwrCapabilities & 0xFF00) | (static_cast<uint16_t>(antMessage.pwrCapabilities1));
                             pwrEnCapabilities = (pwrCapabilities & 0xFF00) | (static_cast<uint16_t>(antMessage.pwrEnCapabilities1));
-                            qDebug()<<number
-                                << qPrintable(QString("Capabilities sub-page 1 received from ANT PWR Device: 0x")
-                                +  QString("%1").arg(antMessage.pwrCapabilities1, 2, 16, QChar('0')).toUpper()
-                                +  QString(", enabled capabilities: 0x")
-                                +  QString("%1").arg(antMessage.pwrEnCapabilities1, 2, 16, QChar('0')).toUpper());
-                            break;
+                            // qDebug()<<number
+                            //     << qPrintable(QString("Capabilities sub-page 1 received from ANT PWR Device: 0x")
+                            //     +  QString("%1").arg(antMessage.pwrCapabilities1, 2, 16, QChar('0')).toUpper()
+                            //     +  QString(", enabled capabilities: 0x")
+                            //     +  QString("%1").arg(antMessage.pwrEnCapabilities1, 2, 16, QChar('0')).toUpper());
+                            // break;
 
                         case POWER_ADV_CAPABILITIES2_SUBPAGE:
                             pwrCapabilities = (pwrCapabilities & 0x00FF) | (static_cast<uint16_t>(antMessage.pwrCapabilities2)<<8);
                             pwrEnCapabilities = (pwrCapabilities & 0x00FF) | (static_cast<uint16_t>(antMessage.pwrEnCapabilities2)<<8);
-                            qDebug()<<number
-                                << qPrintable(QString("Capabilities sub-page 2 received from ANT PWR Device: 0x")
-                                +  QString("%1").arg(antMessage.pwrCapabilities2, 2, 16, QChar('0')).toUpper()
-                                +  QString(", enabled capabilities2: 0x")
-                                +  QString("%1").arg(antMessage.pwrEnCapabilities2, 2, 16, QChar('0')).toUpper());
+                            // qDebug()<<number
+                            //     << qPrintable(QString("Capabilities sub-page 2 received from ANT PWR Device: 0x")
+                            //     +  QString("%1").arg(antMessage.pwrCapabilities2, 2, 16, QChar('0')).toUpper()
+                            //     +  QString(", enabled capabilities2: 0x")
+                            //     +  QString("%1").arg(antMessage.pwrEnCapabilities2, 2, 16, QChar('0')).toUpper());
                             break;
                         default:
                             qDebug()<<number<<"unknown capabilty subpage"<<QString("0x")+QString("%1").arg(data_subpage, 2, 16, QChar('0')).toUpper();
@@ -1604,15 +1604,15 @@ uint16_t ANTChannel::capabilities()
             pwrReqCapabilities = pwrEnCapabilities;
             pwrMaskCapabilities = pwrEnCapabilities;
 
-            qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
-                <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper());
+            // qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
+            //     <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper());
 
             // 8Hz mode (mandatory for cycling dynamics)
             // and disable 4Hz transmission in order to enable 8Hz
             if ((~pwrCapabilities & (POWER_NO_8HZ_MODE_CAPABILITY<<8))
                 && !(~pwrEnCapabilities & (POWER_NO_8HZ_MODE_CAPABILITY<<8)))
             {
-                qDebug()<<number<<"capability 8Hz found to be activated from sub-page 2";
+                // qDebug()<<number<<"capability 8Hz found to be activated from sub-page 2";
                 pwrReqCapabilities  &= ~(POWER_NO_8HZ_MODE_CAPABILITY<<8);
                 pwrMaskCapabilities &= ~(POWER_NO_8HZ_MODE_CAPABILITY<<8);
             }
@@ -1620,7 +1620,7 @@ uint16_t ANTChannel::capabilities()
                 && (~pwrCapabilities & (POWER_NO_8HZ_MODE_CAPABILITY<<8))
                 && (~pwrEnCapabilities & (POWER_NO_4HZ_MODE_CAPABILITY<<8)))
             {
-                qDebug()<<number<<"capability 4Hz found to be deactivated from sub-page 2";
+                // qDebug()<<number<<"capability 4Hz found to be deactivated from sub-page 2";
                 pwrReqCapabilities  |=  (POWER_NO_4HZ_MODE_CAPABILITY<<8);
                 pwrMaskCapabilities &= ~(POWER_NO_4HZ_MODE_CAPABILITY<<8);
             }
@@ -1628,7 +1628,7 @@ uint16_t ANTChannel::capabilities()
             if ((~pwrCapabilities & (POWER_NO_POWERPHASE_CAPABILITY<<8))
                 && !(~pwrEnCapabilities & (POWER_NO_POWERPHASE_CAPABILITY<<8)))
             {
-                qDebug()<<number<<"capability powerphase found to be activated";
+                // qDebug()<<number<<"capability powerphase found to be activated";
                 pwrReqCapabilities  &= ~(POWER_NO_POWERPHASE_CAPABILITY<<8);
                 pwrMaskCapabilities &= ~(POWER_NO_POWERPHASE_CAPABILITY<<8);
             }
@@ -1644,7 +1644,7 @@ uint16_t ANTChannel::capabilities()
             if ((~pwrCapabilities & (POWER_NO_POSITION_CAPABILITY<<8))
                 && !(~pwrEnCapabilities & (POWER_NO_POSITION_CAPABILITY<<8)))
             {
-                qDebug()<<number<<"capability position found to be activated";
+                // qDebug()<<number<<"capability position found to be activated";
                 pwrReqCapabilities  &= ~(POWER_NO_POSITION_CAPABILITY<<8);
                 pwrMaskCapabilities &= ~(POWER_NO_POSITION_CAPABILITY<<8);
             }
@@ -1670,12 +1670,12 @@ uint16_t ANTChannel::capabilities()
             {
                 if ((pwrEnCapabilities&0x00FF)!=(pwrReqCapabilities&0x00FF) && !pwrSkipCapability1Setup)
                 {
-                    qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("requested: 0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("setup mask: 0x"+QString("%1").arg(pwrMaskCapabilities, 4, 16, QChar('0')).toUpper());
-                    qDebug()<<number<<qPrintable(QString("capabilities from sub-page 1 previously received but still to be setup correctly")
-                        +QString(" will be set to 0x")+QString("%1").arg(pwrReqCapabilities & 0x00FF, 2, 16, QChar('0')).toUpper());
+                    // qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("requested: 0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("setup mask: 0x"+QString("%1").arg(pwrMaskCapabilities, 4, 16, QChar('0')).toUpper());
+                    // qDebug()<<number<<qPrintable(QString("capabilities from sub-page 1 previously received but still to be setup correctly")
+                    //     +QString(" will be set to 0x")+QString("%1").arg(pwrReqCapabilities & 0x00FF, 2, 16, QChar('0')).toUpper());
 
                     // reset known capabilities in order to force reload from device
                     pwrCapabilities = pwrCapabilities&0xFF00;
@@ -1692,12 +1692,12 @@ uint16_t ANTChannel::capabilities()
 
                 } else if ((pwrEnCapabilities&0xFF00)!=(pwrReqCapabilities&0xFF00))
                 {
-                    qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("requested: 0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper())
-                        <<qPrintable("setup mask: 0x"+QString("%1").arg(pwrMaskCapabilities, 4, 16, QChar('0')).toUpper());
-                    qDebug()<<number<<qPrintable(QString("capabilities from sub-page 2 previously received but still to be setup correctly")
-                        +QString(" will be set to 0x")+QString("%1").arg(pwrReqCapabilities >> 8, 2, 16, QChar('0')).toUpper());
+                    // qDebug()<<number<<qPrintable("capabilities: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("requested: 0x"+QString("%1").arg(pwrReqCapabilities, 4, 16, QChar('0')).toUpper())
+                    //     <<qPrintable("setup mask: 0x"+QString("%1").arg(pwrMaskCapabilities, 4, 16, QChar('0')).toUpper());
+                    // qDebug()<<number<<qPrintable(QString("capabilities from sub-page 2 previously received but still to be setup correctly")
+                    //     +QString(" will be set to 0x")+QString("%1").arg(pwrReqCapabilities >> 8, 2, 16, QChar('0')).toUpper());
 
                     // reset known capabilities in order to force reload from device
                     pwrCapabilities = pwrCapabilities&0x00FF;
@@ -1734,8 +1734,8 @@ uint16_t ANTChannel::capabilities()
         if ((pwrCapabilities&0x00FF) && (pwrCapabilities&0xFF00))
         {
             // we received all capabilities from sensor
-            qDebug()<<number<<qPrintable("Capabilities previously received for power sensor: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
-                    +", enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper());
+            // qDebug()<<number<<qPrintable("Capabilities previously received for power sensor: 0x"+QString("%1").arg(pwrCapabilities, 4, 16, QChar('0')).toUpper()
+                    // +", enabled: 0x"+QString("%1").arg(pwrEnCapabilities, 4, 16, QChar('0')).toUpper());
             return pwrCapabilities;
         } else
         {

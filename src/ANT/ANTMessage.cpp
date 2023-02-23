@@ -1250,7 +1250,7 @@ ANTMessage ANTMessage::requestPwrCalibration(const uint8_t channel, const uint8_
 
 ANTMessage ANTMessage::requestPwrCapabilities1(const uint8_t channel)
 {
-    qDebug()<<channel<<"Requesting Capabilities sub-page 1 from power device";
+    // qDebug()<<channel<<"Requesting Capabilities sub-page 1 from power device";
 
     // based on ANT+ Common Pages, Rev 2.4 p 14: 6.2  Common Data Page 70: Request Data Page
     return ANTMessage(9, ANT_ACK_DATA, channel,
@@ -1265,7 +1265,7 @@ ANTMessage ANTMessage::requestPwrCapabilities1(const uint8_t channel)
 
 ANTMessage ANTMessage::requestPwrCapabilities2(const uint8_t channel)
 {
-    qDebug()<<channel<<"Requesting Capabilities sub-page 2 from power device";
+    // qDebug()<<channel<<"Requesting Capabilities sub-page 2 from power device";
 
     // based on ANT+ Common Pages, Rev 2.4 p 14: 6.2  Common Data Page 70: Request Data Page
     return ANTMessage(9, ANT_ACK_DATA, channel,
@@ -1280,8 +1280,8 @@ ANTMessage ANTMessage::requestPwrCapabilities2(const uint8_t channel)
 
 ANTMessage ANTMessage::enablePwrCapabilities1(const uint8_t channel, const uint8_t capabilitiesMask, const uint8_t capabilitiesSetup)
 {
-    qDebug()<<channel<<"Setup power sensor capabilities from sub-page 1 to"
-        << qPrintable(QString("0x")+QString("%1").arg(capabilitiesSetup, 2, 16, QChar('0')).toUpper());
+    // qDebug()<<channel<<"Setup power sensor capabilities from sub-page 1 to"
+    //     << qPrintable(QString("0x")+QString("%1").arg(capabilitiesSetup, 2, 16, QChar('0')).toUpper());
 
     // based on ANT+ Device Profile - Bicycle Power Rev 5.1
     // page 21: 4.5.2 Enabling Cycling Dynamics
@@ -1298,8 +1298,8 @@ ANTMessage ANTMessage::enablePwrCapabilities1(const uint8_t channel, const uint8
 
 ANTMessage ANTMessage::enablePwrCapabilities2(const uint8_t channel, const uint8_t capabilitiesMask, const uint8_t capabilitiesSetup)
 {
-    qDebug()<<channel<<"Setup power sensor capabilities from sub-page 2 to"
-        << qPrintable(QString("0x")+QString("%1").arg(capabilitiesSetup, 2, 16, QChar('0')).toUpper());
+    // qDebug()<<channel<<"Setup power sensor capabilities from sub-page 2 to"
+    //     << qPrintable(QString("0x")+QString("%1").arg(capabilitiesSetup, 2, 16, QChar('0')).toUpper());
 
     // based on ANT+ Device Profile - Bicycle Power Rev 5.1
     // page 21: 4.5.2 Enabling Cycling Dynamics
