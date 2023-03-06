@@ -419,7 +419,7 @@ ANT::setGradient(double gradient)
     if ((fecChannel != -1) && (antChannel[fecChannel]->capabilities() & FITNESS_EQUIPMENT_SIMUL_MODE_CAPABILITY))
     {
         //set fitness equipment target gradient
-        qDebug() << "Setting fitness equipment target gradient to" << gradient;
+        // qDebug() << "Setting fitness equipment target gradient to" << gradient;
         sendMessage(ANTMessage::fecSetTrackResistance(fecChannel, gradient, currentRollingResistance));
         currentGradient = gradient;
         // TODO : obtain acknowledge / confirm value using fecRequestCommandStatus
