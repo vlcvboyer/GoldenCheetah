@@ -34,6 +34,7 @@ RealtimeData::RealtimeData()
     rte = lte = lps = rps = 0.0;
     rppb = rppe = rpppb = rpppe = 0.0;
     lppb = lppe = lpppb = lpppe = 0.0;
+    altKph = altCad = 0.0;
     latitude = longitude = altitude = 0.0;
     rf = rmv = vo2 = vco2 = tv = feo2 = 0.0;
     routeDistance = distanceRemaining = 0.0;
@@ -75,6 +76,10 @@ void RealtimeData::setSpeed(double speed)
 {
     this->speed = speed;
 }
+void RealtimeData::setAltSpeed(double speed)
+{
+    this->altSpeed = speed;
+}
 void RealtimeData::setWbal(double wbal)
 {
     this->wbal = wbal;
@@ -93,6 +98,10 @@ void RealtimeData::setWheelRpm(double wheelRpm, bool fMarkWheelRpmTime)
 void RealtimeData::setCadence(double aCadence)
 {
     cadence = (int)aCadence;
+}
+void RealtimeData::setAltCadence(double aCadence)
+{
+    altCadence = (int)aCadence;
 }
 void RealtimeData::setSlope(double slope)
 {
@@ -170,6 +179,11 @@ void RealtimeData::setRPS(double x)
     this->rps = x;
 }
 
+void RealtimeData::setAltWheelRpm(double wheelRpm)
+{
+    this->altWheelRpm = wheelRpm;
+}
+
 const char *
 RealtimeData::getName() const
 {
@@ -197,6 +211,10 @@ double RealtimeData::getSpeed() const
 {
     return speed;
 }
+double RealtimeData::getAltSpeed() const
+{
+    return altSpeed;
+}
 double RealtimeData::getWbal() const
 {
     return wbal;
@@ -216,6 +234,10 @@ std::chrono::high_resolution_clock::time_point RealtimeData::getWheelRpmSampleTi
 double RealtimeData::getCadence() const
 {
     return cadence;
+}
+double RealtimeData::getAltCadence() const
+{
+    return altCadence;
 }
 double RealtimeData::getSlope() const
 {
@@ -486,6 +508,12 @@ double RealtimeData::value(DataSeries series) const
         break;
 
     case LeftPCO: return leftPCO;
+        break;
+
+    case AltKph: return altSpeed;
+        break;
+
+    case AltCad: return altCadence;
         break;
 
     case Slope: return slope;

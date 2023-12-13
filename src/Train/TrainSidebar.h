@@ -268,6 +268,9 @@ class TrainSidebar : public GcWindow
         double displayRppb, displayRppe, displayRpppb, displayRpppe;
         double displayLppb, displayLppe, displayLpppb, displayLpppe;
         RealtimeData::riderPosition displayPosition; // rider position (seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 10, off = 11)
+        double displayAltSpeed, displayAltCad;
+
+        bool is_altpower_present, is_altspeed_present, is_altcad_present, is_cycldynamics_present;
 
         void maintainLapDistanceState();
 

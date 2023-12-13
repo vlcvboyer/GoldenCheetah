@@ -638,6 +638,10 @@ public:
         lastCadenceMessage = QDateTime(QDateTime::currentDateTime());
         telemetry.setCadence(x);
     }
+    void setAltCadence(float x) {
+        lastAltCadenceMessage = QDateTime(QDateTime::currentDateTime());
+        telemetry.setAltCadence(x);
+    }
     float getCadence(void) { return telemetry.getCadence(); }
     void setSecondaryCadence(float x) {
         if (lastCadenceMessage.toTime_t() == 0 || (QDateTime::currentDateTime().toTime_t() - lastCadenceMessage.toTime_t())>10)  {
@@ -649,6 +653,9 @@ public:
     {
         telemetry.setSpeed(x);
     }
+    void setAltSpeed(float x) {
+        telemetry.setAltSpeed(x);
+    }
 
     void incAltDistance(double x)
     {
@@ -657,6 +664,9 @@ public:
 
     void setWheelRpm(float x);
     float getWheelRpm(void) { return telemetry.getWheelRpm(); }
+
+    void setAltWheelRpm(float x);
+    float getAltWheelRpm(void) { return telemetry.getAltWheelRpm(); }
 
     void setWatts(float x) {
         telemetry.setWatts(x);
@@ -769,7 +779,10 @@ private:
     int bytes;
     int checksum;
     int powerchannels; // how many power channels do we have?
+    int speedchannels;
+    int cadencechannels;
     QDateTime lastCadenceMessage;
+    QDateTime lastAltCadenceMessage;
 
     QElapsedTimer elapsedTimer;
 

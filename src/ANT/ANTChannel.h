@@ -176,7 +176,9 @@ class ANTChannel : public QObject {
         bool is_srm;
         bool is_fec;
         bool is_power;
-        bool is_alt; // is alternative channel for power
+        bool is_alt_watts; // is alternative channel for power
+        bool is_alt_kph;   // is alternative channel (sensor) for speed
+        bool is_alt_cad;   // is alternative channel (sensor) for cadence
         bool is_master; // is a master channel (for remote control)
 
         int search_type;
@@ -230,7 +232,9 @@ class ANTChannel : public QObject {
         void checkMoxy();
         void checkSRM();
 
-        void setAlt(bool value) { is_alt = value; }
+        void setAltWatts(bool value) { is_alt_watts = value; }
+        void setAltKph(bool value) { is_alt_kph = value; }
+        void setAltCad(bool value) { is_alt_cad = value; }
 
     public slots:
        // setup sensors

@@ -374,6 +374,10 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayRppb = displayRppe = displayRpppb = displayRpppe = 0.0;
     displayLppb = displayLppe = displayLpppb = displayLpppe = 0.0;
 
+    displayAltSpeed = displayAltCad = 0.0;
+
+    is_altpower_present = is_altspeed_present = is_altcad_present = is_cycldynamics_present = false;
+
     connect(gui_timer, SIGNAL(timeout()), this, SLOT(guiUpdate()));
     connect(disk_timer, SIGNAL(timeout()), this, SLOT(diskUpdate()));
     connect(load_timer, SIGNAL(timeout()), this, SLOT(loadUpdate()));
@@ -1351,7 +1355,7 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
+                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, position, altkph, altcad\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -1565,6 +1569,9 @@ void TrainSidebar::updateData(RealtimeData &rtData)
 {
     displayPower = rtData.getWatts();
     displayAltPower = rtData.getAltWatts();
+    if (displayAltPower!=0.0) {
+        is_altpower_present = true;
+    }
     displayCadence = rtData.getCadence();
     displayHeartRate = rtData.getHr();
     displaySpeed = rtData.getSpeed();
@@ -1589,7 +1596,19 @@ void TrainSidebar::updateData(RealtimeData &rtData)
     displayLppe = rtData.getLppe();
     displayLpppb = rtData.getLpppb();
     displayLpppe = rtData.getLpppe();
+    if (    displayRppb!=0.0 || displayRppe!=0.0 || displayRpppb!=0.0 || displayRpppe!=0.0
+         || displayLppb!=0.0 || displayLppe!=0.0 || displayLpppb!=0.0 || displayLpppe!=0.0 ) {
+        is_cycldynamics_present = true;
+    }
     displayPosition = rtData.getPosition();
+    displayAltSpeed = rtData.getAltSpeed();
+    if (displayAltSpeed!=0.0) {
+        is_altspeed_present = true;
+    }
+    displayAltCad = rtData.getAltCadence();
+    if (displayAltCad!=0.0) {
+        is_altcad_present = true;
+    }
     // Gradient not supported
     return;
 }
@@ -1795,9 +1814,13 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
 
                 // what are we getting from this one?
                 if (dev == bpmTelemetry) rtData.setHr(local.getHr());
-                if (dev == rpmTelemetry) rtData.setCadence(local.getCadence());
+                if (dev == rpmTelemetry) {
+                    rtData.setCadence(local.getCadence());
+                    rtData.setAltCadence(local.getAltCadence());
+                }
                 if (dev == kphTelemetry) {
                     rtData.setSpeed(local.getSpeed());
+                    rtData.setAltSpeed(local.getAltSpeed());
                     rtData.setDistance(local.getDistance());
                     rtData.setRouteDistance(local.getRouteDistance());
                     rtData.setDistanceRemaining(local.getDistanceRemaining());
@@ -2032,6 +2055,9 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayLpppe = rtData.getLpppe();
             displayPosition = rtData.getPosition();
 
+            displayAltSpeed = rtData.getAltSpeed();
+            displayAltCad = rtData.getAltCadence();
+
             double weightKG = bicycle.MassKG();
             double vs = computeInstantSpeed(weightKG, rtData.getSlope(), rtData.getAltitude(), rtData.getWatts());
 
@@ -2151,7 +2177,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, position, altkph, altcad\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2189,15 +2215,24 @@ void TrainSidebar::diskUpdate()
                         << "," << displayO2HB
                         << "," << displayHHB
                         << "," << loadStr
-                        << "," << displayAltPower // allows altWatts to record power from trainer in addition to watts which are from power sensor
-                        << "," << displayRppb
-                        << "," << displayRppe
-                        << "," << displayRpppb
-                        << "," << displayRpppe
-                        << "," << displayLppb
-                        << "," << displayLppe
-                        << "," << displayLpppb
-                        << "," << displayLpppe
+
+                        // allows altWatts to record power from trainer in addition to watts which are from power sensor. Useful to troubleshoot accuracy issues.
+                        << "," << (is_altpower_present ? QString::number(displayAltPower):QString(""))
+
+                        // Cycling dynamics
+                        << "," << (is_cycldynamics_present ? QString::number(displayRppb):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayRppe):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayRpppb):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayRpppe):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayLppb):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayLppe):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayLpppb):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayLpppe):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number((int) displayPosition):QString(""))
+
+                        // allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
+                        << "," << (is_altspeed_present ? QString::number(displayAltSpeed):QString(""))
+                        << "," << (is_altcad_present ? QString::number(displayAltCad):QString(""))
                         << "," << "\n";
 }
 

@@ -50,6 +50,7 @@ public:
                       Position, RightPCO, LeftPCO,
                       LapDistance, LapDistanceRemaining, ErgTimeRemaining,
                       Latitude, Longitude, Altitude, RouteDistance,
+                      AltCad, AltKph,
                       DistanceRemaining };
 
     typedef enum dataseries DataSeries;
@@ -76,10 +77,13 @@ public:
     void setHr(double hr);
     void setTime(long time);
     void setSpeed(double speed);
+    void setAltSpeed(double speed);
     void setWbal(double speed);
     void setVirtualSpeed(double speed);
     void setWheelRpm(double wheelRpm, bool fMarkTimeSample = false);
+    void setAltWheelRpm(double);
     void setCadence(double aCadence);
+    void setAltCadence(double aCadence);
     void setLoad(double load);
     void setSlope(double slope);
     void setMsecs(long);
@@ -147,11 +151,14 @@ public:
     double getHr() const;
     long getTime() const;
     double getSpeed() const;
+    double getAltSpeed() const;
     double getWbal() const;
     double getVirtualSpeed() const;
     double getWheelRpm() const;
+    double getAltWheelRpm() const;
     std::chrono::high_resolution_clock::time_point getWheelRpmSampleTime() const;
     double getCadence() const;
+    double getAltCadence() const;
     double getLoad() const;
     double getSlope() const;
     long getMsecs() const;
@@ -178,6 +185,7 @@ public:
     double getRightPCO() const;
     double getLeftPCO() const;
     RealtimeData::riderPosition getPosition() const;
+
     double getTorque() const;
     double getLatitude() const;
     double getLongitude() const;
@@ -209,10 +217,12 @@ private:
     double rppb, rppe, rpppb, rpppe;
     double lppb, lppe, lpppb, lpppe;
     double rightPCO, leftPCO;
+    double altKph, altCad;
     double torque; // raw torque data for calibration display
     double RTorque, LTorque;
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
+    double altSpeed, altWheelRpm, altCadence;
     RealtimeData::riderPosition position;
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;

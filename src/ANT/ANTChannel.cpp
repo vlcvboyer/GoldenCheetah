@@ -48,7 +48,9 @@ ANTChannel::init()
     is_power=false;
     is_cinqo=0;
     is_old_cinqo=0;
-    is_alt=0;
+    is_alt_watts=0;
+    is_alt_kph=0;
+    is_alt_cad=0;
     is_master=0;
     is_srm=0;
     manufacturer_id=0;
@@ -493,7 +495,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                                     // we should be coasting, so power and cadence
                                     // will be zero
                                     //srm_offset = antMessage.srmOffset;
-                                    //is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                                    //is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
                                     //parent->setSecondaryCadence(0);
                                     //value2=value=0;
                                 }
@@ -575,7 +577,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         // ignore the occasional spikes (reed switch)
                         if (power >= 0 && power < 2501 && cadence >=0 && cadence < 256) {
                             value2 = value = power;
-                            is_alt ? parent->setAltWatts(power) : parent->setWatts(power);
+                            is_alt_watts ? parent->setAltWatts(power) : parent->setWatts(power);
                             parent->setSecondaryCadence(cadence);
                         }
 
@@ -584,7 +586,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         nullCount++;
                         if (nullCount >= 4) { // 4 messages on an SRM
                             value2 = value = 0;
-                            is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                            is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
                             parent->setSecondaryCadence(0);
                         }
                     }
@@ -615,16 +617,16 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         float power = 3.14159 * nm_torque * wheelRPM / 30;
 
                         value2 = value = power;
-                        parent->setWheelRpm(wheelRPM);
-                        is_alt ? parent->setAltWatts(power) : parent->setWatts(power);
+                        is_alt_kph ? parent->setAltWheelRpm(wheelRPM) : parent->setWheelRpm(wheelRPM);
+                        is_alt_watts ? parent->setAltWatts(power) : parent->setWatts(power);
 
                     } else {
                         nullCount++;
 
                         if (nullCount >= 4) { // 4 messages on Powertap according to specs
-                            parent->setWheelRpm(0);
+                            is_alt_kph ? parent->setAltWheelRpm(0) : parent->setWheelRpm(0);
                             value2 = value = 0;
-                            is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                            is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
                         }
                     }
                 }
@@ -662,7 +664,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                                 uint8_t events = antMessage.eventCount - lastStdPwrMessage.eventCount;
                                 if (lastStdPwrMessage.type && events) {
                                     stdNullCount = 0;
-                                    is_alt ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
+                                    is_alt_watts ? parent->setAltWatts(antMessage.instantPower) : parent->setWatts(antMessage.instantPower);
                                     value2 = value = antMessage.instantPower;
                                     parent->setSecondaryCadence(antMessage.instantCadence); // cadence
                                     // LRBalance is left side contribution, pedalPower is right side
@@ -671,7 +673,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                                 stdNullCount++;
                                 if (stdNullCount >= 6) { //6 for standard power according to specs
                                     parent->setSecondaryCadence(0);
-                                    is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                                    is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
                                     parent->setLRBalance(RideFile::NA);
                                     value2 = value = 0;
                                     parent->setTE(0,0);
@@ -826,14 +828,14 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         float power = 3.14159 * nm_torque * cadence / 30;
 
                         parent->setSecondaryCadence(cadence);
-                        is_alt ? parent->setAltWatts(power) : parent->setWatts(power);
+                        is_alt_watts ? parent->setAltWatts(power) : parent->setWatts(power);
                         value2 = value = power;
 
                     } else {
                         nullCount++;
                         if (nullCount >= 4) { // 4 on a quarq according to specs
                             parent->setSecondaryCadence(0);
-                            is_alt ? parent->setAltWatts(0) : parent->setWatts(0);
+                            is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
                             value2 = value = 0;
                         }
                     }
@@ -920,7 +922,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                    if (rpm < last_measured_rpm / 2.0)
                        rpm = 0.0; // if rpm is less than half previous cadence we consider that we are stopped
                }
-               parent->setCadence(rpm);
+               is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm);
                value2 = value = rpm;
            }
            break;
@@ -941,7 +943,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                        last_measured_rpm = rpm;
 
                        if (is_moxy) /* do nothing for now */ ; //XXX fixme when moxy arrives XXX
-                       else parent->setCadence(rpm);
+                       else is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm);
                        lastMessageTimestamp = parent->getElapsedTime();
                    } else {
                        qint64 ms = parent->getElapsedTime() - lastMessageTimestamp;
@@ -952,7 +954,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                            rpm = 0.0; // if rpm is less than half previous cadence we consider that we are stopped
 
                        if (sc_cadence_active)
-                           parent->setCadence(rpm); // don't update if never received data on this channel (support S&C with single magnet)
+                           is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm); // don't update if never received data on this channel (support S&C with single magnet)
                    }
                    value = rpm;
 
@@ -964,7 +966,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                        rpm = 1024*60*revs / time;
 
                        if (is_moxy) /* do nothing for now */ ; //XXX fixme when moxy arrives XXX
-                       else parent->setWheelRpm(rpm);
+                       else is_alt_kph ? parent->setAltWheelRpm(rpm) : parent->setWheelRpm(rpm);
                        lastMessageTimestamp2 = parent->getElapsedTime();
                    } else {
                        qint64 ms = parent->getElapsedTime() - lastMessageTimestamp2;
@@ -975,7 +977,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                            rpm = 0.0; // if rpm is less than 15rpm (=4s) then we consider that we are stopped
 
                        if (sc_speed_active)
-                           parent->setWheelRpm(rpm); // don't update if never received data on this channel (support S&C with single magnet)
+                           is_alt_kph ? parent->setAltWheelRpm(rpm) : parent->setWheelRpm(rpm); // don't update if never received data on this channel (support S&C with single magnet)
                    }
                    value2 = rpm;
                }
@@ -998,7 +1000,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                    if (rpm < (float) 15.0)
                        rpm = 0.0; // if rpm is less than 15 (4s) then we consider that we are stopped
                }
-               parent->setWheelRpm(rpm);
+               is_alt_kph ? parent->setAltWheelRpm(rpm) : parent->setWheelRpm(rpm);
                value2=value=rpm;
            }
            break;
@@ -1048,7 +1050,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     parent->setCalibrationType(number, CALIBRATION_TYPE_SPINDOWN);
 
                     if (antMessage.fecInstantPower != 0xFFF)
-                        is_alt ? parent->setAltWatts(antMessage.fecInstantPower) : parent->setWatts(antMessage.fecInstantPower);
+                        is_alt_watts ? parent->setAltWatts(antMessage.fecInstantPower) : parent->setWatts(antMessage.fecInstantPower);
                     // TODO : as per ANT specification instantaneous power is to be used for display purpose only
                     //        but shall not be taken into account for records and calculations as it will not be accurate in case of transmission loss
                     //        accumulated power to be used instead as it is not affected by any transmission loss
@@ -1087,7 +1089,8 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     if (antMessage.fecSpeed != 0xFFFF)
                     {
                         // FEC speed is in 0.001m/s, telemetry speed is km/h
-                        parent->setSpeed(antMessage.fecSpeed * 0.0036);
+                        is_alt_kph ? parent->setAltSpeed(antMessage.fecSpeed * 0.0036):parent->setSpeed(antMessage.fecSpeed * 0.0036);
+
                     }
 
                     // FEC distance is in m, telemetry is km
@@ -1155,7 +1158,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
 
                 case FITNESS_EQUIPMENT_STATIONARY_SPECIFIC_PAGE:
                     if (antMessage.fecInstantPower != 0xFFFF)
-                        is_alt ? parent->setAltWatts(antMessage.fecInstantPower) : parent->setWatts(antMessage.fecInstantPower);
+                        is_alt_watts ? parent->setAltWatts(antMessage.fecInstantPower) : parent->setWatts(antMessage.fecInstantPower);
                     if (antMessage.fecCadence != 0xFF)
                         parent->setSecondaryCadence(antMessage.fecCadence);
                     parent->setTrainerStatusAvailable(true);

@@ -100,6 +100,8 @@ ANT::ANT(QObject *parent, DeviceConfiguration *devConf, QString athlete) : QThre
     deviceFilename = devConf ? devConf->portSpec : "";
     baud=115200;
     powerchannels=0;
+    speedchannels=0;
+    cadencechannels=0;
     configuring = false;
 
     // kickr
@@ -226,6 +228,15 @@ void ANT::setWheelRpm(float x) {
     else telemetry.setSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
 }
 
+void ANT::setAltWheelRpm(float x) {
+    telemetry.setAltWheelRpm(x); // record time sample for new rpm data
+
+    // devConf will be NULL if we are are running the add device wizard
+    // we can default to the global setting
+    if (devConf) telemetry.setAltSpeed(x * devConf->wheelSize / 1000 * 60 / 1000);
+    else telemetry.setAltSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
+}
+
 void ANT::setHb(double smo2, double thb)
 {
     telemetry.setHb(smo2, thb);
@@ -239,6 +250,8 @@ void ANT::run()
 {
     int status; // control commands from controller
     powerchannels = 0;
+    speedchannels=0;
+    cadencechannels=0;
 
     Status = ANT_RUNNING;
     QString strBuf;
@@ -719,10 +732,36 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (powerchannels)
-                    antChannel[i]->setAlt(true);
+                    antChannel[i]->setAltWatts(true);
 
                 // increment the number of power channels
                 powerchannels++;
+            }
+            // this is an alternate channel for speed
+            if ((device_type == ANTChannel::CHANNEL_TYPE_SPEED) ||
+                (device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
+                (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
+
+                // if we are not the first power channel then set to update
+                // the alternate power channel
+                if (speedchannels)
+                    antChannel[i]->setAltKph(true);
+
+                // increment the number of speed channels
+                speedchannels++;
+            }
+            // this is an alternate channel for cadence
+            if ((device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
+                (device_type == ANTChannel::CHANNEL_TYPE_CADENCE) ||
+                (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
+
+                // if we are not the first power channel then set to update
+                // the alternate power channel
+                if (cadencechannels)
+                    antChannel[i]->setAltCad(true);
+
+                // increment the number of cadence channels
+                cadencechannels++;
             }
             return i;
         }

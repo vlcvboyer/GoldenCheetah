@@ -670,6 +670,7 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                 double gct = 0.0, vo = 0.0, rcad = 0.0;
                 //UNUSED double o2hb = 0.0, hhb = 0.0;
                 double target = 0.0;
+                double altKph=0,altCad=0;
 
                 int interval=0;
                 int pause=0;
@@ -778,6 +779,10 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                                 target = valueStr.toDouble();
                             } else if (valueName == "altwatts") {
                                 altWatts = valueStr.toDouble();
+                            } else if (valueName == "altkph") {
+                                altKph = valueStr.toDouble();
+                            } else if (valueName == "altcad") {
+                                altCad = valueStr.toDouble();
                             } else {
                                 // print debug message but only once
                                 static bool debugMessageFlag=false;
@@ -1352,6 +1357,10 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                             rideFile->setPointValue(minutes * 60.0, RideFile::lpppb, lpppb);
                         if (gcSeries->valuename.indexOf("lpppe")!=-1)
                             rideFile->setPointValue(minutes * 60.0, RideFile::lpppe, lpppe);
+                        if (gcSeries->valuename.indexOf("altkph")!=-1)
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altkph, altKph);
+                        if (gcSeries->valuename.indexOf("altcad")!=-1)
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad, altCad);
                     }
 
                     if (target > 0.0) {
@@ -1804,6 +1813,14 @@ CsvFileReader::writeRideFile(Context *, const RideFile *ride, QFile &file, CsvTy
             gcSeries->valuename << "altwatts";
             gcSeries->unitname  << "watts";
         }
+        if (present->altkph) {
+            gcSeries->valuename << "altkph";
+            gcSeries->unitname  << "kph";
+        }
+        if (present->altcad) {
+            gcSeries->valuename << "altcad";
+            gcSeries->unitname  << "rpm";
+        }
         if (present->lpco) {
             gcSeries->valuename << "lpco";
             gcSeries->unitname  << "";
@@ -1900,6 +1917,10 @@ CsvFileReader::writeRideFile(Context *, const RideFile *ride, QFile &file, CsvTy
                     csvLineData << QString::number(point->hhb);
                 } else if (valueName == "altwatts") {
                     csvLineData << QString::number(point->altwatts);
+                } else if (valueName == "altkph") {
+                    csvLineData << QString::number(point->altkph);
+                } else if (valueName == "altcad") {
+                    csvLineData << QString::number(point->altcad);
                 } else if (valueName == "lpco") {
                     csvLineData << QString::number(point->lpco);
                 } else if (valueName == "rpco") {

@@ -311,6 +311,8 @@ RideFile::seriesName(SeriesType series, bool compat)
         case RideFile::nm: return QString("torque");
         case RideFile::watts: return QString("power");
         case RideFile::altwatts: return QString("altPower");
+        case RideFile::altkph: return QString("altSpeed");
+        case RideFile::altcad: return QString("altCad");
         case RideFile::xPower: return QString("xpower");
         case RideFile::aPower: return QString("apower");
         case RideFile::aTISS: return QString("atiss");
@@ -369,6 +371,8 @@ RideFile::seriesName(SeriesType series, bool compat)
         case RideFile::nm: return QString(tr("Torque"));
         case RideFile::watts: return QString(tr("Power"));
         case RideFile::altwatts: return QString("Alternative Power");
+        case RideFile::altkph: return QString("Alternative Speed");
+        case RideFile::altcad: return QString("Alternative Cadence");
         case RideFile::xPower: return QString(tr("xPower"));
         case RideFile::aPower: return QString(tr("aPower"));
         case RideFile::aTISS: return QString(tr("aTISS"));
@@ -421,10 +425,12 @@ RideFile::colorFor(SeriesType series)
     switch (series) {
     case RideFile::cad: return GColor(CCADENCE);
     case RideFile::cadd: return GColor(CCADENCE);
+    case RideFile::altcad: return GColor(CCADENCE);
     case RideFile::hr: return GColor(CHEARTRATE);
     case RideFile::hrd: return GColor(CHEARTRATE);
     case RideFile::kph: return GColor(CSPEED);
     case RideFile::kphd: return GColor(CSPEED);
+    case RideFile::altkph: return GColor(CSPEED);
     case RideFile::nm: return GColor(CTORQUE);
     case RideFile::nmd: return GColor(CTORQUE);
     case RideFile::watts: return GColor(CPOWER);
@@ -485,11 +491,13 @@ RideFile::unitName(SeriesType series, Context *context)
     case RideFile::secs: return QString(tr("seconds"));
     case RideFile::cad: return QString(tr("rpm"));
     case RideFile::cadd: return QString(tr("rpm/s"));
+    case RideFile::altcad: return QString(tr("rpm"));
     case RideFile::hr: return QString(tr("bpm"));
     case RideFile::hrd: return QString(tr("bpm/s"));
     case RideFile::km: return QString(useMetricUnits ? tr("km") : tr("miles"));
     case RideFile::kph: return QString(useMetricUnits ? tr("kph") : tr("mph"));
     case RideFile::kphd: return QString(tr("m/s/s"));
+    case RideFile::altkph: return QString(useMetricUnits ? tr("kph") : tr("mph"));
     case RideFile::nm: return QString(tr("N"));
     case RideFile::nmd: return QString(tr("N/s"));
     case RideFile::watts: return QString(tr("watts"));
@@ -1205,12 +1213,16 @@ void RideFile::updateMin(RideFilePoint* point)
        minPoint->secs = point->secs;
     if (minPoint->cad == 0 || point->cad<minPoint->cad)
        minPoint->cad = point->cad;
+    if (minPoint->altcad == 0 || point->altcad<minPoint->altcad)
+       minPoint->altcad = point->altcad;
     if (minPoint->hr == 0 || point->hr<minPoint->hr)
        minPoint->hr = point->hr;
     if (minPoint->km == 0 || point->km<minPoint->km)
        minPoint->km = point->km;
     if (minPoint->kph == 0 || point->kph<minPoint->kph)
        minPoint->kph = point->kph;
+    if (minPoint->altkph == 0 || point->altkph<minPoint->altkph)
+       minPoint->altkph = point->altkph;
     if (minPoint->nm == 0 || point->nm<minPoint->nm)
        minPoint->nm = point->nm;
     if (minPoint->watts == 0 || point->watts<minPoint->watts)
@@ -1286,12 +1298,16 @@ void RideFile::updateMax(RideFilePoint* point)
        maxPoint->secs = point->secs;
     if (point->cad>maxPoint->cad)
        maxPoint->cad = point->cad;
+    if (point->altcad>maxPoint->altcad)
+       maxPoint->altcad = point->altcad;
     if (point->hr>maxPoint->hr)
        maxPoint->hr = point->hr;
     if (point->km>maxPoint->km)
        maxPoint->km = point->km;
     if (point->kph>maxPoint->kph)
        maxPoint->kph = point->kph;
+    if (point->altkph>maxPoint->altkph)
+       maxPoint->altkph = point->altkph;
     if (point->nm>maxPoint->nm)
        maxPoint->nm = point->nm;
     if (point->watts>maxPoint->watts)
@@ -1366,9 +1382,11 @@ void RideFile::updateAvg(RideFilePoint* point)
         // AVG
         totalPoint->secs += point->secs;
         totalPoint->cad += point->cad;
+        totalPoint->altcad += point->altcad;
         totalPoint->hr += point->hr;
         totalPoint->km += point->km;
         totalPoint->kph += point->kph;
+        totalPoint->altkph += point->altkph;
         totalPoint->nm += point->nm;
         totalPoint->watts += point->watts;
         totalPoint->altwatts += point->altwatts;
@@ -1409,9 +1427,11 @@ void RideFile::updateAvg(RideFilePoint* point)
     // todo : division only for last after last point
     avgPoint->secs = totalPoint->secs/totalCount;
     avgPoint->cad = totalPoint->cad/totalCount;
+    avgPoint->altcad = totalPoint->altcad/totalCount;
     avgPoint->hr = totalPoint->hr/totalCount;
     avgPoint->km = totalPoint->km/totalCount;
     avgPoint->kph = totalPoint->kph/totalCount;
+    avgPoint->altkph = totalPoint->altkph/totalCount;
     avgPoint->nm = totalPoint->nm/totalCount;
     avgPoint->watts = totalPoint->watts/totalCount;
     avgPoint->altwatts = totalPoint->altwatts/totalCount;
@@ -1452,9 +1472,11 @@ void RideFile::updateAvg(SeriesType series, double value)
    switch (series) {
         case secs : totalPoint->secs += value; break;
         case cad : totalPoint->cad += value; break;
+        case altcad : totalPoint->altcad += value; break;
         case hr : totalPoint->hr += value; break;
         case km : totalPoint->km += value; break;
         case kph : totalPoint->kph += value; break;
+        case altkph : totalPoint->altkph += value; break;
         case nm : totalPoint->nm += value; break;
         case watts : totalPoint->watts += value; break;
         case altwatts : totalPoint->altwatts = value; break;
@@ -1634,9 +1656,11 @@ void RideFile::appendOrUpdatePoint(double secs, double cad, double hr, double km
 
     dataPresent.secs     |= (secs != 0);
     dataPresent.cad      |= (cad != 0);
+    dataPresent.altcad   |= (altcad != 0);
     dataPresent.hr       |= (hr != 0);
     dataPresent.km       |= (km != 0);
     dataPresent.kph      |= (kph != 0);
+    dataPresent.altkph   |= (altkph != 0);
     dataPresent.nm       |= (nm != 0);
     dataPresent.watts    |= (watts != 0);
     dataPresent.altwatts |= (altwatts != 0);
@@ -1693,12 +1717,16 @@ void
 RideFile::updatePoint(RideFilePoint *point, const RideFilePoint *oldPoint){
     if (point->cad == 0 && oldPoint->cad != 0)
         point->cad = oldPoint->cad;
+    if (point->altcad == 0 && oldPoint->altcad != 0)
+        point->altcad = oldPoint->altcad;
     if (point->hr == 0 && oldPoint->hr != 0)
         point->hr = oldPoint->hr;
     if (point->km == 0 && oldPoint->km != 0)
         point->km = oldPoint->km;
     if (point->kph == 0 && oldPoint->kph != 0)
         point->kph = oldPoint->kph;
+    if (point->altkph == 0 && oldPoint->altkph != 0)
+        point->altkph = oldPoint->altkph;
 
     if (point->nm == 0 && oldPoint->nm != 0)
         point->nm = oldPoint->nm;
@@ -1778,9 +1806,11 @@ RideFile::setDataPresent(SeriesType series, bool value)
     switch (series) {
         case secs : dataPresent.secs = value; break;
         case cad : dataPresent.cad = value; break;
+        case altcad : dataPresent.altcad = value; break;
         case hr : dataPresent.hr = value; break;
         case km : dataPresent.km = value; break;
         case kph : dataPresent.kph = value; break;
+        case altkph : dataPresent.altkph = value; break;
         case nm : dataPresent.nm = value; break;
         case watts : dataPresent.watts = value; break;
         case altwatts : dataPresent.altwatts = value; break;
@@ -1830,11 +1860,13 @@ RideFile::isDataPresent(SeriesType series)
         case secs : return dataPresent.secs; break;
         case cadd :
         case cad : return dataPresent.cad; break;
+        case altcad : return dataPresent.altcad; break;
         case hrd :
         case hr : return dataPresent.hr; break;
         case km : return dataPresent.km; break;
         case kphd :
         case kph : return dataPresent.kph; break;
+        case altkph : return dataPresent.altkph; break;
         case nmd :
         case nm : return dataPresent.nm; break;
         case wbal :
@@ -1918,9 +1950,11 @@ RideFile::setPointValue(int index, SeriesType series, double value)
     switch (series) {
         case secs : dataPoints_[index]->secs = value; break;
         case cad : dataPoints_[index]->cad = value; break;
+        case altcad : dataPoints_[index]->altcad = value; break;
         case hr : dataPoints_[index]->hr = value; break;
         case km : dataPoints_[index]->km = value; break;
         case kph : dataPoints_[index]->kph = value; break;
+        case altkph : dataPoints_[index]->altkph = value; break;
         case nm : dataPoints_[index]->nm = value; break;
         case watts : dataPoints_[index]->watts = value; break;
         case altwatts : dataPoints_[index]->altwatts = value; break;
@@ -1965,9 +1999,11 @@ RideFilePoint::value(RideFile::SeriesType series) const
     switch (series) {
         case RideFile::secs : return secs; break;
         case RideFile::cad : return cad; break;
+        case RideFile::altcad : return altcad; break;
         case RideFile::hr : return hr; break;
         case RideFile::km : return km; break;
         case RideFile::kph : return kph; break;
+        case RideFile::altkph : return altkph; break;
         case RideFile::kphd : return kphd; break;
         case RideFile::cadd : return cadd; break;
         case RideFile::nmd : return nmd; break;
@@ -2025,9 +2061,11 @@ RideFilePoint::setValue(RideFile::SeriesType series, double value)
     switch (series) {
         case RideFile::secs : secs = value; break;
         case RideFile::cad : cad = value; break;
+        case RideFile::altcad : altcad = value; break;
         case RideFile::hr : hr = value; break;
         case RideFile::km : km = value; break;
         case RideFile::kph : kph = value; break;
+        case RideFile::altkph : altkph = value; break;
         case RideFile::kphd : kphd = value; break;
         case RideFile::cadd : cadd = value; break;
         case RideFile::nmd : nmd = value; break;
@@ -2124,9 +2162,11 @@ RideFile::decimalsFor(SeriesType series)
     switch (series) {
         case secs : return 3; break;
         case cad : return 0; break;
+        case altcad : return 0; break;
         case hr : return 0; break;
         case km : return 6; break;
         case kph : return 4; break;
+        case altkph : return 4; break;
         case nm : return 2; break;
         case watts : return 0; break;
         case altwatts : return 0; break;
@@ -2182,9 +2222,11 @@ RideFile::maximumFor(SeriesType series)
     switch (series) {
         case secs : return 999999; break;
         case cad : return 255; break;
+        case altcad : return 255; break;
         case hr : return 255; break;
         case km : return 999999; break;
         case kph : return 150; break;
+        case altkph : return 150; break;
         case nm : return 100; break;
         case watts : return 2500; break;
         case altwatts : return 2500; break;
@@ -2240,9 +2282,11 @@ RideFile::minimumFor(SeriesType series)
     switch (series) {
         case secs : return 0; break;
         case cad : return 0; break;
+        case altcad : return 0; break;
         case hr : return 0; break;
         case km : return 0; break;
         case kph : return 0; break;
+        case altkph : return 0; break;
         case nm : return 0; break;
         case watts : return 0; break;
         case altwatts : return 0; break;
@@ -3399,6 +3443,8 @@ static struct {
 	{ "TORQUED", RideFile::nmd },
 	{ "POWER", RideFile::watts },
 	{ "ALTWATTS", RideFile::altwatts },
+	{ "ALTKPH", RideFile::altkph },
+	{ "ALTCAD", RideFile::altcad },
 	{ "POWERD", RideFile::wattsd },
 	{ "ALTITUDE", RideFile::alt },
 	{ "LON", RideFile::lon },
