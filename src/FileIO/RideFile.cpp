@@ -1888,7 +1888,9 @@ RideFile::setPointValue(double secs, SeriesType series, double value) {
     if ((idx != -1) && (dataPoints_.at(idx)->secs == secs)) {
         double previousVal = getPointValue(idx, series);
         setPointValue(idx, series, value);
-        setDataPresent(series, true);
+        if (value != 0.0) {
+            setDataPresent(series, true);
+        }
 
         updateAvg(series, value-previousVal);
         updateMin(dataPoints_.at(idx));
