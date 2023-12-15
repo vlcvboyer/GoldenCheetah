@@ -1355,7 +1355,7 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, position, altkph, altcad\n";
+                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -2177,7 +2177,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, position, altkph, altcad\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2228,7 +2228,6 @@ void TrainSidebar::diskUpdate()
                         << "," << (is_cycldynamics_present ? QString::number(displayLppe):QString(""))
                         << "," << (is_cycldynamics_present ? QString::number(displayLpppb):QString(""))
                         << "," << (is_cycldynamics_present ? QString::number(displayLpppe):QString(""))
-                        << "," << (is_cycldynamics_present ? QString::number((int) displayPosition):QString(""))
 
                         // allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
                         << "," << (is_altspeed_present ? QString::number(displayAltSpeed):QString(""))
