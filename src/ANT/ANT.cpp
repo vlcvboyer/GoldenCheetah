@@ -698,6 +698,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
 {
     // if we're given a channel number, then use that one
     if (channel_number>-1) {
+        qDebug()<<"Add ANT device "<<device_number<<" type "<<device_type<<" on channel nbr "<<channel_number<<".";
         //antChannel[channel_number]->close();
         antChannel[channel_number]->open(device_number, device_type);
         return channel_number;
@@ -729,6 +730,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
             if ((device_type == ANTChannel::CHANNEL_TYPE_POWER) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
+                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as POWER device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (powerchannels)
@@ -742,6 +744,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 (device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
+                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as SPEED device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (speedchannels)
@@ -755,6 +758,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 (device_type == ANTChannel::CHANNEL_TYPE_CADENCE) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
+                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as CADENCE device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (cadencechannels)
@@ -768,6 +772,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
     }
 
     // there are no unused channels.  fail.
+    qDebug()<<"Cannot add ANT device "<<device_number<<" of type "<<device_type<<" no channel left on USB stick...";
     return -1;
 }
 
@@ -1190,12 +1195,14 @@ int ANT::openPort()
     if ((rc=usb2->open()) != -1) {
         usbMode = USB2;
         channels = 8;
+        qDebug()<<"USB2 ANT USB stick with "<<channels<<" available channels";
         return rc;
     }
 #if defined(WIN32) && defined(GC_HAVE_USBXPRESS)
     else if ((rc= USBXpress::open(&devicePort)) != -1) {
         usbMode = USB1;
         channels = 4;
+        qDebug()<<"USB1 ANT USB stick with "<<channels<<" available channels";
         return rc;
     }
 #endif
@@ -1221,6 +1228,7 @@ int ANT::openPort()
     if ((rc=usb2->open()) != -1) {
         usbMode = USB2;
         channels = 8;
+        qDebug()<<"USB2 ANT USB stick with "<<channels<<" available channels";
         return rc;
     }
     usbMode = USB1;
@@ -1229,6 +1237,7 @@ int ANT::openPort()
     // if usb2 failed / not compiled in, we must be using
     // a USB1 stick so default to 4 channels
     channels = 4;
+    qDebug()<<"Default USB1 ANT USB stick with "<<channels<<" available channels";
 
     if ((devicePort=open(deviceFilename.toLatin1(),O_RDWR | O_NOCTTY | O_NONBLOCK)) == -1)
         return errno;
