@@ -732,6 +732,8 @@ public:
     void setTrainerReady(bool status) { telemetry.setTrainerReady(status); }
     void setTrainerRunning(bool status) { telemetry.setTrainerRunning(status); }
 
+    void setDeviceDetails(QString deviceDetails) { telemetry.setDeviceDetails(deviceDetails); }
+
     qint64 getElapsedTime();
 
 private:
@@ -783,6 +785,7 @@ private:
     int cadencechannels;
     QDateTime lastCadenceMessage;
     QDateTime lastAltCadenceMessage;
+    QString deviceDetails;
 
     QElapsedTimer elapsedTimer;
 

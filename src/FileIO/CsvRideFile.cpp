@@ -670,7 +670,8 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                 double gct = 0.0, vo = 0.0, rcad = 0.0;
                 //UNUSED double o2hb = 0.0, hhb = 0.0;
                 double target = 0.0;
-                double altKph=0,altCad=0;
+                double altKph = 0, altCad = 0;
+                QString comments = QString("");
 
                 int interval=0;
                 int pause=0;
@@ -783,6 +784,8 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                                 altKph = valueStr.toDouble();
                             } else if (valueName == "altcad") {
                                 altCad = valueStr.toDouble();
+                            } else if (valueName == "comments") {
+                                comments = valueStr;
                             } else {
                                 // print debug message but only once
                                 static bool debugMessageFlag=false;

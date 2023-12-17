@@ -44,6 +44,9 @@ RealtimeData::RealtimeData()
     trainerCalibRequired = false;
     trainerConfigRequired = false;
     trainerBrakeFault = false;
+    altSpeed= altWheelRpm= altCadence = 0.0;
+    comments = QString("");
+    deviceDetails = QString("");
     memset(spinScan, 0, 24);
 }
 
@@ -857,6 +860,8 @@ double RealtimeData::getLatitude() const { return latitude; }
 double RealtimeData::getLongitude() const { return longitude; }
 double RealtimeData::getAltitude() const { return altitude; }
 RealtimeData::riderPosition  RealtimeData::getPosition() const { return position; }
+QString RealtimeData::getComments() const { return comments; }
+QString RealtimeData::getDeviceDetails() const { return deviceDetails; }
 
 void RealtimeData::setLatitude(double d) { latitude = d; }
 void RealtimeData::setLongitude(double d) { longitude = d; }
@@ -873,6 +878,8 @@ void RealtimeData::setLpppe(double lpppe) { this->lpppe = lpppe; }
 void RealtimeData::setRightPCO(double rightPCO) { this->rightPCO = rightPCO; }
 void RealtimeData::setLeftPCO(double leftPCO) { this->leftPCO = leftPCO; }
 void RealtimeData::setPosition(RealtimeData::riderPosition position) { this->position = position; }
+void RealtimeData::setComments(QString comments ) { this->comments = comments; }
+void RealtimeData::setDeviceDetails(QString deviceDetails ) { this->deviceDetails = (this->deviceDetails!=QString("")?QString(", "):QString(""))+deviceDetails; }
 
 void RealtimeData::setRf(double rf) { this->rf = rf; }
 void RealtimeData::setRMV(double rmv) { this->rmv = rmv; }

@@ -701,6 +701,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
         qDebug()<<"Add ANT device "<<device_number<<" type "<<device_type<<" on channel nbr "<<channel_number<<".";
         //antChannel[channel_number]->close();
         antChannel[channel_number]->open(device_number, device_type);
+        this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(channel_number)+"/G");
         return channel_number;
     }
 
@@ -713,6 +714,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
         for (int i=0; i<channels; i++) {
             if ((antChannel[i]->channel_type == device_type) &&
                 (antChannel[i]->device_number == device_number)) {
+                this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(i)+"/D");
                 // send the channel found...
                 return i;
             }
@@ -767,6 +769,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 // increment the number of cadence channels
                 cadencechannels++;
             }
+            this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(i)+"/N");
             return i;
         }
     }

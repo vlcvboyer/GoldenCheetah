@@ -375,6 +375,9 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayLppb = displayLppe = displayLpppb = displayLpppe = 0.0;
 
     displayAltSpeed = displayAltCad = 0.0;
+    displayComments = QString("");
+    displayCommentsPrev = QString("");
+    displayDeviceDetails = QString("");
 
     is_altpower_present = is_altspeed_present = is_altcad_present = is_cycldynamics_present = false;
 
@@ -1355,7 +1358,7 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad\n";
+                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad, comments\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -1609,6 +1612,14 @@ void TrainSidebar::updateData(RealtimeData &rtData)
     if (displayAltCad!=0.0) {
         is_altcad_present = true;
     }
+
+    displayComments = rtData.getComments();
+    displayDeviceDetails = rtData.getDeviceDetails();
+    if (displayComments!=QString("") && displayDeviceDetails!=QString("")) {
+        displayComments += ", ";
+    }
+    displayComments += displayDeviceDetails;
+
     // Gradient not supported
     return;
 }
@@ -2058,6 +2069,9 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayAltSpeed = rtData.getAltSpeed();
             displayAltCad = rtData.getAltCadence();
 
+            displayComments = rtData.getComments();
+            displayDeviceDetails = rtData.getDeviceDetails();
+
             double weightKG = bicycle.MassKG();
             double vs = computeInstantSpeed(weightKG, rtData.getSlope(), rtData.getAltitude(), rtData.getWatts());
 
@@ -2177,7 +2191,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad, comments\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2200,6 +2214,13 @@ void TrainSidebar::diskUpdate()
 
     QString slopeStr = (status&RT_MODE_SLOPE)?QString::number(slope):QString("");
     QString loadStr = (status&RT_MODE_ERGO)?QString::number(load):QString("");
+
+    QString displayCommentStr = displayComments!=QString("") ? QString("\"") + displayComments + QString("\"") : QString("");
+    if (displayComments!=displayCommentsPrev) {
+        displayCommentsPrev = displayComments;
+    } else {
+        displayCommentStr=QString(""); // do not record successive identical comments in CSV file
+    }
 
     recordFileStream    << "," // headwind
                         << "," << slopeStr
@@ -2232,7 +2253,8 @@ void TrainSidebar::diskUpdate()
                         // allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
                         << "," << (is_altspeed_present ? QString::number(displayAltSpeed):QString(""))
                         << "," << (is_altcad_present ? QString::number(displayAltCad):QString(""))
-                        << "," << "\n";
+                        << "," << displayCommentStr
+                        << "\n";
 }
 
 //----------------------------------------------------------------------

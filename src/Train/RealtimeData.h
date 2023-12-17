@@ -121,6 +121,8 @@ public:
     void setLatitude(double);
     void setLongitude(double);
     void setAltitude(double);
+    void setComments(QString comments );
+    void setDeviceDetails(QString deviceDetails );
 
     const char *getName() const;
 
@@ -185,6 +187,8 @@ public:
     double getRightPCO() const;
     double getLeftPCO() const;
     RealtimeData::riderPosition getPosition() const;
+    QString getComments() const;
+    QString getDeviceDetails() const;
 
     double getTorque() const;
     double getLatitude() const;
@@ -224,6 +228,8 @@ private:
     double vo2, vco2, rf, rmv, tv, feo2;
     double altSpeed, altWheelRpm, altCadence;
     RealtimeData::riderPosition position;
+    QString comments;
+    QString deviceDetails;
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 
