@@ -138,7 +138,7 @@ before_build:
 - echo DEFINES+=_MATH_DEFINES_DEFINED >> src\gcconfig.pri
 
 # Add debug console
-#- echo CONFIG+=console >> src\gcconfig.pri
+- echo CONFIG+=console >> src\gcconfig.pri
 
 # Patch Secrets.h
 - ps: (Get-Content src\Core\Secrets.h) -replace '__GC_GOOGLE_CALENDAR_CLIENT_SECRET__', $env:GC_GOOGLE_CALENDAR_CLIENT_SECRET | Set-Content src\Core\Secrets.h
