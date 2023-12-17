@@ -232,9 +232,9 @@ class ANTChannel : public QObject {
         void checkMoxy();
         void checkSRM();
 
-        void setAltWatts(bool value) { is_alt_watts = value; }
-        void setAltKph(bool value) { is_alt_kph = value; }
-        void setAltCad(bool value) { is_alt_cad = value; }
+        void setAltWatts(int nbr) { alt_watts = nbr; }
+        void setAltKph(int nbr) { alt_kph = nbr; }
+        void setAltCad(int nbr) { alt_cad = nbr; }
 
     public slots:
        // setup sensors

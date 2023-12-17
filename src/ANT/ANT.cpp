@@ -698,7 +698,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
 {
     // if we're given a channel number, then use that one
     if (channel_number>-1) {
-        qDebug()<<"Add ANT device "<<device_number<<" type "<<device_type<<" on channel nbr "<<channel_number<<".";
+        qDebug()<<"Add ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<channel_number<<" (specified channel).";
         //antChannel[channel_number]->close();
         antChannel[channel_number]->open(device_number, device_type);
         this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(channel_number)+"/G");
@@ -714,6 +714,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
         for (int i=0; i<channels; i++) {
             if ((antChannel[i]->channel_type == device_type) &&
                 (antChannel[i]->device_number == device_number)) {
+                qDebug()<<"Add ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" (allocated channel).";
                 this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(i)+"/D");
                 // send the channel found...
                 return i;
@@ -725,6 +726,8 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
     for (int i=0; i<channels; i++) {
         if (antChannel[i]->channel_type == ANTChannel::CHANNEL_TYPE_UNUSED) {
 
+            qDebug()<<"Add ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" (free channel).";
+
             //antChannel[i]->close();
             antChannel[i]->open(device_number, device_type);
 
@@ -732,7 +735,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
             if ((device_type == ANTChannel::CHANNEL_TYPE_POWER) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as POWER device.";
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as POWER device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (powerchannels)
@@ -746,7 +749,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 (device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as SPEED device.";
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as SPEED device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (speedchannels)
@@ -760,7 +763,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 (device_type == ANTChannel::CHANNEL_TYPE_CADENCE) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<"Add ANT device "<<device_number<<" of type "<<device_type<<" on channel nbr "<<i<<" as CADENCE device.";
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as CADENCE device.";
                 // if we are not the first power channel then set to update
                 // the alternate power channel
                 if (cadencechannels)
@@ -775,7 +778,7 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
     }
 
     // there are no unused channels.  fail.
-    qDebug()<<"Cannot add ANT device "<<device_number<<" of type "<<device_type<<" no channel left on USB stick...";
+    qDebug()<<"Cannot add ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeCode(device_type))<<" no channel left on USB stick...";
     return -1;
 }
 

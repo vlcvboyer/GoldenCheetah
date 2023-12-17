@@ -638,9 +638,9 @@ public:
         lastCadenceMessage = QDateTime(QDateTime::currentDateTime());
         telemetry.setCadence(x);
     }
-    void setAltCadence(float x) {
-        lastAltCadenceMessage = QDateTime(QDateTime::currentDateTime());
-        telemetry.setAltCadence(x);
+    void setAltCadence(int nbr, float x) {
+        lastAltCadenceMessage[nbr] = QDateTime(QDateTime::currentDateTime());
+        telemetry.setAltCadence(nbr, x);
     }
     float getCadence(void) { return telemetry.getCadence(); }
     void setSecondaryCadence(float x) {

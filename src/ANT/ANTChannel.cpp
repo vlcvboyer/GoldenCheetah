@@ -48,9 +48,9 @@ ANTChannel::init()
     is_power=false;
     is_cinqo=0;
     is_old_cinqo=0;
-    is_alt_watts=0;
-    is_alt_kph=0;
-    is_alt_cad=0;
+    alt_watts=0;
+    alt_kph=0;
+    alt_cad=0;
     is_master=0;
     is_srm=0;
     manufacturer_id=0;
@@ -922,7 +922,14 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                    if (rpm < last_measured_rpm / 2.0)
                        rpm = 0.0; // if rpm is less than half previous cadence we consider that we are stopped
                }
-               is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm);
+               switch (alt_cad) {
+                    0:
+                        parent->setCadence(rpm);
+                        break;
+                    1:
+                        parent->setAltCadence(nbr, rpm);
+                        break;
+               }
                value2 = value = rpm;
            }
            break;
