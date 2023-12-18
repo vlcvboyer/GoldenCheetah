@@ -638,23 +638,20 @@ public:
         if (rank==0) {
             lastCadenceMessage = QDateTime(QDateTime::currentDateTime());
             telemetry.setCadence(x);
-        } else if (rank<ANT_MAX_ALT_CADENCE) {
+        } else if (rank<RT_MAX_ALT_CADENCE) {
         }
         telemetry.setCadence(x, rank);
     }
-    float getCadence(void) { return telemetry.getCadence(); }
+    float getCadence(int rank=0) { return telemetry.getCadence(rank); }
     void setSecondaryCadence(float x) {
         if (lastCadenceMessage.toTime_t() == 0 || (QDateTime::currentDateTime().toTime_t() - lastCadenceMessage.toTime_t())>10)  {
             telemetry.setCadence(x);
         }
     }
 
-    void setSpeed(double x)
+    void setSpeed(double x, int rank=0)
     {
-        telemetry.setSpeed(x);
-    }
-    void setAltSpeed(float x) {
-        telemetry.setAltSpeed(x);
+        telemetry.setSpeed(x, rank);
     }
 
     void incAltDistance(double x)
@@ -662,17 +659,11 @@ public:
         telemetry.setAltDistance(telemetry.getAltDistance() + x);
     }
 
-    void setWheelRpm(float x);
-    float getWheelRpm(void) { return telemetry.getWheelRpm(); }
+    void setWheelRpm(float x, int rank=0);
+    float getWheelRpm(int rank=0) { return telemetry.getWheelRpm(rank); }
 
-    void setAltWheelRpm(float x);
-    float getAltWheelRpm(void) { return telemetry.getAltWheelRpm(); }
-
-    void setWatts(float x) {
-        telemetry.setWatts(x);
-    }
-    void setAltWatts(float x) {
-        telemetry.setAltWatts(x);
+    void setWatts(float x, int rank=0) {
+        telemetry.setWatts(x, rank);
     }
     void setHb(double smo2, double thb);
 

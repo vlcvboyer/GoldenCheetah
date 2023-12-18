@@ -107,7 +107,7 @@ void RealtimeData::setWheelRpm(double wheelRpm, bool fMarkWheelRpmTime, int rank
         this->wheelRpm = wheelRpm;
         if (fMarkWheelRpmTime)
             this->wheelRpmSampleTime = std::chrono::high_resolution_clock::now();
-    } else if (rank>0 && rank<=ANT_MAX_ALT_SPEED) {
+    } else if (rank>0 && rank<=RT_MAX_ALT_SPEED) {
         this->altWheelRpm[rank-1]=wheelRpm;
     }
 }
@@ -116,7 +116,7 @@ void RealtimeData::setCadence(double aCadence, int rank)
 {
     if (rank==0) {
         cadence = (int)aCadence;
-    } else if (rank>0 && rank<=ANT_MAX_ALT_CADENCE) {
+    } else if (rank>0 && rank<=RT_MAX_ALT_CADENCE) {
         this->altCadence[rank-1]=aCadence;
     }
 }

@@ -232,6 +232,7 @@ class ANTChannel : public QObject {
         void checkMoxy();
         void checkSRM();
 
+        // set source rank in case of alternative sensor (secondary sensors)
         void setAltWatts(int nbr) { alt_watts = nbr; }
         void setAltKph(int nbr) { alt_kph = nbr; }
         void setAltCad(int nbr) { alt_cad = nbr; }

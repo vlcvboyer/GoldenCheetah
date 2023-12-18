@@ -219,22 +219,13 @@ double ANT::channelValue(int channel)
     return antChannel[channel]->channelValue();
 }
 
-void ANT::setWheelRpm(float x) {
-    telemetry.setWheelRpm(x, true); // record time sample for new rpm data
+void ANT::setWheelRpm(float x, int rank) {
+    telemetry.setWheelRpm(x, true, rank); // record time sample for new rpm data
 
     // devConf will be NULL if we are are running the add device wizard
     // we can default to the global setting
-    if (devConf) telemetry.setSpeed(x * devConf->wheelSize / 1000 * 60 / 1000);
-    else telemetry.setSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
-}
-
-void ANT::setAltWheelRpm(float x) {
-    telemetry.setAltWheelRpm(x); // record time sample for new rpm data
-
-    // devConf will be NULL if we are are running the add device wizard
-    // we can default to the global setting
-    if (devConf) telemetry.setAltSpeed(x * devConf->wheelSize / 1000 * 60 / 1000);
-    else telemetry.setAltSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000);
+    if (devConf) telemetry.setSpeed(x * devConf->wheelSize / 1000 * 60 / 1000, rank);
+    else telemetry.setSpeed(x * appsettings->cvalue(trainAthlete, GC_WHEELSIZE, 2100).toInt() / 1000 * 60 / 1000, rank);
 }
 
 void ANT::setHb(double smo2, double thb)
@@ -735,13 +726,8 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
             if ((device_type == ANTChannel::CHANNEL_TYPE_POWER) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as POWER device.";
-                // if we are not the first power channel then set to update
-                // the alternate power channel
-                if (powerchannels)
-                    antChannel[i]->setAltWatts(true);
-
-                // increment the number of power channels
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as POWER device nbr "<<powerchannels;
+                antChannel[i]->setAltWatts(powerchannels); // populate sensor rank in case of alternative source
                 powerchannels++;
             }
             // this is an alternate channel for speed
@@ -749,27 +735,18 @@ ANT::addDevice(int device_number, int device_type, int channel_number)
                 (device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as SPEED device.";
-                // if we are not the first power channel then set to update
-                // the alternate power channel
-                if (speedchannels)
-                    antChannel[i]->setAltKph(true);
-
-                // increment the number of speed channels
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as SPEED device nbr "<<speedchannels;
+                antChannel[i]->setAltKph(speedchannels); // populate sensor rank in case of alternative source
                 speedchannels++;
             }
             // this is an alternate channel for cadence
             if ((device_type == ANTChannel::CHANNEL_TYPE_SandC) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_CADENCE) ||
+                (device_type == ANTChannel::CHANNEL_TYPE_POWER) ||
                 (device_type == ANTChannel::CHANNEL_TYPE_FITNESS_EQUIPMENT)) {
 
-                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as CADENCE device.";
-                // if we are not the first power channel then set to update
-                // the alternate power channel
-                if (cadencechannels)
-                    antChannel[i]->setAltCad(true);
-
-                // increment the number of cadence channels
+                qDebug()<<" ...set ANT device "<<device_number<<QString(deviceTypeCode(device_type))<<" of type "<<QString(deviceTypeDescription(device_type))<<" on channel nbr "<<i<<" as CADENCE device nbr "<<cadencechannels;
+                antChannel[i]->setAltCad(cadencechannels); // populate sensor rank in case of alternative source
                 cadencechannels++;
             }
             this->setDeviceDetails("devNbr="+QString(device_number)+"/devType="+QString(device_type)+"/chan="+QString(i)+"/N");

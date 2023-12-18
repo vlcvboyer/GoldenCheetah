@@ -1841,12 +1841,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                 // what are we getting from this one?
                 if (dev == bpmTelemetry) rtData.setHr(local.getHr());
                 if (dev == rpmTelemetry) {
-                    rtData.setCadence(local.getCadence());
-                    rtData.setAltCadence(local.getAltCadence());
+                    rtData.setCadence(local.getCadence(), alt_cad);
                 }
                 if (dev == kphTelemetry) {
-                    rtData.setSpeed(local.getSpeed());
-                    rtData.setAltSpeed(local.getAltSpeed());
+                    rtData.setSpeed(local.getSpeed(), alt_speed);
                     rtData.setDistance(local.getDistance());
                     rtData.setRouteDistance(local.getRouteDistance());
                     rtData.setDistanceRemaining(local.getDistanceRemaining());
@@ -1854,8 +1852,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     rtData.setLapDistanceRemaining(local.getLapDistanceRemaining());
                 }
                 if (dev == wattsTelemetry) {
-                    rtData.setWatts(local.getWatts());
-                    rtData.setAltWatts(local.getAltWatts());
+                    rtData.setWatts(local.getWatts(), alt_watts);
                     rtData.setLRBalance(local.getLRBalance());
                     rtData.setLTE(local.getLTE());
                     rtData.setRTE(local.getRTE());
