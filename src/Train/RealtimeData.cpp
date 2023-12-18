@@ -25,7 +25,7 @@
 RealtimeData::RealtimeData()
 {
     name[0] = '\0';
-    hr= watts= altWatts= speed= wheelRpm= load= slope= torque= 0.0;
+    hr= watts= speed= wheelRpm= load= slope= torque= 0.0;
     cadence = distance = altDistance = virtualSpeed = wbal = 0.0;
     lap = msecs = lapMsecs = lapMsecsRemaining = ergMsecsRemaining = 0;
     thb = smo2 = o2hb = hhb = 0.0;
@@ -44,10 +44,21 @@ RealtimeData::RealtimeData()
     trainerCalibRequired = false;
     trainerConfigRequired = false;
     trainerBrakeFault = false;
-    altSpeed= altWheelRpm= altCadence = 0.0;
     comments = QString("");
     deviceDetails = QString("");
     memset(spinScan, 0, 24);
+    for (i=0; i<ANT_MAX_ALT_WATTS;i++) {
+        altWatts[i] = 0.0;
+    }
+    for (i=0; i<ANT_MAX_ALT_SPEED;i++) {
+        altWheelRpm[i] = 0.0;
+    }
+    for (i=0; i<ANT_MAX_ALT_SPEED;i++) {
+        altSpeed[i] = 0.0;
+    }
+    for (i=0; i<ANT_MAX_ALT_CADENCE;i++) {
+        altCadence[i] = 0.0;
+    }
 }
 
 void RealtimeData::setName(char *name)
@@ -102,9 +113,11 @@ void RealtimeData::setCadence(double aCadence)
 {
     cadence = (int)aCadence;
 }
-void RealtimeData::setAltCadence(double aCadence)
+void RealtimeData::setAltCadence(int nbr, double aCadence)
 {
-    altCadence = (int)aCadence;
+    if (nbr<ANT_MAX_ALT_CADENCE) {
+        altCadence[nbr-1] = (int)aCadence;
+    }
 }
 void RealtimeData::setSlope(double slope)
 {

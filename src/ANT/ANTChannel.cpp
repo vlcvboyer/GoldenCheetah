@@ -926,9 +926,8 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                     0:
                         parent->setCadence(rpm);
                         break;
-                    1:
-                        parent->setAltCadence(nbr, rpm);
-                        break;
+                    default:
+                        parent->setAltCadence(alt_cad, rpm);
                }
                value2 = value = rpm;
            }
@@ -950,7 +949,15 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                        last_measured_rpm = rpm;
 
                        if (is_moxy) /* do nothing for now */ ; //XXX fixme when moxy arrives XXX
-                       else is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm);
+                       else {
+                            switch (alt_cad) {
+                                    0:
+                                        parent->setCadence(rpm);
+                                        break;
+                                    default:
+                                        parent->setAltCadence(alt_cad, rpm);
+                            }
+                       }
                        lastMessageTimestamp = parent->getElapsedTime();
                    } else {
                        qint64 ms = parent->getElapsedTime() - lastMessageTimestamp;
@@ -960,8 +967,15 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                        if (rpm < last_measured_rpm / 2.0)
                            rpm = 0.0; // if rpm is less than half previous cadence we consider that we are stopped
 
-                       if (sc_cadence_active)
-                           is_alt_cad ? parent->setAltCadence(rpm):parent->setCadence(rpm); // don't update if never received data on this channel (support S&C with single magnet)
+                       if (sc_cadence_active) { // don't update if never received data on this channel (support S&C with single magnet)
+                            switch (alt_cad) {
+                                    0:
+                                        parent->setCadence(rpm);
+                                        break;
+                                    default:
+                                        parent->setAltCadence(alt_cad, rpm);
+                            }
+                       }
                    }
                    value = rpm;
 

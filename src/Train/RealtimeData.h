@@ -214,7 +214,7 @@ private:
     char name[64];
 
     // realtime telemetry
-    double hr, watts, altWatts, altDistance, speed, wheelRpm, load, slope, lrbalance;
+    double hr, watts, altDistance, speed, wheelRpm, load, slope, lrbalance;
     double cadence;      // in rpm
     double smo2, thb;
     double lte, rte, lps, rps; // torque efficiency and pedal smoothness
@@ -226,10 +226,14 @@ private:
     double RTorque, LTorque;
     double latitude, longitude, altitude;
     double vo2, vco2, rf, rmv, tv, feo2;
-    double altSpeed, altWheelRpm, altCadence;
     RealtimeData::riderPosition position;
     QString comments;
     QString deviceDetails;
+
+    double altWatts[ANT_MAX_ALT_WATTS];
+    double altSpeed[ANT_MAX_ALT_SPEED];
+    double altWheelRpm[ANT_MAX_ALT_SPEED];
+    double altCadence[ANT_MAX_ALT_CADENCE];
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 

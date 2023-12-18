@@ -1358,7 +1358,22 @@ void TrainSidebar::Start()       // when start button is pressed
                 // CSV File header
 
                 QTextStream recordFileStream(recordFile);
-                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altwatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad, comments\n";
+                recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe";
+
+                for (i=0;i<ANT_MAX_ALT_WATTS;i++) {
+                    recordFileStream << QString(", altwatts") + QString::number(i);
+                }
+                QString altSpeedStr = QString("");
+                for (i=0;i<ANT_MAX_ALT_SPEED;i++) {
+                    recordFileStream << QString(", altkph") + QString::number(i);
+                }
+                QString altCadStr = QString("");
+                for (i=0;i<ANT_MAX_ALT_CADENCE;i++) {
+                    recordFileStream << QString(", altcad") + QString::number(i);
+                }
+
+                recordFileStream << ", comments\n";
+                recordFileStream << "\n";
 
                 disk_timer->start(SAMPLERATE);  // start screen
             }
@@ -2191,7 +2206,7 @@ void TrainSidebar::diskUpdate()
     if (secs <= lastRecordSecs) return; // Avoid duplicates
     lastRecordSecs = secs;
 
-    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, altWatts, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altkph, altcad, comments\n";
+    // GoldenCheetah CVS Format "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe, altwatts1,  altkph1, altcad1, altcad2, comments\n";
 
     recordFileStream    << secs
                         << "," << displayCadence
@@ -2215,13 +2230,6 @@ void TrainSidebar::diskUpdate()
     QString slopeStr = (status&RT_MODE_SLOPE)?QString::number(slope):QString("");
     QString loadStr = (status&RT_MODE_ERGO)?QString::number(load):QString("");
 
-    QString displayCommentStr = displayComments!=QString("") ? QString("\"") + displayComments + QString("\"") : QString("");
-    if (displayComments!=displayCommentsPrev) {
-        displayCommentsPrev = displayComments;
-    } else {
-        displayCommentStr=QString(""); // do not record successive identical comments in CSV file
-    }
-
     recordFileStream    << "," // headwind
                         << "," << slopeStr
                         << "," // temp
@@ -2237,9 +2245,6 @@ void TrainSidebar::diskUpdate()
                         << "," << displayHHB
                         << "," << loadStr
 
-                        // allows altWatts to record power from trainer in addition to watts which are from power sensor. Useful to troubleshoot accuracy issues.
-                        << "," << (is_altpower_present ? QString::number(displayAltPower):QString(""))
-
                         // Cycling dynamics
                         << "," << (is_cycldynamics_present ? QString::number(displayRppb):QString(""))
                         << "," << (is_cycldynamics_present ? QString::number(displayRppe):QString(""))
@@ -2248,13 +2253,35 @@ void TrainSidebar::diskUpdate()
                         << "," << (is_cycldynamics_present ? QString::number(displayLppb):QString(""))
                         << "," << (is_cycldynamics_present ? QString::number(displayLppe):QString(""))
                         << "," << (is_cycldynamics_present ? QString::number(displayLpppb):QString(""))
-                        << "," << (is_cycldynamics_present ? QString::number(displayLpppe):QString(""))
+                        << "," << (is_cycldynamics_present ? QString::number(displayLpppe):QString(""));
 
-                        // allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
-                        << "," << (is_altspeed_present ? QString::number(displayAltSpeed):QString(""))
-                        << "," << (is_altcad_present ? QString::number(displayAltCad):QString(""))
-                        << "," << displayCommentStr
-                        << "\n";
+    // allows altWatts to record power from trainer in addition to watts which are from power sensor. Useful to troubleshoot accuracy issues.
+    // and allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
+    QString altWattsStr = QString("");
+    for (i=0;i<ANT_MAX_ALT_WATTS;i++) {
+        altWattsStr += QString(",") + (altpower_qty>i ? QString::number(displayAltPower[i]) : QString(""));
+    }
+    QString altSpeedStr = QString("");
+    for (i=0;i<ANT_MAX_ALT_SPEED;i++) {
+        altSpeedStr += QString(",") + (altspeed_qty>i ? QString::number(displayAltSpeed[i]) : QString(""));
+    }
+    QString altCadStr = QString("");
+    for (i=0;i<ANT_MAX_ALT_CADENCE;i++) {
+        altCadStr += QString(",") + (altcad_qty>i ? QString::number(displayAltCad[i]) : QString(""));
+    }
+    recordFileStream    << altWattsStr
+                        << altSpeedStr
+                        << altCadStr
+
+    QString displayCommentStr = displayComments!=QString("") ? QString("\"") + displayComments + QString("\"") : QString("");
+    if (displayComments!=displayCommentsPrev) {
+        displayCommentsPrev = displayComments;
+    } else {
+        displayCommentStr=QString(""); // do not record successive identical comments in CSV file
+    }
+    recordFileStream    << "," << displayCommentStr;
+
+    recordFileStream    << "\n";
 }
 
 //----------------------------------------------------------------------
