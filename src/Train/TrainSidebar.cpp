@@ -2258,15 +2258,15 @@ void TrainSidebar::diskUpdate()
     // allows altWatts to record power from trainer in addition to watts which are from power sensor. Useful to troubleshoot accuracy issues.
     // and allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
     QString altWattsStr = QString("");
-    for (i=0;i<ANT_MAX_ALT_WATTS;i++) {
+    for (i=0;i<RT_MAX_ALT_WATTS;i++) {
         altWattsStr += QString(",") + (altpower_qty>i ? QString::number(displayAltPower[i]) : QString(""));
     }
     QString altSpeedStr = QString("");
-    for (i=0;i<ANT_MAX_ALT_SPEED;i++) {
+    for (i=0;i<RT_MAX_ALT_SPEED;i++) {
         altSpeedStr += QString(",") + (altspeed_qty>i ? QString::number(displayAltSpeed[i]) : QString(""));
     }
     QString altCadStr = QString("");
-    for (i=0;i<ANT_MAX_ALT_CADENCE;i++) {
+    for (i=0;i<RT_MAX_ALT_CADENCE;i++) {
         altCadStr += QString(",") + (altcad_qty>i ? QString::number(displayAltCad[i]) : QString(""));
     }
     recordFileStream    << altWattsStr
