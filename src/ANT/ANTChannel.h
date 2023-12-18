@@ -176,9 +176,9 @@ class ANTChannel : public QObject {
         bool is_srm;
         bool is_fec;
         bool is_power;
-        bool is_alt_watts; // is alternative channel for power
-        bool is_alt_kph;   // is alternative channel (sensor) for speed
-        bool is_alt_cad;   // is alternative channel (sensor) for cadence
+        int alt_watts; // alternative rank of this channel (sensor) for power
+        int alt_kph;   // alternative rank of this channel (sensor) for speed
+        int alt_cad;   // alternative rank of this channel (sensor) for cadence
         bool is_master; // is a master channel (for remote control)
 
         int search_type;

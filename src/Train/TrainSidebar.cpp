@@ -1360,15 +1360,15 @@ void TrainSidebar::Start()       // when start button is pressed
                 QTextStream recordFileStream(recordFile);
                 recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe";
 
-                for (i=0;i<ANT_MAX_ALT_WATTS;i++) {
+                for (i=0;i<RT_MAX_ALT_WATTS;i++) {
                     recordFileStream << QString(", altwatts") + QString::number(i);
                 }
                 QString altSpeedStr = QString("");
-                for (i=0;i<ANT_MAX_ALT_SPEED;i++) {
+                for (i=0;i<RT_MAX_ALT_SPEED;i++) {
                     recordFileStream << QString(", altkph") + QString::number(i);
                 }
                 QString altCadStr = QString("");
-                for (i=0;i<ANT_MAX_ALT_CADENCE;i++) {
+                for (i=0;i<RT_MAX_ALT_CADENCE;i++) {
                     recordFileStream << QString(", altcad") + QString::number(i);
                 }
 

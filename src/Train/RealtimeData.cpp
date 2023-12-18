@@ -47,16 +47,16 @@ RealtimeData::RealtimeData()
     comments = QString("");
     deviceDetails = QString("");
     memset(spinScan, 0, 24);
-    for (i=0; i<ANT_MAX_ALT_WATTS;i++) {
+    for (i=0; i<RT_MAX_ALT_WATTS;i++) {
         altWatts[i] = 0.0;
     }
-    for (i=0; i<ANT_MAX_ALT_SPEED;i++) {
+    for (i=0; i<RT_MAX_ALT_SPEED;i++) {
         altWheelRpm[i] = 0.0;
     }
-    for (i=0; i<ANT_MAX_ALT_SPEED;i++) {
+    for (i=0; i<RT_MAX_ALT_SPEED;i++) {
         altSpeed[i] = 0.0;
     }
-    for (i=0; i<ANT_MAX_ALT_CADENCE;i++) {
+    for (i=0; i<RT_MAX_ALT_CADENCE;i++) {
         altCadence[i] = 0.0;
     }
 }
@@ -65,16 +65,15 @@ void RealtimeData::setName(char *name)
 {
     strcpy(this->name, name);
 }
-void RealtimeData::setAltWatts(double watts)
-{
-    this->altWatts = (int)watts;
-}
-void RealtimeData::setWatts(double watts)
+void RealtimeData::setWatts(double watts, int rank)
 {
     // negs not allowed (usually from virtual power)
     if (watts < 0) watts = 0;
-
-    this->watts = (int)watts;
+    if (rank==0) {
+        this->watts = (int)watts;
+    } else if (rank>0 && rank<=RT_MAX_ALT_WATTS) {
+        this->altWatts[rank-1]=watts;
+    }
 }
 
 void RealtimeData::setAltDistance(double x)
@@ -86,13 +85,13 @@ void RealtimeData::setHr(double hr)
 {
     this->hr = (int)hr;
 }
-void RealtimeData::setSpeed(double speed)
+void RealtimeData::setSpeed(double speed, int rank)
 {
-    this->speed = speed;
-}
-void RealtimeData::setAltSpeed(double speed)
-{
-    this->altSpeed = speed;
+    if (rank==0) {
+        this->speed = speed;
+    } else if (rank>0 && rank<=RT_MAX_ALT_SPEED) {
+        this->altSpeed[rank-1]=speed;
+    }
 }
 void RealtimeData::setWbal(double wbal)
 {
@@ -102,21 +101,23 @@ void RealtimeData::setVirtualSpeed(double speed)
 {
     this->virtualSpeed = speed;
 }
-void RealtimeData::setWheelRpm(double wheelRpm, bool fMarkWheelRpmTime)
+void RealtimeData::setWheelRpm(double wheelRpm, bool fMarkWheelRpmTime, int rank)
 {
-    this->wheelRpm = wheelRpm;
+    if (rank==0) {
+        this->wheelRpm = wheelRpm;
+        if (fMarkWheelRpmTime)
+            this->wheelRpmSampleTime = std::chrono::high_resolution_clock::now();
+    } else if (rank>0 && rank<=ANT_MAX_ALT_SPEED) {
+        this->altWheelRpm[rank-1]=wheelRpm;
+    }
+}
 
-    if (fMarkWheelRpmTime)
-        this->wheelRpmSampleTime = std::chrono::high_resolution_clock::now();
-}
-void RealtimeData::setCadence(double aCadence)
+void RealtimeData::setCadence(double aCadence, int rank)
 {
-    cadence = (int)aCadence;
-}
-void RealtimeData::setAltCadence(int nbr, double aCadence)
-{
-    if (nbr<ANT_MAX_ALT_CADENCE) {
-        altCadence[nbr-1] = (int)aCadence;
+    if (rank==0) {
+        cadence = (int)aCadence;
+    } else if (rank>0 && rank<=ANT_MAX_ALT_CADENCE) {
+        this->altCadence[rank-1]=aCadence;
     }
 }
 void RealtimeData::setSlope(double slope)
@@ -193,11 +194,6 @@ void RealtimeData::setLPS(double x)
 void RealtimeData::setRPS(double x)
 {
     this->rps = x;
-}
-
-void RealtimeData::setAltWheelRpm(double wheelRpm)
-{
-    this->altWheelRpm = wheelRpm;
 }
 
 const char *

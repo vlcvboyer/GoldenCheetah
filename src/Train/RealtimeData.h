@@ -25,6 +25,11 @@
 #include <QString>
 #include <QApplication>
 
+// Accepted qty of alternative sensors
+#define RT_MAX_ALT_WATTS      1 // Typical: main power sensor as primary one and hometrainer as secondary one
+#define RT_MAX_ALT_SPEED      1 // Typical: bike speed sensor as primary one and hometrainer as secondary one
+#define RT_MAX_ALT_CADENCE    3 // Typical: bike cadence sensor as primary one and power sensor cadence output & hometrainer cadence estimator as alternatives
+
 class RealtimeData
 {
     Q_DECLARE_TR_FUNCTIONS(RealtimeData)
@@ -71,19 +76,16 @@ public:
     void reset(); // set all values to zero
 
     void setName(char *name);
-    void setWatts(double watts);
-    void setAltWatts(double watts);
+    void setWatts(double watts, int rank=0);
     void setAltDistance(double distance);
     void setHr(double hr);
     void setTime(long time);
-    void setSpeed(double speed);
-    void setAltSpeed(double speed);
+    void setSpeed(double speed, int rank=0);
     void setWbal(double speed);
     void setVirtualSpeed(double speed);
-    void setWheelRpm(double wheelRpm, bool fMarkTimeSample = false);
+    void setWheelRpm(double wheelRpm, bool fMarkTimeSample = false, int rank=0);
     void setAltWheelRpm(double);
-    void setCadence(double aCadence);
-    void setAltCadence(double aCadence);
+    void setCadence(double aCadence, int rank=0);
     void setLoad(double load);
     void setSlope(double slope);
     void setMsecs(long);
@@ -152,15 +154,12 @@ public:
     double getAltDistance() const;
     double getHr() const;
     long getTime() const;
-    double getSpeed() const;
-    double getAltSpeed() const;
+    double getSpeed(int rank=0) const;
     double getWbal() const;
     double getVirtualSpeed() const;
-    double getWheelRpm() const;
-    double getAltWheelRpm() const;
+    double getWheelRpm(int rank=0) const;
     std::chrono::high_resolution_clock::time_point getWheelRpmSampleTime() const;
-    double getCadence() const;
-    double getAltCadence() const;
+    double getCadence(int rank=0) const;
     double getLoad() const;
     double getSlope() const;
     long getMsecs() const;
@@ -230,10 +229,10 @@ private:
     QString comments;
     QString deviceDetails;
 
-    double altWatts[ANT_MAX_ALT_WATTS];
-    double altSpeed[ANT_MAX_ALT_SPEED];
-    double altWheelRpm[ANT_MAX_ALT_SPEED];
-    double altCadence[ANT_MAX_ALT_CADENCE];
+    double altWatts[RT_MAX_ALT_WATTS];
+    double altSpeed[RT_MAX_ALT_SPEED];
+    double altWheelRpm[RT_MAX_ALT_SPEED];
+    double altCadence[RT_MAX_ALT_CADENCE];
 
     std::chrono::high_resolution_clock::time_point wheelRpmSampleTime;
 

@@ -88,11 +88,6 @@
 #define ANT_READTIMEOUT    1000
 #define ANT_WRITETIMEOUT   2000
 
-// Accepted qty of alternative sensors
-#define ANT_MAX_ALT_WATTS      1 // Typical: main power sensor as primary one and hometrainer as secondary one
-#define ANT_MAX_ALT_SPEED      1 // Typical: bike speed sensor as primary one and hometrainer as secondary one
-#define ANT_MAX_ALT_CADENCE    2 // Typical: bike cadence sensor as primary one and power sensor cadence output & hometrainer cadence estimator as alternatives
-
 class ANTMessage;
 class ANTChannel;
 
@@ -639,15 +634,13 @@ public:
     void setBPM(float x) {
         telemetry.setHr(x);
     }
-    void setCadence(float x) {
-        lastCadenceMessage = QDateTime(QDateTime::currentDateTime());
-        telemetry.setCadence(x);
-    }
-    void setAltCadence(int nbr, float x) {
-        if (nbr<ANT_MAX_ALT_CADENCE) {
-            lastAltCadenceMessage[nbr-1] = QDateTime(QDateTime::currentDateTime());
-            telemetry.setAltCadence(nbr, x);
+    void setCadence(float x, int rank=0) {
+        if (rank==0) {
+            lastCadenceMessage = QDateTime(QDateTime::currentDateTime());
+            telemetry.setCadence(x);
+        } else if (rank<ANT_MAX_ALT_CADENCE) {
         }
+        telemetry.setCadence(x, rank);
     }
     float getCadence(void) { return telemetry.getCadence(); }
     void setSecondaryCadence(float x) {

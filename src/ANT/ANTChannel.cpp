@@ -577,7 +577,20 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         // ignore the occasional spikes (reed switch)
                         if (power >= 0 && power < 2501 && cadence >=0 && cadence < 256) {
                             value2 = value = power;
-                            is_alt_watts ? parent->setAltWatts(power) : parent->setWatts(power);
+                            switch (alt_watts) {
+                                    0:
+                                        parent->setWatts(power);
+                                        break;
+                                    default:
+                                        parent->setAltWatts(alt_watts, power);
+                            }
+                            switch (alt_cad) {
+                                    0:
+                                        parent->setCadence(cadence);
+                                        break;
+                                    default:
+                                        parent->setAltCadence(alt_cad, cadence);
+                            }
                             parent->setSecondaryCadence(cadence);
                         }
 
@@ -586,7 +599,20 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         nullCount++;
                         if (nullCount >= 4) { // 4 messages on an SRM
                             value2 = value = 0;
-                            is_alt_watts ? parent->setAltWatts(0) : parent->setWatts(0);
+                            switch (alt_watts) {
+                                    0:
+                                        parent->setWatts(0);
+                                        break;
+                                    default:
+                                        parent->setAltWatts(alt_watts, 0);
+                            }
+                            switch (alt_cad) {
+                                    0:
+                                        parent->setCadence(0);
+                                        break;
+                                    default:
+                                        parent->setAltCadence(alt_cad, 0);
+                            }
                             parent->setSecondaryCadence(0);
                         }
                     }
