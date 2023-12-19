@@ -363,8 +363,8 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     lodcount = 0;
     wbalr = wbal = 0;
     load_msecs = total_msecs = lap_msecs = 0;
-    displayWorkoutDistance = displayDistance = displayPower = displayHeartRate =
-    displayAltPower[0] = displaySpeed[0] = displayCadence[0] = displayCadence[1] = displayCadence[2] = slope = load = 0;
+    displayWorkoutDistance = displayDistance = displayPower = displayHeartRate = displaySpeed = displayCadence = 0.0;
+    slope = load = 0;
 
     displaySMO2 = displayTHB = displayO2HB = displayHHB = 0;
     displayLRBalance = RideFile::NA;
@@ -374,7 +374,7 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayRppb = displayRppe = displayRpppb = displayRpppe = 0.0;
     displayLppb = displayLppe = displayLpppb = displayLpppe = 0.0;
 
-    displayAltSpeed = displayAltCad = 0.0;
+    displayAltPower[0] = displayAltSpeed[0] = displayAltCadence[0] = displayAltCadence[1] = displayAltCadence[2] = 0.0;
     displayComments = QString("");
     displayCommentsPrev = QString("");
     displayDeviceDetails = QString("");
