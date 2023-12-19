@@ -775,7 +775,7 @@ private:
     int speedchannels;
     int cadencechannels;
     QDateTime lastCadenceMessage;
-    QDateTime lastAltCadenceMessage[ANT_MAX_ALT_CADENCE];
+    QDateTime lastAltCadenceMessage[RT_MAX_ALT_CADENCE];
     QString deviceDetails;
 
     QElapsedTimer elapsedTimer;

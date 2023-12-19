@@ -1373,15 +1373,15 @@ RideFile *CsvFileReader::openRideFile(QFile &file, QStringList &errors, QList<Ri
                         if (gcSeries->valuename.indexOf("lpppe")!=-1)
                             rideFile->setPointValue(minutes * 60.0, RideFile::lpppe, lpppe);
                         if (gcSeries->valuename.indexOf("altwatts1")!=-1)
-                            rideFile->setPointValue(minutes * 60.0, RideFile::altwatts1, altWatts1);
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altwatts1, altWatts[0]);
                         if (gcSeries->valuename.indexOf("altkph1")!=-1)
-                            rideFile->setPointValue(minutes * 60.0, RideFile::altkph1, altKph1);
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altkph1, altKph[0]);
                         if (gcSeries->valuename.indexOf("altcad1")!=-1)
-                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad1, altCad1);
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad1, altCad[0]);
                         if (gcSeries->valuename.indexOf("altcad2")!=-1)
-                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad2, altCad2);
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad2, altCad[1]);
                         if (gcSeries->valuename.indexOf("altcad3")!=-1)
-                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad3, altCad3);
+                            rideFile->setPointValue(minutes * 60.0, RideFile::altcad3, altCad[2]);
                     }
 
                     if (target > 0.0) {

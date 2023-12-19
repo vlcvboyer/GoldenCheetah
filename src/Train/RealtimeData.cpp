@@ -207,25 +207,29 @@ double RealtimeData::getAltDistance() const
     return altDistance;
 }
 
-double RealtimeData::getAltWatts() const
+double RealtimeData::getAltWatts(int rank=0) const
 {
-    return altWatts;
-}
-double RealtimeData::getWatts() const
-{
-    return watts;
+    if (rank==0) {
+        return watts;
+    } else if (rank>0 && rank<RT_MAX_ALT_WATTS) {
+        return altWatts[rank];
+    } else {
+        return 0;
+    }
 }
 double RealtimeData::getHr() const
 {
     return hr;
 }
-double RealtimeData::getSpeed() const
+double RealtimeData::getSpeed(int rank=0) const
 {
+    if (rank==0) {
     return speed;
-}
-double RealtimeData::getAltSpeed() const
-{
-    return altSpeed;
+    } else if (rank>0 && rank<RT_MAX_ALT_SPEED) {
+        return altSpeed[rank];
+    } else {
+        return 0;
+    }
 }
 double RealtimeData::getWbal() const
 {
@@ -235,21 +239,29 @@ double RealtimeData::getVirtualSpeed() const
 {
     return virtualSpeed;
 }
-double RealtimeData::getWheelRpm() const
+double RealtimeData::getWheelRpm(int rank=0) const
 {
-    return wheelRpm;
+    if (rank==0) {
+        return wheelRpm;
+    } else if (rank>0 && rank<RT_MAX_ALT_SPEED) {
+        return altWheelRpm[rank];
+    } else {
+        return 0;
+    }
 }
 std::chrono::high_resolution_clock::time_point RealtimeData::getWheelRpmSampleTime() const
 {
     return this->wheelRpmSampleTime;
 }
-double RealtimeData::getCadence() const
+double RealtimeData::getCadence(int rank=0) const
 {
-    return cadence;
-}
-double RealtimeData::getAltCadence() const
-{
-    return altCadence;
+    if (rank==0) {
+        return cadence;
+    } else if (rank>0 && rank<RT_MAX_ALT_CADENCE) {
+        return altCadence[rank];
+    } else {
+        return 0;
+    }
 }
 double RealtimeData::getSlope() const
 {

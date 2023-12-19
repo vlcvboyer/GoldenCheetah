@@ -368,9 +368,11 @@ series: SECS ':' number                 { jc->JsonPoint.secs = jc->JsonNumber; }
         | RVERT ':' number              { jc->JsonPoint.rvert = jc->JsonNumber; }
         | RCAD ':' number               { jc->JsonPoint.rcad = jc->JsonNumber; }
         | RCON ':' number               { jc->JsonPoint.rcontact = jc->JsonNumber; }
-        | ALTWATTS ':' number           { jc->JsonPoint.altwatts = jc->JsonNumber; }
-        | ALTKPH ':' number             { jc->JsonPoint.altkph = jc->JsonNumber; }
-        | ALTCAD ':' number             { jc->JsonPoint.altcad = jc->JsonNumber; }
+        | ALTWATTS1 ':' number           { jc->JsonPoint.altwatts1 = jc->JsonNumber; }
+        | ALTKPH1 ':' number             { jc->JsonPoint.altkph1 = jc->JsonNumber; }
+        | ALTCAD1 ':' number             { jc->JsonPoint.altcad1 = jc->JsonNumber; }
+        | ALTCAD2 ':' number             { jc->JsonPoint.altcad2 = jc->JsonNumber; }
+        | ALTCAD3 ':' number             { jc->JsonPoint.altcad3 = jc->JsonNumber; }
         | string ':' number             { }
         | string ':' string
         ;
@@ -674,9 +676,11 @@ JsonFileReader::toByteArray(Context *, const RideFile *ride, bool withAlt, bool 
             if (ride->areDataPresent()->rcad) out += ", \"RCAD\":" + QString("%1").arg(p->rcad);
             if (ride->areDataPresent()->rvert) out += ", \"RVERT\":" + QString("%1").arg(p->rvert);
             if (ride->areDataPresent()->rcontact) out += ", \"RCON\":" + QString("%1").arg(p->rcontact);
-            if (ride->areDataPresent()->altwatts) out += ", \"ALTWATTS\":" + QString("%1").arg(p->altwatts);
-            if (ride->areDataPresent()->altkph) out += ", \"ALTKPH\":" + QString("%1").arg(p->altkph);
-            if (ride->areDataPresent()->altcad) out += ", \"ALTCAD\":" + QString("%1").arg(p->altcad);
+            if (ride->areDataPresent()->altwatts1) out += ", \"ALTWATTS1\":" + QString("%1").arg(p->altwatts1);
+            if (ride->areDataPresent()->altkph1) out += ", \"ALTKPH1\":" + QString("%1").arg(p->altkph1);
+            if (ride->areDataPresent()->altcad1) out += ", \"ALTCAD1\":" + QString("%1").arg(p->altcad1);
+            if (ride->areDataPresent()->altcad2) out += ", \"ALTCAD2\":" + QString("%1").arg(p->altcad2);
+            if (ride->areDataPresent()->altcad3) out += ", \"ALTCAD3\":" + QString("%1").arg(p->altcad3);
 
             // sample points in here!
             out += " }";
