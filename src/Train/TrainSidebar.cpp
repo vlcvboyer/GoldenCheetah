@@ -1592,7 +1592,7 @@ void TrainSidebar::Stop(int deviceStatus)        // when stop button is pressed
 void TrainSidebar::updateData(RealtimeData &rtData)
 {
     displayPower = rtData.getWatts();
-    displayAltPower[0] = rtData.getAltWatts(1);
+    displayAltPower[0] = rtData.getWatts(1);
     if (displayAltPower[0]!=0.0) {
         is_altpower1_present = true;
     }

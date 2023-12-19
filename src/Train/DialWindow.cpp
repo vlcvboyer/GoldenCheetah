@@ -234,7 +234,7 @@ DialWindow::telemetryUpdate(const RealtimeData &rtData)
         {
           double left = 0; double right = 0;
           if (value == RideFile::NA) { // no LR Balance provided - so use previous logic
-              double tot = rtData.getWatts() + rtData.getAltWatts();
+              double tot = rtData.getWatts() + rtData.getWatts(1);
               left = rtData.getWatts() / tot * 100.00f;
               right = 100.00 - left;
               if (tot < 0.1 || left >= 100) left = right = 0; // No power or no AltWatts
