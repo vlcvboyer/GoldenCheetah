@@ -374,7 +374,7 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayRppb = displayRppe = displayRpppb = displayRpppe = 0.0;
     displayLppb = displayLppe = displayLpppb = displayLpppe = 0.0;
 
-    altpower_qty = altcad_qty = altspeed_qty = 0; &&&&&
+    altpower_qty = altcad_qty = altspeed_qty = 0;
     for (int i=0; i<RT_MAX_ALT_WATTS; i++)
         displayAltPower[i] = 0.0;
     for (int i=0; i<RT_MAX_ALT_SPEED; i++)
@@ -1855,7 +1855,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                 // what are we getting from this one?
                 if (dev == bpmTelemetry) rtData.setHr(local.getHr());
                 if (dev == rpmTelemetry) {
-                    rtData.setCadence(local.getCadence(), Devices[dev].alt_cadence); &&&&&
+                    rtData.setCadence(local.getCadence(), Devices[dev].alt_cadence);
                 }
                 if (dev == kphTelemetry) {
                     rtData.setSpeed(local.getSpeed(), Devices[dev].alt_speed);
