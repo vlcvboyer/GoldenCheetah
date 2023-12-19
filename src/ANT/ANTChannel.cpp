@@ -832,7 +832,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         float power = 3.14159 * nm_torque * cadence / 30;
 
                         parent->setSecondaryCadence(cadence);
-                        parent->setCadence(cadence, alt_cadence);
+                        parent->setCadence(cadence, alt_cad);
                         parent->setWatts(power, alt_watts);
                         value2 = value = power;
 
@@ -840,7 +840,7 @@ void ANTChannel::broadcastEvent(unsigned char *ant_message)
                         nullCount++;
                         if (nullCount >= 4) { // 4 on a quarq according to specs
                             parent->setSecondaryCadence(0);
-                            parent->setCadence(0, alt_cadence);
+                            parent->setCadence(0, alt_cad);
                             parent->setWatts(0, alt_watts);
                             value2 = value = 0;
                         }
