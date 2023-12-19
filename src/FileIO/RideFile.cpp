@@ -1310,7 +1310,7 @@ void RideFile::updateMax(RideFilePoint* point)
        maxPoint->km = point->km;
     if (point->kph>maxPoint->kph)
        maxPoint->kph = point->kph;
-    if (point->altkph1>maxPoint->altkph)1
+    if (point->altkph1>maxPoint->altkph1)
        maxPoint->altkph1 = point->altkph1;
     if (point->nm>maxPoint->nm)
        maxPoint->nm = point->nm;
