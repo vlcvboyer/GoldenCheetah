@@ -47,16 +47,16 @@ RealtimeData::RealtimeData()
     comments = QString("");
     deviceDetails = QString("");
     memset(spinScan, 0, 24);
-    for (i=0; i<RT_MAX_ALT_WATTS;i++) {
+    for (int i=0; i<RT_MAX_ALT_WATTS;i++) {
         altWatts[i] = 0.0;
     }
-    for (i=0; i<RT_MAX_ALT_SPEED;i++) {
+    for (int i=0; i<RT_MAX_ALT_SPEED;i++) {
         altWheelRpm[i] = 0.0;
     }
-    for (i=0; i<RT_MAX_ALT_SPEED;i++) {
+    for (int i=0; i<RT_MAX_ALT_SPEED;i++) {
         altSpeed[i] = 0.0;
     }
-    for (i=0; i<RT_MAX_ALT_CADENCE;i++) {
+    for (int i=0; i<RT_MAX_ALT_CADENCE;i++) {
         altCadence[i] = 0.0;
     }
 }

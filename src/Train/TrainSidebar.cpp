@@ -364,7 +364,7 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     wbalr = wbal = 0;
     load_msecs = total_msecs = lap_msecs = 0;
     displayWorkoutDistance = displayDistance = displayPower = displayHeartRate =
-    displayAltPower = displaySpeed = displayCadence = slope = load = 0;
+    displayAltPower[0] = displaySpeed[0] = displayCadence[0] = displayCadence[1] = displayCadence[2] = slope = load = 0;
 
     displaySMO2 = displayTHB = displayO2HB = displayHHB = 0;
     displayLRBalance = RideFile::NA;
@@ -379,7 +379,7 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayCommentsPrev = QString("");
     displayDeviceDetails = QString("");
 
-    is_altpower_present = is_altspeed_present = is_altcad_present = is_cycldynamics_present = false;
+    is_altpower1_present = is_altspeed1_present = is_altcad1_present = is_altcad2_present = is_altcad3_present = is_cycldynamics_present = false;
 
     connect(gui_timer, SIGNAL(timeout()), this, SLOT(guiUpdate()));
     connect(disk_timer, SIGNAL(timeout()), this, SLOT(diskUpdate()));
@@ -1360,15 +1360,15 @@ void TrainSidebar::Start()       // when start button is pressed
                 QTextStream recordFileStream(recordFile);
                 recordFileStream << "secs, cad, hr, km, kph, nm, watts, alt, lon, lat, headwind, slope, temp, interval, lrbalance, lte, rte, lps, rps, smo2, thb, o2hb, hhb, target, rppb, rppe, rpppb, rpppe, lppb, lppe, lpppb, lpppe";
 
-                for (i=0;i<RT_MAX_ALT_WATTS;i++) {
+                for (int i=0;i<RT_MAX_ALT_WATTS;i++) {
                     recordFileStream << QString(", altwatts") + QString::number(i);
                 }
                 QString altSpeedStr = QString("");
-                for (i=0;i<RT_MAX_ALT_SPEED;i++) {
+                for (int i=0;i<RT_MAX_ALT_SPEED;i++) {
                     recordFileStream << QString(", altkph") + QString::number(i);
                 }
                 QString altCadStr = QString("");
-                for (i=0;i<RT_MAX_ALT_CADENCE;i++) {
+                for (int i=0;i<RT_MAX_ALT_CADENCE;i++) {
                     recordFileStream << QString(", altcad") + QString::number(i);
                 }
 
@@ -1586,9 +1586,9 @@ void TrainSidebar::Stop(int deviceStatus)        // when stop button is pressed
 void TrainSidebar::updateData(RealtimeData &rtData)
 {
     displayPower = rtData.getWatts();
-    displayAltPower = rtData.getAltWatts();
-    if (displayAltPower!=0.0) {
-        is_altpower_present = true;
+    displayAltPower[0] = rtData.getAltWatts(1);
+    if (displayAltPower[0]!=0.0) {
+        is_altpower1_present = true;
     }
     displayCadence = rtData.getCadence();
     displayHeartRate = rtData.getHr();
@@ -1619,13 +1619,21 @@ void TrainSidebar::updateData(RealtimeData &rtData)
         is_cycldynamics_present = true;
     }
     displayPosition = rtData.getPosition();
-    displayAltSpeed = rtData.getAltSpeed();
-    if (displayAltSpeed!=0.0) {
-        is_altspeed_present = true;
+    displayAltSpeed[0] = rtData.getSpeed(1);
+    if (displayAltSpeed[0]!=0.0) {
+        is_altspeed[0]_present = true;
     }
-    displayAltCad = rtData.getAltCadence();
-    if (displayAltCad!=0.0) {
-        is_altcad_present = true;
+    displayAltCad[0] = rtData.getAltCadence(1);
+    if (displayAltCad[0]!=0.0) {
+        is_altcad1_present = true;
+    }
+    displayAltCad[1] = rtData.getAltCadence(2);
+    if (displayAltCad[1]!=0.0) {
+        is_altcad2_present = true;
+    }
+    displayAltCad[2] = rtData.getAltCadence(3);
+    if (displayAltCad[2]!=0.0) {
+        is_altcad3_present = true;
     }
 
     displayComments = rtData.getComments();
@@ -2050,7 +2058,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
 
             // local stuff ...
             displayPower = rtData.getWatts();
-            displayAltPower = rtData.getAltWatts();
+            displayAltPower[0] = rtData.getWatts(1);
             displayCadence = rtData.getCadence();
             displayHeartRate = rtData.getHr();
             displaySpeed = rtData.getSpeed();
@@ -2078,8 +2086,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
             displayLpppe = rtData.getLpppe();
             displayPosition = rtData.getPosition();
 
-            displayAltSpeed = rtData.getAltSpeed();
-            displayAltCad = rtData.getAltCadence();
+            displayAltSpeed[0] = rtData.getSpeed(1);
+            displayAltCad[0] = rtData.getCadence(1);
+            displayAltCad[1] = rtData.getCadence(2);
+            displayAltCad[2] = rtData.getCadence(3);
 
             displayComments = rtData.getComments();
             displayDeviceDetails = rtData.getDeviceDetails();
@@ -2255,15 +2265,15 @@ void TrainSidebar::diskUpdate()
     // allows altWatts to record power from trainer in addition to watts which are from power sensor. Useful to troubleshoot accuracy issues.
     // and allows to record speed/cadence from second sensor (typ. hometrainer). Used to troubleshoot power sensor accuracy issues.
     QString altWattsStr = QString("");
-    for (i=0;i<RT_MAX_ALT_WATTS;i++) {
+    for (int i=0;i<RT_MAX_ALT_WATTS;i++) {
         altWattsStr += QString(",") + (altpower_qty>i ? QString::number(displayAltPower[i]) : QString(""));
     }
     QString altSpeedStr = QString("");
-    for (i=0;i<RT_MAX_ALT_SPEED;i++) {
+    for (int i=0;i<RT_MAX_ALT_SPEED;i++) {
         altSpeedStr += QString(",") + (altspeed_qty>i ? QString::number(displayAltSpeed[i]) : QString(""));
     }
     QString altCadStr = QString("");
-    for (i=0;i<RT_MAX_ALT_CADENCE;i++) {
+    for (int i=0;i<RT_MAX_ALT_CADENCE;i++) {
         altCadStr += QString(",") + (altcad_qty>i ? QString::number(displayAltCad[i]) : QString(""));
     }
     recordFileStream    << altWattsStr

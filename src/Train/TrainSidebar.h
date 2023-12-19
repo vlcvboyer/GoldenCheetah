@@ -252,7 +252,7 @@ class TrainSidebar : public GcWindow
         // updated with a RealtimeData object either from
         // update() - from a push device (quarqd ANT+)
         // Device->getRealtimeData() - from a pull device (Computrainer)
-        double displayPower, displayAltPower, displayHeartRate, displayCadence, displaySpeed;
+        double displayPower, displayHeartRate, displayCadence, displaySpeed;
         double displayLRBalance, displayLTE, displayRTE, displayLPS, displayRPS;
         double displaySMO2, displayTHB, displayO2HB, displayHHB;
         double displayDistance, displayWorkoutDistance;
@@ -268,12 +268,14 @@ class TrainSidebar : public GcWindow
         double displayRppb, displayRppe, displayRpppb, displayRpppe;
         double displayLppb, displayLppe, displayLpppb, displayLpppe;
         RealtimeData::riderPosition displayPosition; // rider position (seated = 0, transistionToSeated = 1, standing = 2, transitionToStanding=3, aero = 10, off = 11)
-        double displayAltSpeed, displayAltCad;
+        double displayAltPower[RT_MAX_ALT_WATTS];
+        double displayAltSpeed[RT_MAX_ALT_SPEED];
+        double displayAltCad[RT_MAX_ALT_CADENCE];
         QString displayComments;
         QString displayDeviceDetails;
         QString displayCommentsPrev;
 
-        bool is_altpower_present, is_altspeed_present, is_altcad_present, is_cycldynamics_present;
+        bool is_altpower1_present, is_altspeed1_present, is_altcad1_present, is_altcad2_present, is_altcad3_present, is_cycldynamics_present;
 
         void maintainLapDistanceState();
 
