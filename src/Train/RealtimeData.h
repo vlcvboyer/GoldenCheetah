@@ -149,8 +149,7 @@ public:
     double getTv() const;
     double getFeO2() const;
 
-    double getWatts() const;
-    double getAltWatts() const;
+    double getWatts(int rank=0) const;
     double getAltDistance() const;
     double getHr() const;
     long getTime() const;

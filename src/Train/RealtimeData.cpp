@@ -207,7 +207,7 @@ double RealtimeData::getAltDistance() const
     return altDistance;
 }
 
-double RealtimeData::getAltWatts(int rank=0) const
+double RealtimeData::getWatts(int rank=0) const
 {
     if (rank==0) {
         return watts;

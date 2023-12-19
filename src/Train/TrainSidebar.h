@@ -271,6 +271,7 @@ class TrainSidebar : public GcWindow
         double displayAltPower[RT_MAX_ALT_WATTS];
         double displayAltSpeed[RT_MAX_ALT_SPEED];
         double displayAltCad[RT_MAX_ALT_CADENCE];
+        int altpower_qty, altcad_qty, altspeed_qty;
         QString displayComments;
         QString displayDeviceDetails;
         QString displayCommentsPrev;

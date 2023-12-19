@@ -374,7 +374,13 @@ TrainSidebar::TrainSidebar(Context *context) : GcWindow(context), context(contex
     displayRppb = displayRppe = displayRpppb = displayRpppe = 0.0;
     displayLppb = displayLppe = displayLpppb = displayLpppe = 0.0;
 
-    displayAltPower[0] = displayAltSpeed[0] = displayAltCadence[0] = displayAltCadence[1] = displayAltCadence[2] = 0.0;
+    altpower_qty = altcad_qty = altspeed_qty = 0; &&&&&
+    for (int i=0; i<RT_MAX_ALT_WATTS; i++)
+        displayAltPower[i] = 0.0;
+    for (int i=0; i<RT_MAX_ALT_SPEED; i++)
+        displayAltSpeed[i] = 0.0;
+    for (int i=0; i<RT_MAX_ALT_CADENCE; i++)
+        displayAltCad[i] = 0.0;
     displayComments = QString("");
     displayCommentsPrev = QString("");
     displayDeviceDetails = QString("");
@@ -1621,17 +1627,17 @@ void TrainSidebar::updateData(RealtimeData &rtData)
     displayPosition = rtData.getPosition();
     displayAltSpeed[0] = rtData.getSpeed(1);
     if (displayAltSpeed[0]!=0.0) {
-        is_altspeed[0]_present = true;
+        is_altspeed1_present = true;
     }
-    displayAltCad[0] = rtData.getAltCadence(1);
+    displayAltCad[0] = rtData.getCadence(1);
     if (displayAltCad[0]!=0.0) {
         is_altcad1_present = true;
     }
-    displayAltCad[1] = rtData.getAltCadence(2);
+    displayAltCad[1] = rtData.getCadence(2);
     if (displayAltCad[1]!=0.0) {
         is_altcad2_present = true;
     }
-    displayAltCad[2] = rtData.getAltCadence(3);
+    displayAltCad[2] = rtData.getCadence(3);
     if (displayAltCad[2]!=0.0) {
         is_altcad3_present = true;
     }
@@ -1849,10 +1855,10 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                 // what are we getting from this one?
                 if (dev == bpmTelemetry) rtData.setHr(local.getHr());
                 if (dev == rpmTelemetry) {
-                    rtData.setCadence(local.getCadence(), alt_cad);
+                    rtData.setCadence(local.getCadence(), Devices[dev].alt_cadence); &&&&&
                 }
                 if (dev == kphTelemetry) {
-                    rtData.setSpeed(local.getSpeed(), alt_speed);
+                    rtData.setSpeed(local.getSpeed(), Devices[dev].alt_speed);
                     rtData.setDistance(local.getDistance());
                     rtData.setRouteDistance(local.getRouteDistance());
                     rtData.setDistanceRemaining(local.getDistanceRemaining());
@@ -1860,7 +1866,7 @@ void TrainSidebar::guiUpdate()           // refreshes the telemetry
                     rtData.setLapDistanceRemaining(local.getLapDistanceRemaining());
                 }
                 if (dev == wattsTelemetry) {
-                    rtData.setWatts(local.getWatts(), alt_watts);
+                    rtData.setWatts(local.getWatts(), Devices[dev].alt_watts);
                     rtData.setLRBalance(local.getLRBalance());
                     rtData.setLTE(local.getLTE());
                     rtData.setRTE(local.getRTE());
@@ -2278,7 +2284,7 @@ void TrainSidebar::diskUpdate()
     }
     recordFileStream    << altWattsStr
                         << altSpeedStr
-                        << altCadStr
+                        << altCadStr;
 
     QString displayCommentStr = displayComments!=QString("") ? QString("\"") + displayComments + QString("\"") : QString("");
     if (displayComments!=displayCommentsPrev) {
